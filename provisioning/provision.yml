@@ -7,6 +7,7 @@
     sync_user: mecadoi
     sync_user_home_dir: '/home/{{ sync_user }}'
     sync_dir: '{{ sync_user_home_dir }}/storage-box-local'
+    s3_bucket_name: mecadoi-archives
 
   tasks:
   - name: Update system
@@ -24,6 +25,7 @@
     apt:
       pkg:
       - acl
+      - awscli
       - curl
       - htop
       - make
@@ -86,4 +88,4 @@
       name: Sync MECA archives every day at 05:00
       minute: 0
       hour: 5
-      job: '{{ sync_user_home_dir }}/sync-storage-box.sh "{{ sync_dir }}" | tee -a "{{ sync_user_home_dir }}/logs/sync-storage-box.log"'
+      job: '{{ sync_user_home_dir }}/sync-storage-box.sh "{{ sync_dir }}" "{{ s3_bucket_name }}" | tee -a "{{ sync_user_home_dir }}/logs/sync-storage-box.log"'
