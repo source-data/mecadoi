@@ -1,0 +1,89 @@
+---
+- name: Provision the server for syncing MECA archives
+  hosts: mecadoi
+  remote_user: root
+
+  vars:
+    sync_user: mecadoi
+    sync_user_home_dir: '/home/{{ sync_user }}'
+    sync_dir: '{{ sync_user_home_dir }}/storage-box-local'
+
+  tasks:
+  - name: Update system
+    package:
+      name: '*'
+      update_cache: yes
+      state: latest
+    register: system_updated
+
+  - name: Reboot
+    reboot:
+    when: system_updated is changed
+
+  - name: Install essential packages
+    apt:
+      pkg:
+      - acl
+      - curl
+      - htop
+      - make
+      - unzip
+      - vim
+      - wget
+
+  - name: Create the mecadoi user
+    ansible.builtin.user:
+      name: '{{ sync_user }}'
+      shell: /bin/bash
+      generate_ssh_key: true
+      ssh_key_comment: For FTP access to the MECA storage box
+      ssh_key_file: .ssh/id_storage_box
+
+  - name: Set up ssh config for access to the server from the outside and to the storage box from the server
+    ansible.builtin.copy:
+      src: resources/.ssh
+      dest: '{{ sync_user_home_dir }}/.ssh'
+      owner: '{{ sync_user }}'
+      group: '{{ sync_user }}'
+
+  - name: Fetch the public part of the keypair we just created
+    fetch: 
+      src: '{{ sync_user_home_dir }}/.ssh/id_storage_box.pub'
+      dest: buffer/id_storage_box.pub
+      flat: yes
+    register: storage_box_key
+
+  - name: Merge the base authorized keys and the server's new public key to create the storage box' authorized keys file
+    when: storage_box_key is changed
+    local_action: shell paste -d '\n' -s resources/authorized_keys buffer/id_storage_box.pub > buffer/authorized_keys_storage_box
+
+  - name: Upload the storage box' authorized keys file
+    when: storage_box_key is changed
+    local_action: ansible.builtin.command scp buffer/authorized_keys_storage_box mecadoi-ftp:.ssh/authorized_keys
+
+  - name: Create the local directories needed for sync
+    ansible.builtin.file:
+      path: '{{ sync_user_home_dir }}/{{ item }}'
+      state: directory
+      owner: '{{ sync_user }}'
+      group: '{{ sync_user }}'
+    loop:
+      - storage-box-local
+      - logs
+
+  - name: Copy the sync script to the server
+    ansible.builtin.copy:
+      src: resources/sync-storage-box.sh
+      dest: '{{ sync_user_home_dir }}/sync-storage-box.sh'
+      owner: '{{ sync_user }}'
+      group: '{{ sync_user }}'
+      mode: u=rwx,g=r,o=r
+
+  - name: Set up cron job for syncing the storage box
+    become: yes
+    become_user: '{{ sync_user }}'
+    ansible.builtin.cron:
+      name: Sync MECA archives every day at 05:00
+      minute: 0
+      hour: 5
+      job: '{{ sync_user_home_dir }}/sync-storage-box.sh "{{ sync_dir }}" | tee -a "{{ sync_user_home_dir }}/logs/sync-storage-box.log"'
