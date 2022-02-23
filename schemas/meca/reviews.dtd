@@ -1,0 +1,117 @@
+<!-- ============================================================= -->
+<!-- SPECIAL CHARACTER MODULES -->
+<!-- ============================================================= -->
+<!-- SPECIAL CHARACTERS DECLARATIONS -->
+<!-- Declares any standard XML special character entities used in this DTD -->
+<!ENTITY % xmlspecchars.ent PUBLIC "-//NLM//DTD JATS (Z39.96) JATS DTD Suite XML Special Characters Module v1.2 20190208//EN" "JATS-xmlspecchars1.ent">
+<!-- CUSTOM SPECIAL CHARACTERS DECLARATIONS -->
+<!-- Declares any custom special character entities created for this Suite -->
+<!ENTITY % chars.ent PUBLIC "-//NLM//DTD JATS (Z39.96) JATS DTD Suite Custom Special Characters Module v1.2 20190208//EN" "JATS-chars1.ent">
+<!ELEMENT review-group (review+)>
+<!ATTLIST review-group
+    content-version CDATA #IMPLIED
+    xmlns CDATA #FIXED "https://manuscriptexchange.org/schema/reviews"
+    xmlns:xlink CDATA #FIXED "http://www.w3.org/1999/xlink"
+    xmlns:ali CDATA #FIXED "http://www.niso.org/schemas/ali/1.0/"
+>
+<!-- A review encapsulates the work that a reviewer has done to review a particular version of a
+manuscript -->
+<!ELEMENT review (review-item-group, date*, contrib-group?, permissions?)>
+<!ATTLIST review review-version CDATA #IMPLIED>
+<!ATTLIST review review-type (review|recommendation|decision|CDATA) #IMPLIED>
+<!ATTLIST review blinding (single|double|none|CDATA) #IMPLIED>
+<!ATTLIST review permission-to-publish (yes|no) #IMPLIED>
+<!ATTLIST review permission-to-transfer (yes|no) #IMPLIED>
+<!ATTLIST review sequence-id (CDATA) #IMPLIED>
+<!ELEMENT review-item-group (review-item+)>
+<!-- A review-item is a single piece of data gathered for a review. It is fairly flexible but may be (for example) a question and answer, question and set of answers, a miscellaneous comment, or an attached file. -->
+<!ELEMENT review-item (review-item-question?, review-item-response*)>
+<!ATTLIST review-item sequence-number CDATA #IMPLIED>
+<!ATTLIST review-item is-confidential (yes|no) #IMPLIED>
+<!ATTLIST review-item attended-for (editor|associate-editor|eic|authors|other-reviewers|public|CDATA) #IMPLIED>
+<!ATTLIST review-item review-item-type (decision|recommendation|rating|single-choice|multiple-choice|text|comments|file|correspondence|CDATA) #IMPLIED>
+<!-- A review-item-question is the question part of a review-item. It's used to indicate what information a reviewer was asked to provide. -->
+<!ELEMENT review-item-question (review-question-id?, title?, alt-title?, text?)>
+<!ELEMENT review-question-id (#PCDATA)>
+<!ATTLIST review-question-id pub-id-type CDATA #IMPLIED>
+<!ELEMENT title (#PCDATA)>
+<!ELEMENT alt-title (#PCDATA)>
+<!ELEMENT text (#PCDATA)>
+<!-- A review-item-response is the response part of a review-item. It is some single piece of data that a reviewer has provided. -->
+<!ELEMENT review-item-response (review-item-data?, ext-link?)>
+<!ELEMENT review-item-data (#PCDATA)>
+<!-- the review-item-data may specify a data type to aid the receiver in processing it. If not, it'll be assumed to be raw text. -->
+<!ATTLIST review-item-data review-item-data-type (integer|decimal|date|text) #IMPLIED>
+<!ELEMENT ext-link (#PCDATA)>
+<!ATTLIST ext-link
+    xmlns:xlink CDATA #FIXED "http://www.w3.org/1999/xlink"
+    xlink:href CDATA #REQUIRED
+    xlink:title CDATA #IMPLIED
+>
+<!-- A date is the date on which some relevant event related to a particular review occurred. For example, when the review was assigned, submitted or due -->
+<!ELEMENT date (year, month, day)>
+<!ELEMENT year (#PCDATA)>
+<!ELEMENT month (#PCDATA)>
+<!ELEMENT day (#PCDATA)>
+<!ATTLIST date date-type (assigned|submitted|due|CDATA) #IMPLIED>
+<!-- A contrib-group contains contact information about a particular reviewer. While it's not syntactically possible to prohibit the inclusion of a stand-alone aff element, having contact information without anybody to associate it with is not very practical. -->
+<!ELEMENT contrib-group (contrib?, aff?)>
+<!-- A contrib is the individual information about a reviewer -->
+<!ELEMENT contrib ((name | name-alternatives)?, contrib-id?, degrees?, email?, xref?)>
+<!ATTLIST contrib contrib-type CDATA #IMPLIED>
+<!ELEMENT name-alternatives (name+)>
+<!ELEMENT name (surname, given-names, prefix?, suffix?)>
+<!ATTLIST name name-style ( western | eastern | islek ) 'western' xml:lang NMTOKEN #IMPLIED>
+<!ELEMENT surname (#PCDATA)>
+<!ELEMENT given-names (#PCDATA)>
+<!ELEMENT prefix (#PCDATA)>
+<!ELEMENT suffix (#PCDATA)>
+<!ELEMENT contrib-id (#PCDATA)>
+<!ATTLIST contrib-id contrib-id-type (isni |orcid| pub-med-author-id| researcher-id| scopus-author-id|custom) #IMPLIED>
+<!ELEMENT degrees (#PCDATA)>
+<!ELEMENT email (#PCDATA)>
+<!-- the xref element of a contrib points to an aff element with the given rid -->
+<!ELEMENT xref EMPTY>
+<!ATTLIST xref ref-type CDATA #IMPLIED>
+<!ATTLIST xref rid IDREF #REQUIRED>
+<!-- An aff element contains information about a reviewer's affiliation -->
+<!ELEMENT aff (#PCDATA|institution-wrap|institution|addr-line|fax|phone)*>
+<!ATTLIST aff id ID #REQUIRED>
+<!ELEMENT institution-wrap (institution, institution-id?)>
+<!ELEMENT institution (#PCDATA)>
+<!ATTLIST institution content-type CDATA #IMPLIED>
+<!ELEMENT institution-id (#PCDATA)>
+<!ATTLIST institution-id institution-id-type CDATA #IMPLIED>
+<!ELEMENT department (#PCDATA)>
+<!ELEMENT addr-line (#PCDATA)>
+<!ATTLIST addr-line content-type (addrline1|addrline2|addrline3|addrline4|city|state|country|country-code|zip|CDATA) #IMPLIED>
+<!ELEMENT fax (#PCDATA)>
+<!ELEMENT phone (#PCDATA)>
+<!ELEMENT permissions (copyright-statement*, copyright-year*, copyright-holder*, (ali:free_to_read | license)*)>
+<!ATTLIST permissions id ID #IMPLIED>
+<!ELEMENT copyright-statement (#PCDATA )>
+<!ATTLIST copyright-statement id ID #IMPLIED>
+<!ELEMENT copyright-year (#PCDATA)>
+<!ELEMENT copyright-holder (#PCDATA)>
+<!ATTLIST copyright-holder
+    id ID #IMPLIED
+    xml:lang CDATA #IMPLIED
+>
+<!ELEMENT license (ali:license_ref | license-p)+>
+<!ATTLIST license
+    id ID #IMPLIED
+    license-type CDATA #IMPLIED
+    xml:lang CDATA #IMPLIED
+>
+<!ELEMENT license-p (#PCDATA)>
+<!ELEMENT ali:free_to_read EMPTY>
+<!ATTLIST ali:free_to_read
+    xmlns:ali CDATA #FIXED "http://www.niso.org/schemas/ali/1.0/"
+    end_date CDATA #IMPLIED
+    start_date CDATA #IMPLIED
+>
+<!ELEMENT ali:license_ref (#PCDATA)>
+<!ATTLIST ali:license_ref
+    xmlns:ali CDATA #FIXED "http://www.niso.org/schemas/ali/1.0/"
+    start_date CDATA #IMPLIED
+>
