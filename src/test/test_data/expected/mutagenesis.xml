@@ -1,0 +1,117 @@
+<doi_batch xmlns="http://www.crossref.org/schema/5.3.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="5.3.1" xsi:schemaLocation="http://www.crossref.org/schema/5.3.1 http://www.crossref.org/schemas/crossref5.3.1.xsd">
+  <head>
+    <doi_batch_id>0000</doi_batch_id>
+    <timestamp>0</timestamp>
+    <depositor>
+      <depositor_name>EMBO</depositor_name>
+      <email_address>contact@reviewcommons.org</email_address>
+    </depositor>
+    <registrant>EMBO</registrant>
+  </head>
+  <body>
+    <peer_review revision-round="0" type="referee-report">
+      <contributors>
+        <anonymous sequence="first" contributor_role="author" />
+      </contributors>
+      <titles>
+        <title>Review of Mutagenesis of the ADAM17-phosphatidylserine-binding motif leads to embryonic lethality in mice</title>
+      </titles>
+      <review_date>
+        <month>05</month>
+        <day>31</day>
+        <year>2019</year>
+      </review_date>
+      <institution>
+        <institution_name>Review Commons</institution_name>
+      </institution>
+      <running_number>1</running_number>
+      <rel:program xmlns:rel="http://www.crossref.org/relations.xsd">
+        <rel:related_item>
+          <rel:inter_work_relation relationship-type="isReviewOf" identifier-type="doi">10.26508/lsa.201900430</rel:inter_work_relation>
+        </rel:related_item>
+      </rel:program>
+      <doi_data>
+        <doi>10.15252/lsa.201900430.rev0.rr1</doi>
+        <resource>https://eeb.embo.org/doi/10.26508/lsa.201900430#rev0-rr1</resource>
+      </doi_data>
+    </peer_review>
+    <peer_review revision-round="0" type="referee-report">
+      <contributors>
+        <anonymous sequence="first" contributor_role="author" />
+      </contributors>
+      <titles>
+        <title>Review of Mutagenesis of the ADAM17-phosphatidylserine-binding motif leads to embryonic lethality in mice</title>
+      </titles>
+      <review_date>
+        <month>05</month>
+        <day>29</day>
+        <year>2019</year>
+      </review_date>
+      <institution>
+        <institution_name>Review Commons</institution_name>
+      </institution>
+      <running_number>2</running_number>
+      <rel:program xmlns:rel="http://www.crossref.org/relations.xsd">
+        <rel:related_item>
+          <rel:inter_work_relation relationship-type="isReviewOf" identifier-type="doi">10.26508/lsa.201900430</rel:inter_work_relation>
+        </rel:related_item>
+      </rel:program>
+      <doi_data>
+        <doi>10.15252/lsa.201900430.rev0.rr2</doi>
+        <resource>https://eeb.embo.org/doi/10.26508/lsa.201900430#rev0-rr2</resource>
+      </doi_data>
+    </peer_review>
+    <peer_review revision-round="0" type="referee-report">
+      <contributors>
+        <anonymous sequence="first" contributor_role="author" />
+      </contributors>
+      <titles>
+        <title>Review of Mutagenesis of the ADAM17-phosphatidylserine-binding motif leads to embryonic lethality in mice</title>
+      </titles>
+      <review_date>
+        <month>06</month>
+        <day>06</day>
+        <year>2019</year>
+      </review_date>
+      <institution>
+        <institution_name>Review Commons</institution_name>
+      </institution>
+      <running_number>3</running_number>
+      <rel:program xmlns:rel="http://www.crossref.org/relations.xsd">
+        <rel:related_item>
+          <rel:inter_work_relation relationship-type="isReviewOf" identifier-type="doi">10.26508/lsa.201900430</rel:inter_work_relation>
+        </rel:related_item>
+      </rel:program>
+      <doi_data>
+        <doi>10.15252/lsa.201900430.rev0.rr3</doi>
+        <resource>https://eeb.embo.org/doi/10.26508/lsa.201900430#rev0-rr3</resource>
+      </doi_data>
+    </peer_review>
+    <peer_review revision-round="1" type="referee-report">
+      <contributors>
+        <anonymous sequence="first" contributor_role="author" />
+      </contributors>
+      <titles>
+        <title>Review of Mutagenesis of the ADAM17-phosphatidylserine-binding motif leads to embryonic lethality in mice</title>
+      </titles>
+      <review_date>
+        <month>12</month>
+        <day>21</day>
+        <year>2020</year>
+      </review_date>
+      <institution>
+        <institution_name>Review Commons</institution_name>
+      </institution>
+      <running_number>1</running_number>
+      <rel:program xmlns:rel="http://www.crossref.org/relations.xsd">
+        <rel:related_item>
+          <rel:inter_work_relation relationship-type="isReviewOf" identifier-type="doi">10.26508/lsa.201900430</rel:inter_work_relation>
+        </rel:related_item>
+      </rel:program>
+      <doi_data>
+        <doi>10.15252/lsa.201900430.rev1.rr1</doi>
+        <resource>https://eeb.embo.org/doi/10.26508/lsa.201900430#rev1-rr1</resource>
+      </doi_data>
+    </peer_review>
+  </body>
+</doi_batch>

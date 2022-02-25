@@ -1,1 +1,1 @@
-from .reader import MECArchive
+from .archive import MECArchive
