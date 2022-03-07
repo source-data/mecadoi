@@ -4,3 +4,4 @@ __pycache__/
 
 provisioning/buffer/
 src/test/tmp/*
+.secrets/*
