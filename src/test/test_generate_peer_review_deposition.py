@@ -1,11 +1,11 @@
 import lxml.etree
-import unittest
 import zipfile
 
 from src.meca import MECArchive
 from src.crossref import generate_peer_review_deposition
+from .common import DoiDbTestCase
 
-class TestGeneratePeerReviewDeposition(unittest.TestCase):
+class TestGeneratePeerReviewDeposition(DoiDbTestCase):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
@@ -21,7 +21,7 @@ class TestGeneratePeerReviewDeposition(unittest.TestCase):
             meca = MECArchive(archive)
 
         with self.assertRaises(ValueError):
-            generate_peer_review_deposition(meca, 'src/test/tmp/out.xml')
+            generate_peer_review_deposition(meca, 'src/test/tmp/out.xml', self.DOI_DB_FILE)
 
     def test_generate_peer_review_deposition(self):
         for meca_name in self.fixtures:
@@ -35,11 +35,15 @@ class TestGeneratePeerReviewDeposition(unittest.TestCase):
         with zipfile.ZipFile(meca_archive, 'r') as archive:
             meca = MECArchive(archive)
             output_filename = f'src/test/tmp/{meca_name}.xml'
-            generate_peer_review_deposition(meca, output_filename)
+            generate_peer_review_deposition(meca, output_filename, self.DOI_DB_FILE)
             return output_filename
 
     def assertXmlEquals(self, meca_name, expected_xml_file, actual_xml_file):
-        ignore_xpaths = ['./cr:head/cr:doi_batch_id', './cr:head/cr:timestamp']
+        ignore_xpaths = [
+            './cr:head/cr:doi_batch_id',
+            './cr:head/cr:timestamp',
+            './cr:body/cr:peer_review/cr:doi_data/cr:doi'
+        ]
         ignore_namespaces = {'cr': 'http://www.crossref.org/schema/5.3.1'}
 
         def canonicalize(xml_file):

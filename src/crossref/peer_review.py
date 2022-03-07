@@ -4,6 +4,7 @@ from string import Template
 from lxml import etree
 
 from src.meca import MECArchive
+from . import get_free_doi
 
 DEPOSITION_TEMPLATE = Template("""<doi_batch
     xmlns="http://www.crossref.org/schema/5.3.1"
@@ -53,7 +54,7 @@ PEER_REVIEW_TEMPLATE = Template("""
 </peer_review>
 """)
 
-def generate_peer_review_deposition(meca: MECArchive, output_filename: str) -> None:
+def generate_peer_review_deposition(meca: MECArchive, output_filename: str, doi_db_file: str) -> None:
     """
     Generate a CrossRef deposition file for the peer reviews in the given MECA archive and write it to the given output file.
 
@@ -75,12 +76,12 @@ def generate_peer_review_deposition(meca: MECArchive, output_filename: str) -> N
     )
 
     body = deposition_xml[1]
-    for review_xml in generate_reviews(meca):
+    for review_xml in generate_reviews(meca, doi_db_file):
         body.append(review_xml)
 
     etree.ElementTree(deposition_xml).write(output_filename, pretty_print=True)
 
-def generate_reviews(meca: MECArchive):
+def generate_reviews(meca: MECArchive, doi_db_file: str):
     def assigned_date(meca_review):
         date = meca.get_el_with_attr(meca_review.history.date, 'date_type', 'assigned')
         return strptime(f'{date.year} {date.month} {date.day}', '%Y %m %d')
@@ -90,6 +91,8 @@ def generate_reviews(meca: MECArchive):
         revision = revision_round.revision
         for running_number, meca_review in enumerate(sorted(revision_round.review, key=assigned_date), start=1):
             review_date = meca.get_el_with_attr(meca_review.history.date, 'date_type', 'completed')
+            review_resource = f'https://eeb.embo.org/doi/{meca.article_doi}#rev{revision}-rr{running_number}'
+            review_doi = get_free_doi(review_resource, doi_db_file=doi_db_file)
             yield etree.fromstring(
                 PEER_REVIEW_TEMPLATE.substitute(
                     revision_round=revision,
@@ -100,8 +103,8 @@ def generate_reviews(meca: MECArchive):
                     institution_name='Review Commons',
                     running_number=running_number,
                     article_doi=meca.article_doi,
-                    review_doi=f'{doi_prefix}/{meca.article_doi.split("/")[1]}.rev{revision}.rr{running_number}',
-                    review_resource=f'https://eeb.embo.org/doi/{meca.article_doi}#rev{revision}-rr{running_number}',
+                    review_doi=review_doi,
+                    review_resource=review_resource,
                 ),
                 parser=etree.XMLParser(remove_blank_text=True),
             )
