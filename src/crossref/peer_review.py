@@ -54,9 +54,9 @@ PEER_REVIEW_TEMPLATE = Template("""
 </peer_review>
 """)
 
-def generate_peer_review_deposition(meca: MECArchive, output_filename: str, doi_db_file: str) -> None:
+def generate_peer_review_deposition(meca: MECArchive, doi_db_file: str) -> bytes:
     """
-    Generate a CrossRef deposition file for the peer reviews in the given MECA archive and write it to the given output file.
+    Generate a CrossRef deposition file for the peer reviews in the given MECA archive.
 
     If the archive does not contain any peer reviews, a ValueError is thrown.
     """
@@ -79,7 +79,7 @@ def generate_peer_review_deposition(meca: MECArchive, output_filename: str, doi_
     for review_xml in generate_reviews(meca, doi_db_file):
         body.append(review_xml)
 
-    etree.ElementTree(deposition_xml).write(output_filename, pretty_print=True)
+    return etree.tostring(deposition_xml, pretty_print=True)
 
 def generate_reviews(meca: MECArchive, doi_db_file: str):
     def assigned_date(meca_review):

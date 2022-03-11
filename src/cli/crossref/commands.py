@@ -7,17 +7,12 @@ from src.cli.dois.options import path_to_existing_doi_db
 @meca_archive
 @strict_validation
 @path_to_existing_doi_db
-@click.option(
-    '-o', '--output-file',
-    required=True,
-    help='The output file.',
-    type=click.Path(),
-)
-def generate(meca_archive, strict_validation, output_file, path_to_existing_doi_db):
+def generate(meca_archive, strict_validation, path_to_existing_doi_db):
     """Generate a CrossRef deposition file for any reviews within the given MECA archive."""
-    meca = read_meca(meca_archive, strict_validation)
     try:
-        generate_peer_review_deposition(meca, output_file, path_to_existing_doi_db)
-        click.echo(f'Deposition file written to {output_file}')
+        meca = read_meca(meca_archive, strict_validation)
+        deposition_xml = generate_peer_review_deposition(meca, path_to_existing_doi_db)
     except ValueError as e:
         raise click.ClickException(e)
+
+    click.echo(deposition_xml)
