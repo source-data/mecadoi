@@ -1,3 +1,0 @@
-[submodule "schemas/crossref"]
-	path = schemas/crossref
-	url = https://gitlab.com/crossref/schema.git
