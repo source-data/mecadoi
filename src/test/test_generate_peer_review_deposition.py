@@ -1,3 +1,5 @@
+import unittest
+
 import lxml.etree
 import zipfile
 
