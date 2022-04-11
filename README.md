@@ -24,14 +24,27 @@ pip install -r requirements.txt
 
 ### CLI
 
+Explore the command line interface by adding the `--help` parameter to any command to see its usage instructions and subcommands.
+```
+python3 -m src.cli.main --help
+python3 -m src.cli.main meca --help
+python3 -m src.cli.main meca info --help
+```
+
 Get basic information about a MECA archive:
 ```
-python3 -m src.cli.mecadoi -m src/test/test_data/mutagenesis.zip
+python3 -m src.cli.main meca info src/test/test_data/mutagenesis.zip
 ```
 
 Generate a CrossRef deposition file:
 ```
-python3 -m src.cli.mecadoi generate -m src/test/test_data/mutagenesis.zip -o deposition.xml
+python3 -m src.cli.main crossref generate -o deposition.xml src/test/test_data/mutagenesis.zip
+```
+
+Add DOIs to the database of unused DOIs:
+```
+echo "1\n2\n3\n" > dois.txt
+python3 -m src.cli.main dois add dois.txt
 ```
 
 ### Python libary
@@ -42,7 +55,7 @@ from zipfile import ZipFile
 from src.meca import MECArchive
 
 with ZipFile('src/test/test_data/mutagenesis.zip', 'r') as archive:
-        meca = MECArchive(archive, strict_validation=strict_validation)
+    meca = MECArchive(archive, strict_validation=strict_validation)
 ```
 
 Print some basic information:
@@ -52,7 +65,9 @@ print(meca)
 
 Generate a CrossRef deposition file:
 ```python
-generate_peer_review_deposition(meca, 'deposition.xml')
+from src.crossref import generate_peer_review_deposition
+doi_db = 'data/dois.sqlite3'
+deposition_xml = generate_peer_review_deposition(meca, doi_db)
 ```
 
 ## Testing

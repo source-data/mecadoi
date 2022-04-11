@@ -8,7 +8,13 @@ from src.cli.dois.options import path_to_existing_doi_db
 @meca_archive
 @strict_validation
 @path_to_existing_doi_db
-def generate(meca_archive, strict_validation, path_to_existing_doi_db):
+@click.option(
+    '-o', '--output',
+    default='-',
+    help='Write the CrossRef deposition file to this file. Defaults to stdout.',
+    type=click.File('wb'),
+)
+def generate(meca_archive, strict_validation, path_to_existing_doi_db, output):
     """Generate a CrossRef deposition file for any reviews within the given MECA archive."""
     try:
         meca = read_meca(meca_archive, strict_validation)
@@ -16,7 +22,7 @@ def generate(meca_archive, strict_validation, path_to_existing_doi_db):
     except ValueError as e:
         raise click.ClickException(e)
 
-    click.echo(deposition_xml)
+    output.write(deposition_xml)
 
 @click.command()
 @click.argument(
@@ -35,11 +41,22 @@ def generate(meca_archive, strict_validation, path_to_existing_doi_db):
     '-v', '--verbose',
     count=True,
 )
-def deposit(deposition_file: BufferedReader, crossref_username: str, crossref_password: str, verbose: int):
+@click.option(
+    '--sandbox/--no-sandbox',
+    default=True,
+    help='Should the CrossRef sandbox be used for deposition.',
+)
+@click.option(
+    '-o', '--output',
+    default='-',
+    help='Write the response returned by the CrossRef API to this file. Defaults to stdout.',
+    type=click.File('w'),
+)
+def deposit(deposition_file: BufferedReader, crossref_username: str, crossref_password: str, verbose: int, sandbox: bool, output):
     """Send the given deposition XML to CrossRef."""
     try:
-        response = deposit_xml(deposition_file.read(), crossref_username, crossref_password, verbose=verbose)
-        if verbose:
-            click.echo(response)
-    except ValueError as e:
+        response = deposit_xml(deposition_file.read(), crossref_username, crossref_password, verbose=verbose, sandbox=sandbox)
+    except Exception as e:
         raise click.ClickException(e)
+
+    output.write(response)
