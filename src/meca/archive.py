@@ -63,6 +63,13 @@ class MECArchive:
         self.copyright_year = self.article.front.article_meta.permissions.copyright_year
         self.article_doi = self.get_el_with_attr(self.article.front.article_meta.article_id, 'pub_id_type', 'doi').value
 
+        preprint_doi = None
+        for custom_meta_tag in self.article.front.article_meta.custom_meta_group.custom_meta:
+            tag_name = custom_meta_tag.meta_name
+            if tag_name == "Pre-existing BioRxiv Preprint DOI":
+                preprint_doi = custom_meta_tag.meta_value
+        self.article_preprint_doi = preprint_doi
+
     def is_valid(self, strict=False) -> Tuple[bool, str]:
         """
         Is this MECA archive valid?
@@ -133,7 +140,8 @@ class MECArchive:
     def __str__(self) -> str:
         return f'''
 {self.article_title}
-{self.article_doi}
+Article DOI: {self.article_doi}
+Preprint DOI: {self.article_preprint_doi if self.article_preprint_doi else "-"}
 {self.journal_title}, {self.copyright_year}
 '''.strip()
 

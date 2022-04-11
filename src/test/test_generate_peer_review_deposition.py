@@ -13,15 +13,21 @@ class TestGeneratePeerReviewDeposition(DoiDbTestCase):
             'mutagenesis',
             'signaling-pathway',
         ]
+        self.invalid_fixtures = [
+            'no-reviews',
+            'no-preprint-doi',
+        ]
         self.maxDiff = None
         self.outputCanonicalFiles = False
 
-    def test_generate_peer_review_deposition_for_empty_meca(self):
-        with zipfile.ZipFile('src/test/test_data/no-reviews.zip', 'r') as archive:
-            meca = MECArchive(archive)
+    def test_generate_peer_review_deposition_for_invalid_meca(self):
+        for meca_name in self.invalid_fixtures:
+            with self.subTest(meca_name=meca_name):
+                with zipfile.ZipFile(f'src/test/test_data/{meca_name}.zip', 'r') as archive:
+                    meca = MECArchive(archive)
 
-        with self.assertRaises(ValueError):
-            generate_peer_review_deposition(meca, self.DOI_DB_FILE)
+                with self.assertRaises(ValueError):
+                    generate_peer_review_deposition(meca, self.DOI_DB_FILE)
 
     def test_generate_peer_review_deposition(self):
         for meca_name in self.fixtures:

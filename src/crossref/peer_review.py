@@ -62,6 +62,8 @@ def generate_peer_review_deposition(meca: MECArchive, doi_db_file: str) -> bytes
     """
     if not meca.is_present(MECArchive.REVIEWS):
         raise ValueError('no reviews found in the given MECA archive')
+    if not meca.article_preprint_doi:
+        raise ValueError('no preprint DOI found in the given MECA archive')
 
     timestamp = time_ns()
     deposition_xml = etree.fromstring(
@@ -87,11 +89,12 @@ def generate_reviews(meca: MECArchive, doi_db_file: str):
         return strptime(f'{date.year} {date.month} {date.day}', '%Y %m %d')
 
     doi_prefix = '10.15252'
+    article_doi = meca.article_preprint_doi
     for revision_round in meca.reviews.version:
         revision = revision_round.revision
         for running_number, meca_review in enumerate(sorted(revision_round.review, key=assigned_date), start=1):
             review_date = meca.get_el_with_attr(meca_review.history.date, 'date_type', 'completed')
-            review_resource = f'https://eeb.embo.org/doi/{meca.article_doi}#rev{revision}-rr{running_number}'
+            review_resource = f'https://eeb.embo.org/doi/{article_doi}#rev{revision}-rr{running_number}'
             review_doi = get_free_doi(review_resource, doi_db_file=doi_db_file)
             yield etree.fromstring(
                 PEER_REVIEW_TEMPLATE.substitute(
@@ -102,7 +105,7 @@ def generate_reviews(meca: MECArchive, doi_db_file: str):
                     review_date_day=f'{review_date.day:02}',
                     institution_name='Review Commons',
                     running_number=running_number,
-                    article_doi=meca.article_doi,
+                    article_doi=article_doi,
                     review_doi=review_doi,
                     review_resource=review_resource,
                 ),
