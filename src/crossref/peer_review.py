@@ -1,10 +1,19 @@
-from time import strptime, time_ns
+from os import getenv
 from string import Template
+from time import strptime, time_ns
 
+from dotenv import load_dotenv
 from lxml import etree
 
 from src.meca import MECArchive
 from . import get_free_doi
+
+load_dotenv()
+DEPOSITOR_NAME = getenv('DEPOSITOR_NAME')
+DEPOSITOR_EMAIL = getenv('DEPOSITOR_EMAIL')
+REGISTRANT_NAME = getenv('REGISTRANT_NAME')
+INSTITUTION_NAME = getenv('INSTITUTION_NAME')
+RESOURCE_URL_TEMPLATE = Template(getenv('RESOURCE_URL_TEMPLATE'))
 
 DEPOSITION_TEMPLATE = Template("""<doi_batch
     xmlns="http://www.crossref.org/schema/5.3.1"
@@ -70,9 +79,9 @@ def generate_peer_review_deposition(meca: MECArchive, doi_db_file: str) -> bytes
         DEPOSITION_TEMPLATE.substitute(
             doi_batch_id=f'rc.{timestamp}',
             timestamp=timestamp,
-            depositor_name='EMBO',
-            depositor_email='eidens@embl.de',
-            registrant='EMBO',
+            depositor_name=DEPOSITOR_NAME,
+            depositor_email=DEPOSITOR_EMAIL,
+            registrant=REGISTRANT_NAME,
         ),
         parser=etree.XMLParser(remove_blank_text=True),
     )
@@ -88,13 +97,16 @@ def generate_reviews(meca: MECArchive, doi_db_file: str):
         date = meca.get_el_with_attr(meca_review.history.date, 'date_type', 'assigned')
         return strptime(f'{date.year} {date.month} {date.day}', '%Y %m %d')
 
-    doi_prefix = '10.15252'
     article_doi = meca.article_preprint_doi
     for revision_round in meca.reviews.version:
         revision = revision_round.revision
         for running_number, meca_review in enumerate(sorted(revision_round.review, key=assigned_date), start=1):
             review_date = meca.get_el_with_attr(meca_review.history.date, 'date_type', 'completed')
-            review_resource = f'https://eeb.embo.org/doi/{article_doi}#rev{revision}-rr{running_number}'
+            review_resource = RESOURCE_URL_TEMPLATE.substitute(
+                article_doi=article_doi,
+                revision=revision,
+                running_number=running_number,
+            )
             review_doi = get_free_doi(review_resource, doi_db_file=doi_db_file)
             yield etree.fromstring(
                 PEER_REVIEW_TEMPLATE.substitute(
@@ -103,7 +115,7 @@ def generate_reviews(meca: MECArchive, doi_db_file: str):
                     review_date_year=review_date.year,
                     review_date_month=f'{review_date.month:02}',
                     review_date_day=f'{review_date.day:02}',
-                    institution_name='Review Commons',
+                    institution_name=INSTITUTION_NAME,
                     running_number=running_number,
                     article_doi=article_doi,
                     review_doi=review_doi,
