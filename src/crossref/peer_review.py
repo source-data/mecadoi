@@ -69,7 +69,7 @@ def generate_peer_review_deposition(meca: MECArchive, doi_db_file: str) -> bytes
             doi_batch_id=f'rc.{timestamp}',
             timestamp=timestamp,
             depositor_name='EMBO',
-            depositor_email='contact@reviewcommons.org',
+            depositor_email='eidens@embl.de',
             registrant='EMBO',
         ),
         parser=etree.XMLParser(remove_blank_text=True),

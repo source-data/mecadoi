@@ -2,7 +2,7 @@ import re
 import responses
 import unittest
 from src.crossref import deposit
-from src.crossref.api import CROSSREF_DEPOSITION_URL
+from src.crossref.api import CROSSREF_SANDBOX_URL
 
 class TestDepositPeerReviews(unittest.TestCase):
 
@@ -13,17 +13,17 @@ class TestDepositPeerReviews(unittest.TestCase):
         """
         # Set up responses, which mocks out the requests library we use
         expected_response = '<html><head><title>SUCCESS</title></head><body><h2>SUCCESS</h2><p>Your batch submission was successfully received.</p></body></html>'
-        responses.add(responses.POST, CROSSREF_DEPOSITION_URL, body=expected_response, status=200)
+        responses.add(responses.POST, CROSSREF_SANDBOX_URL, body=expected_response, status=200)
 
         deposition_xml = '<doi_batch><head></head><body></body></doi_batch>'
         crossref_username = 'crossref_username'
         crossref_password = 'crossref_password'
-        actual_response = deposit(deposition_xml, crossref_username, crossref_password)
+        actual_response = deposit(deposition_xml, crossref_username, crossref_password, sandbox=True)
         self.assertEqual(expected_response, actual_response)
 
         self.assertEqual(1, len(responses.calls))
         actual_request = responses.calls[0].request
-        self.assertEqual(CROSSREF_DEPOSITION_URL, actual_request.url)
+        self.assertEqual(CROSSREF_SANDBOX_URL, actual_request.url)
 
         self.assertIn('Content-Type', actual_request.headers)
         content_type = actual_request.headers['Content-Type']

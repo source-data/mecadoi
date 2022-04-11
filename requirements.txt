@@ -1,4 +1,5 @@
 click==8.0.3
 lxml==4.7.1
+responses==0.19.0
 typing==3.7.4.3
 xsdata[cli]==22.2
