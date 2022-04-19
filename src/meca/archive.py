@@ -10,6 +10,7 @@ from .xml import (
     Transfer,
 )
 
+
 class MECArchive:
     """
     Read metadata from a MECA archive.
@@ -36,27 +37,27 @@ class MECArchive:
     REQUIRED_FILES = [ARTICLE, MANIFEST, TRANSFER]
     METADATA_FILES = REQUIRED_FILES + [REVIEWS]
 
-    def __init__(self, archive: ZipFile, strict_validation=False, *args, **kwargs) -> None:
+    def __init__(self, path_to_archive: str, strict_validation=False, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
-        self._archive = archive
-        self._files_in_archive = self._archive.namelist()
+        with ZipFile(path_to_archive, 'r') as archive:
+            self._files_in_archive = archive.namelist()
 
-        is_valid, reason = self.is_valid(strict=strict_validation)
-        if not is_valid:
-            raise ValueError(f'not a valid MECA archive: {reason}')
+            is_valid, reason = self.is_valid(archive, strict=strict_validation)
+            if not is_valid:
+                raise ValueError(f'not a valid MECA archive: {reason}')
 
-        def parse(meca_data):
-            if not self.is_present(meca_data):
-                return None
-            parser = XmlParser()
-            with self._archive.open(meca_data.filename) as xml_file:
-                return parser.parse(xml_file, clazz=meca_data.data_class)
+            def parse(meca_data):
+                if not self.is_present(meca_data):
+                    return None
+                parser = XmlParser()
+                with archive.open(meca_data.filename) as xml_file:
+                    return parser.parse(xml_file, clazz=meca_data.data_class)
 
-        self.article = parse(MECArchive.ARTICLE)
-        self.manifest = parse(MECArchive.MANIFEST)
-        self.transfer = parse(MECArchive.TRANSFER)
-        self.reviews = parse(MECArchive.REVIEWS)
+            self.article = parse(MECArchive.ARTICLE)
+            self.manifest = parse(MECArchive.MANIFEST)
+            self.transfer = parse(MECArchive.TRANSFER)
+            self.reviews = parse(MECArchive.REVIEWS)
 
         self.article_title = self.article.front.article_meta.title_group.article_title
         self.journal_title = self.article.front.journal_meta.journal_title_group.journal_title
@@ -70,7 +71,7 @@ class MECArchive:
                 preprint_doi = custom_meta_tag.meta_value
         self.article_preprint_doi = preprint_doi
 
-    def is_valid(self, strict=False) -> Tuple[bool, str]:
+    def is_valid(self, archive: ZipFile, strict=False) -> Tuple[bool, str]:
         """
         Is this MECA archive valid?
 
@@ -79,7 +80,7 @@ class MECArchive:
         definitions.
         """
         # check that the ZIP archive is valid
-        first_bad_file = self._archive.testzip()
+        first_bad_file = archive.testzip()
         if first_bad_file:
             return False, f'ZIP archive is invalid, first bad file: {first_bad_file}'
 
@@ -130,7 +131,7 @@ class MECArchive:
     def get_el_with_attr(self, elements, attr: str, val: str):
         """
         Returns the first of the given elements that has the given attribute with the given value.
-        
+
         Use it like so to get the element that holds the article's DOI:
         `meca.get_el_with_attr(meca.article.front.article_meta.article_id, 'pub_id_type', 'doi')`
         """
