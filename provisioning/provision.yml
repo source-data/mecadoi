@@ -7,6 +7,7 @@
     sync_user: mecadoi
     sync_user_home_dir: '/home/{{ sync_user }}'
     sync_dir: '{{ sync_user_home_dir }}/storage-box-local'
+    code_dir: '{{ sync_user_home_dir }}/mecadoi'
     s3_bucket_name: mecadoi-archives
 
   tasks:
@@ -29,6 +30,9 @@
       - curl
       - htop
       - make
+      - python3
+      - python3-pip
+      - python3-venv
       - unzip
       - vim
       - wget
@@ -89,3 +93,25 @@
       minute: 0
       hour: 5
       job: '{{ sync_user_home_dir }}/sync-storage-box.sh "{{ sync_dir }}" "{{ s3_bucket_name }}" | tee -a "{{ sync_user_home_dir }}/logs/sync-storage-box.log"'
+
+  - name: Copy the Python files to the server
+    ansible.builtin.copy:
+      src: ../src
+      dest: '{{ code_dir }}/'
+      owner: '{{ sync_user }}'
+      group: '{{ sync_user }}'
+      mode: u=rwx,g=r,o=r
+
+  - name: Copy the requirements file to the server
+    ansible.builtin.copy:
+      src: ../requirements.txt
+      dest: '{{ code_dir }}/'
+      owner: '{{ sync_user }}'
+      group: '{{ sync_user }}'
+      mode: u=rwx,g=r,o=r
+
+  - name: Install specified python requirements in indicated (virtualenv)
+    ansible.builtin.pip:
+      requirements: '{{ code_dir }}//requirements.txt'
+      virtualenv: '{{ code_dir }}/.venv'
+      virtualenv_command: /usr/bin/python3.9 -m venv
