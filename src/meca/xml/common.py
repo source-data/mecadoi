@@ -209,6 +209,12 @@ class Contrib:
             "type": "Element",
         }
     )
+    degrees: Optional[str] = field(
+        default=None,
+        metadata={
+            "type": "Element",
+        }
+    )
     email: Optional[str] = field(
         default=None,
         metadata={
