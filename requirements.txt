@@ -20,6 +20,7 @@ pycodestyle==2.8.0
 pyflakes==2.4.0
 python-dotenv==0.20.0
 python-slugify==6.1.0
+pyYAML==5.4.1
 requests==2.27.1
 responses==0.19.0
 six==1.16.0
