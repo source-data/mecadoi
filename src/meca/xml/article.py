@@ -364,6 +364,13 @@ class AwardGroup:
     class Meta:
         name = "award-group"
 
+    award_id: Optional[str] = field(
+        default=None,
+        metadata={
+            "name": "award-id",
+            "type": "Element",
+        }
+    )
     funding_source: Optional[FundingSource] = field(
         default=None,
         metadata={
@@ -385,7 +392,7 @@ class FundingGroup:
     class Meta:
         name = "funding-group"
 
-    award_group: Optional[AwardGroup] = field(
+    award_group: Optional[List[AwardGroup]] = field(
         default=None,
         metadata={
             "name": "award-group",
