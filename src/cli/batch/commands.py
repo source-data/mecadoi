@@ -11,6 +11,10 @@ from src.batch import batch_deposit, BatchDepositRun
     'input-directory',
     type=click.Path(exists=True, file_okay=False, dir_okay=True),
 )
+@click.option(
+    '-o', '--output-directory',
+    type=click.Path(),
+)
 @verbose_output
 @strict_validation
 @click.option(
@@ -19,6 +23,7 @@ from src.batch import batch_deposit, BatchDepositRun
 )
 def deposit(
     input_directory,
+    output_directory,
     verbose: int,
     strict_validation: bool,
     dry_run: bool,
@@ -28,6 +33,7 @@ def deposit(
     """
     result = batch_deposit(
         input_directory,
+        output_directory,
         verbose=verbose,
         strict_validation=strict_validation,
         dry_run=dry_run,
