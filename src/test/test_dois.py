@@ -1,6 +1,6 @@
 from src.crossref import get_free_doi
-from src.crossref.dois import DoiDatabase
 from .common import DoiDbTestCase
+
 
 class TestDoiRetrieval(DoiDbTestCase):
 

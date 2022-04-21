@@ -1,13 +1,12 @@
 from datetime import datetime
 import sqlite3
+from src.config import DOI_DB_FILE, DOI_DB_WARNING_THRESHOLD
 
-DOI_DB_FILE = 'data/dois.sqlite3'
-WARNING_THRESHOLD = 20
 
-def get_free_doi(resource: str, doi_db_file: str, warning_threshold=WARNING_THRESHOLD):
+def get_free_doi(resource: str, doi_db_file: str = DOI_DB_FILE, warning_threshold: int = DOI_DB_WARNING_THRESHOLD):
     """
     Get an unused DOI from the DOI database.
-    
+
     The `doi_db_file` parameter must be the path to an SQLite3 database that is readable by the DoiDatabase class, and
     has to be have at least one free, i.e. unused, DOI.
     """
@@ -19,8 +18,10 @@ def get_free_doi(resource: str, doi_db_file: str, warning_threshold=WARNING_THRE
 
     return doi_db.get_free_doi(resource)
 
+
 def notify_running_low_on_dois(num_free_dois: str):
     print(f'WARNING: running low on DOIs, only {num_free_dois} left!')
+
 
 class DoiDatabase:
     """
@@ -84,7 +85,7 @@ CREATE TABLE IF NOT EXISTS dois
     def insert_dois(self, dois: dict[str]):
         with self.conn() as conn:
             conn.cursor().executemany(self.QUERY_INSERT_DOIS, [(doi,) for doi in dois])
-    
+
     def initialize(self):
         with self.conn() as conn:
             conn.cursor().execute(self.CREATE_TABLE_STATEMENT)

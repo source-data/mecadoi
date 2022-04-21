@@ -1,19 +1,10 @@
-from os import getenv
 from string import Template
 from time import strptime, time_ns
-
-from dotenv import load_dotenv
 from lxml import etree
-
+from src.config import DEPOSITOR_NAME, DEPOSITOR_EMAIL, REGISTRANT_NAME, INSTITUTION_NAME, RESOURCE_URL_TEMPLATE
 from src.meca import MECArchive
 from . import get_free_doi
 
-load_dotenv()
-DEPOSITOR_NAME = getenv('DEPOSITOR_NAME')
-DEPOSITOR_EMAIL = getenv('DEPOSITOR_EMAIL')
-REGISTRANT_NAME = getenv('REGISTRANT_NAME')
-INSTITUTION_NAME = getenv('INSTITUTION_NAME')
-RESOURCE_URL_TEMPLATE = Template(getenv('RESOURCE_URL_TEMPLATE'))
 
 DEPOSITION_TEMPLATE = Template("""<doi_batch
     xmlns="http://www.crossref.org/schema/5.3.1"
@@ -53,7 +44,10 @@ PEER_REVIEW_TEMPLATE = Template("""
     <running_number>${running_number}</running_number>
     <rel:program xmlns:rel="http://www.crossref.org/relations.xsd">
         <rel:related_item>
-            <rel:inter_work_relation relationship-type="isReviewOf" identifier-type="doi">${article_doi}</rel:inter_work_relation>
+            <rel:inter_work_relation
+                relationship-type="isReviewOf"
+                identifier-type="doi"
+            >${article_doi}</rel:inter_work_relation>
         </rel:related_item>
     </rel:program>
     <doi_data>
@@ -63,13 +57,14 @@ PEER_REVIEW_TEMPLATE = Template("""
 </peer_review>
 """)
 
-def generate_peer_review_deposition(meca: MECArchive, doi_db_file: str) -> bytes:
+
+def generate_peer_review_deposition(meca: MECArchive) -> bytes:
     """
     Generate a CrossRef deposition file for the peer reviews in the given MECA archive.
 
     If the archive does not contain any peer reviews, a ValueError is thrown.
     """
-    if not meca.is_present(MECArchive.REVIEWS):
+    if not meca.reviews:
         raise ValueError('no reviews found in the given MECA archive')
     if not meca.article_preprint_doi:
         raise ValueError('no preprint DOI found in the given MECA archive')
@@ -87,12 +82,13 @@ def generate_peer_review_deposition(meca: MECArchive, doi_db_file: str) -> bytes
     )
 
     body = deposition_xml[1]
-    for review_xml in generate_reviews(meca, doi_db_file):
+    for review_xml in generate_reviews(meca):
         body.append(review_xml)
 
     return etree.tostring(deposition_xml, pretty_print=True)
 
-def generate_reviews(meca: MECArchive, doi_db_file: str):
+
+def generate_reviews(meca: MECArchive):
     def assigned_date(meca_review):
         date = meca.get_el_with_attr(meca_review.history.date, 'date_type', 'assigned')
         return strptime(f'{date.year} {date.month} {date.day}', '%Y %m %d')
@@ -102,12 +98,12 @@ def generate_reviews(meca: MECArchive, doi_db_file: str):
         revision = revision_round.revision
         for running_number, meca_review in enumerate(sorted(revision_round.review, key=assigned_date), start=1):
             review_date = meca.get_el_with_attr(meca_review.history.date, 'date_type', 'completed')
-            review_resource = RESOURCE_URL_TEMPLATE.substitute(
+            review_resource = Template(RESOURCE_URL_TEMPLATE).substitute(
                 article_doi=article_doi,
                 revision=revision,
                 running_number=running_number,
             )
-            review_doi = get_free_doi(review_resource, doi_db_file=doi_db_file)
+            review_doi = get_free_doi(review_resource)
             yield etree.fromstring(
                 PEER_REVIEW_TEMPLATE.substitute(
                     revision_round=revision,

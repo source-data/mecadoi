@@ -1,7 +1,7 @@
 import os
 from unittest import TestCase
-
 from src.crossref.dois import DoiDatabase
+
 
 class DoiDbTestCase(TestCase):
 

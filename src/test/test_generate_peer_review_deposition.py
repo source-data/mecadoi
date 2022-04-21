@@ -26,7 +26,7 @@ class TestGeneratePeerReviewDeposition(DoiDbTestCase):
                 meca = MECArchive(f'src/test/test_data/{meca_name}.zip')
 
                 with self.assertRaises(ValueError):
-                    generate_peer_review_deposition(meca, self.DOI_DB_FILE)
+                    generate_peer_review_deposition(meca)
 
     def test_generate_peer_review_deposition(self):
         for meca_name in self.fixtures:
@@ -39,7 +39,7 @@ class TestGeneratePeerReviewDeposition(DoiDbTestCase):
     def generate_xml(self, meca_archive, meca_name):
         meca = MECArchive(meca_archive)
         output_filename = f'src/test/tmp/{meca_name}.xml'
-        deposition_xml = generate_peer_review_deposition(meca, self.DOI_DB_FILE)
+        deposition_xml = generate_peer_review_deposition(meca)
         with open(output_filename, 'wb') as f:
             f.write(deposition_xml)
         return output_filename

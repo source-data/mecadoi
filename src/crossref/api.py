@@ -1,8 +1,6 @@
-import os
 import requests
+from src.config import CROSSREF_DEPOSITION_URL, CROSSREF_USERNAME, CROSSREF_PASSWORD
 
-CROSSREF_SANDBOX_URL='https://test.crossref.org/servlet/deposit'
-CROSSREF_DEPOSITION_URL='https://example.org/servlet/deposit'
 
 def pretty_print_request(req):
     print(req.method, req.url)
@@ -10,25 +8,27 @@ def pretty_print_request(req):
         print(f'{k}: {v}')
     print(req.body.decode())
 
-def prep_request(deposition_file: bytes, crossref_username: str, crossref_password: str, sandbox: bool):
+
+def prep_request(deposition_file: bytes, crossref_username: str, crossref_password: str):
     files = {'fname': ('deposition.xml', deposition_file)}
     data = {
         'operation': 'doQueryUpload',
         'login_id': crossref_username,
         'login_passwd': crossref_password,
     }
-    url = CROSSREF_SANDBOX_URL if sandbox else CROSSREF_DEPOSITION_URL
+    url = CROSSREF_DEPOSITION_URL
     req = requests.Request('POST', url, files=files, data=data)
     return req.prepare()
 
-def deposit(deposition_file: bytes, crossref_username: str, crossref_password: str, verbose=False, sandbox=True) -> None:
+
+def deposit(deposition_file: bytes, verbose=False) -> None:
     """Send a deposition file to the Crossref API."""
-    if not (crossref_username and crossref_password):
+    if not (CROSSREF_USERNAME and CROSSREF_PASSWORD):
         raise ValueError('No CrossRef username or password given!')
     if verbose:
-        pretty_print_request(prep_request(deposition_file, '***', '***', sandbox))
+        pretty_print_request(prep_request(deposition_file, '***', '***'))
 
-    req = prep_request(deposition_file, crossref_username, crossref_password, sandbox)
+    req = prep_request(deposition_file, CROSSREF_USERNAME, CROSSREF_PASSWORD)
     resp = requests.Session().send(req)
     resp.raise_for_status()
     return resp.text
