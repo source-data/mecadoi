@@ -95,12 +95,21 @@
       job: '{{ sync_user_home_dir }}/sync-storage-box.sh "{{ sync_dir }}" "{{ s3_bucket_name }}" | tee -a "{{ sync_user_home_dir }}/logs/sync-storage-box.log"'
 
   - name: Copy the Python files to the server
-    ansible.builtin.copy:
+    ansible.posix.synchronize:
       src: ../src
       dest: '{{ code_dir }}/'
+      # Delete files in dest that do not exist (after transfer, not before) in the src path
+      delete: yes
+      rsync_opts:
+        - "--exclude={'__pycache__','.DS_Store'}"
+
+  - name: Recursively change ownership of the Python files
+    ansible.builtin.file:
+      path: '{{ code_dir }}/'
+      state: directory
+      recurse: yes
       owner: '{{ sync_user }}'
       group: '{{ sync_user }}'
-      mode: u=rwx,g=r,o=r
 
   - name: Copy the requirements file to the server
     ansible.builtin.copy:
