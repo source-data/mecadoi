@@ -32,10 +32,6 @@ class TestDepositPeerReviews(unittest.TestCase):
 
         multipart_boundary = re_content_type.match(content_type)[1]
         expected_body = f"""--{multipart_boundary}
-Content-Disposition: form-data; name="operation"
-
-doQueryUpload
---{multipart_boundary}
 Content-Disposition: form-data; name="login_id"
 
 {CROSSREF_USERNAME}

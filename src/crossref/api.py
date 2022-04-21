@@ -12,7 +12,6 @@ def pretty_print_request(req):
 def prep_request(deposition_file: bytes, crossref_username: str, crossref_password: str):
     files = {'fname': ('deposition.xml', deposition_file)}
     data = {
-        'operation': 'doQueryUpload',
         'login_id': crossref_username,
         'login_passwd': crossref_password,
     }
