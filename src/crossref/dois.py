@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS dois
     QUERY_NUM_TOTAL_DOIS = 'SELECT COUNT(*) FROM dois'
     QUERY_INSERT_DOIS = 'INSERT INTO dois (doi) VALUES (?)'
 
-    def __init__(self, db_file: str) -> None:
+    def __init__(self, db_file: str = DOI_DB_FILE) -> None:
         self.db_file = db_file
 
     def conn(self):
