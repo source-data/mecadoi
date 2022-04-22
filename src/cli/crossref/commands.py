@@ -14,11 +14,11 @@ from .options import verbose_output
     help='Write the CrossRef deposition file to this file. Defaults to stdout.',
     type=click.File('wb'),
 )
-def generate(meca_archive, strict_validation, path_to_existing_doi_db, output):
+def generate(meca_archive, strict_validation, output):
     """Generate a CrossRef deposition file for any reviews within the given MECA archive."""
     try:
         meca = read_meca(meca_archive, strict_validation)
-        deposition_xml = generate_peer_review_deposition(meca, path_to_existing_doi_db)
+        deposition_xml = generate_peer_review_deposition(meca)
     except ValueError as e:
         raise click.ClickException(e)
 
