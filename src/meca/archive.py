@@ -109,7 +109,7 @@ class MECArchive:
                 else:
                     raise ValueError(f'no lxml validator class found for schema file {schema_file}')
 
-                with self._open_file_in_archive(meca_data) as xml_file:
+                with archive.open(meca_data.filename) as xml_file:
                     xml_doc = lxml.etree.parse(xml_file)
                     try:
                         xml_schema.assertValid(xml_doc)

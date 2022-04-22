@@ -20,7 +20,7 @@ def prep_request(deposition_file: bytes, crossref_username: str, crossref_passwo
     return req.prepare()
 
 
-def deposit(deposition_file: bytes, verbose=False) -> None:
+def deposit(deposition_file: bytes, verbose=False) -> str:
     """Send a deposition file to the Crossref API."""
     if not (CROSSREF_USERNAME and CROSSREF_PASSWORD):
         raise ValueError('No CrossRef username or password given!')

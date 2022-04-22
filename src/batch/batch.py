@@ -2,31 +2,31 @@ from dataclasses import dataclass
 from datetime import datetime
 from os import makedirs
 from pathlib import Path
-from typing import List
+from typing import List, Union
 from src.meca import MECArchive
 from src.crossref import deposit as deposit_xml, generate_peer_review_deposition
 
 
 @dataclass
 class DepositionResult:
-    output: object = None
-    error: str = None
+    output: Union[str, None] = None
+    error: Union[str, None] = None
 
 
 @dataclass
 class MecaParsingResult:
     input: str
-    error: str = None
-    has_reviews: bool = None
-    has_preprint_doi: bool = None
-    doi_already_processed: bool = None
+    error: Union[str, None] = None
+    has_reviews: Union[bool, None] = None
+    has_preprint_doi: Union[bool, None] = None
+    doi_already_processed: Union[bool, None] = None
 
 
 @dataclass
 class MecaDeposition:
     meca_parsing: MecaParsingResult
-    depositition_file_generation: DepositionResult = None
-    crossref_deposition: DepositionResult = None
+    deposition_file_generation: Union[DepositionResult, None] = None
+    crossref_deposition: Union[DepositionResult, None] = None
 
 
 @dataclass
@@ -86,15 +86,15 @@ def process(
         result.meca_parsing.doi_already_processed = True
         return result
 
-    result.depositition_file_generation = DepositionResult()
+    result.deposition_file_generation = DepositionResult()
     try:
         deposition_xml = generate_peer_review_deposition(meca)
         deposition_file = f'{output_dir}/deposition.xml'
         with open(deposition_file, 'w') as f:
             f.write(deposition_xml.decode("utf-8"))
-        result.depositition_file_generation.output = deposition_file
+        result.deposition_file_generation.output = deposition_file
     except Exception as e:
-        result.depositition_file_generation.error = str(e)
+        result.deposition_file_generation.error = str(e)
         return result
 
     if dry_run:

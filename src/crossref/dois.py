@@ -1,5 +1,6 @@
 from datetime import datetime
 import sqlite3
+from typing import List
 from src.config import DOI_DB_FILE, DOI_DB_WARNING_THRESHOLD
 
 
@@ -82,7 +83,7 @@ CREATE TABLE IF NOT EXISTS dois
             result = conn.cursor().execute(self.QUERY_NUM_TOTAL_DOIS).fetchone()
         return result[0]
 
-    def insert_dois(self, dois: dict[str]):
+    def insert_dois(self, dois: List[str]):
         with self.conn() as conn:
             conn.cursor().executemany(self.QUERY_INSERT_DOIS, [(doi,) for doi in dois])
 

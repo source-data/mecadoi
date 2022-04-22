@@ -43,7 +43,7 @@ class TestBatchDeposit(DoiDbTestCase):
                         has_preprint_doi=True,
                         doi_already_processed=False,
                     ),
-                    depositition_file_generation=DepositionResult(
+                    deposition_file_generation=DepositionResult(
                         output='src/test/tmp/batch/output/10.1101/2022.02.15.480564/deposition.xml',
                         error=None,
                     ),
@@ -92,7 +92,7 @@ class TestBatchDeposit(DoiDbTestCase):
                         has_preprint_doi=True,
                         doi_already_processed=False,
                     ),
-                    depositition_file_generation=DepositionResult(
+                    deposition_file_generation=DepositionResult(
                         output='src/test/tmp/batch/output/10.1101/2022.02.15.480564/deposition.xml',
                         error=None,
                     ),

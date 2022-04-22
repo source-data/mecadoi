@@ -42,6 +42,6 @@ def deposit(deposition_file: BufferedReader, verbose: int, output):
     try:
         response = deposit_xml(deposition_file.read(), verbose=verbose)
     except Exception as e:
-        raise click.ClickException(e)
+        raise click.ClickException(str(e))
 
     output.write(response)
