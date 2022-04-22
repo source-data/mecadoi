@@ -19,7 +19,7 @@ Clone this repository, create a virtual env (optional), and install the dependen
 ```
 git clone https://github.com/source-data/mecadoi.git && cd mecadoi
 python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements/base.txt
 ```
 
 ### CLI

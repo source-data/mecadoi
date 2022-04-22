@@ -1,0 +1,10 @@
+certifi==2021.10.8
+charset-normalizer==2.0.12
+click==8.1.2
+idna==3.3
+lxml==4.8.0
+python-dotenv==0.20.0
+PyYAML==6.0
+requests==2.27.1
+urllib3==1.26.9
+xsdata==22.4
