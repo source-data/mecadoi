@@ -130,9 +130,9 @@
       owner: '{{ sync_user }}'
       group: '{{ sync_user }}'
 
-  - name: Copy the requirements file to the server
+  - name: Copy the requirements files to the server
     ansible.builtin.copy:
-      src: ../requirements.txt
+      src: ../requirements
       dest: '{{ code_dir }}/'
       owner: '{{ sync_user }}'
       group: '{{ sync_user }}'
@@ -140,6 +140,6 @@
 
   - name: Install specified python requirements in indicated (virtualenv)
     ansible.builtin.pip:
-      requirements: '{{ code_dir }}//requirements.txt'
+      requirements: '{{ code_dir }}/requirements/base.txt'
       virtualenv: '{{ code_dir }}/.venv'
       virtualenv_command: /usr/bin/python3.9 -m venv
