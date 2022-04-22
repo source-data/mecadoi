@@ -7,6 +7,7 @@
     sync_user: mecadoi
     sync_user_home_dir: '/home/{{ sync_user }}'
     sync_dir: '{{ sync_user_home_dir }}/storage-box-local'
+    script_dir: '{{ sync_user_home_dir }}/bin'
     code_dir: '{{ sync_user_home_dir }}/mecadoi'
     s3_bucket_name: mecadoi-archives
 
@@ -74,13 +75,14 @@
       owner: '{{ sync_user }}'
       group: '{{ sync_user }}'
     loop:
-      - storage-box-local
+      - bin
       - logs
+      - storage-box-local
 
   - name: Copy the sync script to the server
     ansible.builtin.copy:
       src: resources/sync-storage-box.sh
-      dest: '{{ sync_user_home_dir }}/sync-storage-box.sh'
+      dest: '{{ script_dir }}/'
       owner: '{{ sync_user }}'
       group: '{{ sync_user }}'
       mode: u=rwx,g=r,o=r
@@ -89,10 +91,27 @@
     become: yes
     become_user: '{{ sync_user }}'
     ansible.builtin.cron:
-      name: Sync MECA archives every day at 05:00
+      name: Sync MECA archives every day at 03:00
       minute: 0
-      hour: 5
-      job: '{{ sync_user_home_dir }}/sync-storage-box.sh "{{ sync_dir }}" "{{ s3_bucket_name }}" | tee -a "{{ sync_user_home_dir }}/logs/sync-storage-box.log"'
+      hour: 3
+      job: '{{ script_dir }}/sync-storage-box.sh "{{ sync_dir }}" "{{ s3_bucket_name }}" | tee -a "{{ sync_user_home_dir }}/logs/sync-storage-box.log"'
+
+  - name: Copy the notification script to the server
+    ansible.builtin.copy:
+      src: resources/notify-about-new-files.sh
+      dest: '{{ script_dir }}/'
+      owner: '{{ sync_user }}'
+      group: '{{ sync_user }}'
+      mode: u=rwx,g=r,o=r
+
+  - name: Set up cron job for syncing the storage box
+    become: yes
+    become_user: '{{ sync_user }}'
+    ansible.builtin.cron:
+      name: Notify about new MECA archives every day at 04:00
+      minute: 0
+      hour: 4
+      job: '{{ script_dir }}/notify-about-new-files.sh "{{ sync_dir }}"'
 
   - name: Copy the Python files to the server
     ansible.posix.synchronize:
