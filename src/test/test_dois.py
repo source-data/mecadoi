@@ -1,4 +1,4 @@
-from src.crossref import get_free_doi
+from src.crossref.dois import get_free_doi
 from .common import DoiDbTestCase
 
 
@@ -20,7 +20,7 @@ class TestDoiRetrieval(DoiDbTestCase):
         'www.embl.de',
     ]
 
-    def test_get_free_dois(self):
+    def test_get_free_dois(self) -> None:
         """Verify that no DOI is returned twice."""
         free_dois = [doi for doi in self.DOIS]
         for resource in self.RESOURCES:
@@ -29,7 +29,7 @@ class TestDoiRetrieval(DoiDbTestCase):
                 self.assertIn(free_doi, free_dois)
                 free_dois.remove(free_doi)
 
-    def test_no_more_free_dois(self):
+    def test_no_more_free_dois(self) -> None:
         """Verify that retrieving a DOI fails if no more free ones are available."""
         for resource in self.RESOURCES:
             get_free_doi(resource, self.DOI_DB_FILE, warning_threshold=None)

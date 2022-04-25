@@ -1,11 +1,12 @@
+from datetime import datetime
 from os import listdir, mkdir
+from typing import List
 import responses
 from shutil import copy, rmtree
 
 import yaml
-from src.batch import batch_deposit, BatchDepositRun
-from src.batch.batch import DepositionResult, MecaDeposition, MecaParsingResult
-from src.crossref.api import CROSSREF_DEPOSITION_URL
+from src.batch.deposit import batch_deposit, BatchDepositRun, DepositionResult, MecaDeposition, MecaParsingResult
+from src.config import CROSSREF_DEPOSITION_URL
 from .common import DoiDbTestCase
 
 
@@ -27,7 +28,7 @@ class TestBatchDeposit(DoiDbTestCase):
         return super().setUp()
 
     @responses.activate
-    def test_batch_deposit(self):
+    def test_batch_deposit(self) -> None:
         input_files = [
             'mutagenesis.zip',
             'no-preprint-doi.zip',
@@ -67,7 +68,7 @@ class TestBatchDeposit(DoiDbTestCase):
                     )
                 ),
             ],
-            timestamp=None,
+            timestamp=datetime.now(),
         )
 
         input_directory = f'{self.base_dir}/input'
@@ -78,7 +79,7 @@ class TestBatchDeposit(DoiDbTestCase):
         self.assert_results_equal(expected_output, result)
 
     @responses.activate
-    def test_batch_deposit_same_file(self):
+    def test_batch_deposit_same_file(self) -> None:
         input_files = [
             'mutagenesis.zip',
         ]
@@ -98,7 +99,7 @@ class TestBatchDeposit(DoiDbTestCase):
                     ),
                 ),
             ],
-            timestamp=None,
+            timestamp=datetime.now(),
         )
         expected_output_second_run = BatchDepositRun(
             results=[
@@ -112,7 +113,7 @@ class TestBatchDeposit(DoiDbTestCase):
                     ),
                 ),
             ],
-            timestamp=None,
+            timestamp=datetime.now(),
         )
 
         input_directory = f'{self.base_dir}/input'
@@ -125,11 +126,11 @@ class TestBatchDeposit(DoiDbTestCase):
         result_second_run = self.do_batch_deposit(input_directory, output_directory)
         self.assert_results_equal(expected_output_second_run, result_second_run)
 
-    def assert_results_equal(self, expected, actual):
+    def assert_results_equal(self, expected: BatchDepositRun, actual: BatchDepositRun) -> None:
         expected.timestamp = actual.timestamp
         self.assertEqual(yaml.dump(expected), yaml.dump(actual))
 
-    def setup_input_directory(self, input_dir, files):
+    def setup_input_directory(self, input_dir: str, files: List[str]) -> None:
         mkdir(input_dir)
         num_files_in_input_dir = len(listdir(input_dir))
         self.assertEqual(0, num_files_in_input_dir)
@@ -140,7 +141,7 @@ class TestBatchDeposit(DoiDbTestCase):
         num_files_in_input_dir = len(listdir(input_dir))
         self.assertEqual(len(files), num_files_in_input_dir)
 
-    def do_batch_deposit(self, input_directory, output_directory):
+    def do_batch_deposit(self, input_directory: str, output_directory: str) -> BatchDepositRun:
         return batch_deposit(
             input_directory,
             output_directory,

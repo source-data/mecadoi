@@ -1,14 +1,15 @@
 import re
+from typing import cast
 import responses
 import unittest
 from src.config import CROSSREF_DEPOSITION_URL, CROSSREF_USERNAME, CROSSREF_PASSWORD
-from src.crossref import deposit
+from src.crossref.api import deposit
 
 
 class TestDepositPeerReviews(unittest.TestCase):
 
     @responses.activate
-    def test_deposit_peer_reviews(self):
+    def test_deposit_peer_reviews(self) -> None:
         """
         Test whether the correct request is sent to the Crossref API when depositing peer reviews.
         """
@@ -17,7 +18,7 @@ class TestDepositPeerReviews(unittest.TestCase):
         responses.add(responses.POST, CROSSREF_DEPOSITION_URL, body=expected_response, status=200)
 
         deposition_xml = '<doi_batch><head></head><body></body></doi_batch>'
-        actual_response = deposit(deposition_xml)
+        actual_response = deposit(deposition_xml.encode())
         self.assertEqual(expected_response, actual_response)
 
         self.assertEqual(1, len(responses.calls))
@@ -30,7 +31,10 @@ class TestDepositPeerReviews(unittest.TestCase):
         re_content_type = re.compile('^multipart/form-data; boundary=(.+)$')
         self.assertRegex(content_type, re_content_type)
 
-        multipart_boundary = re_content_type.match(content_type)[1]
+        match = re_content_type.match(content_type)
+        self.assertIsNotNone(match)
+        multipart_boundary = match[1]  # type: ignore[index] # the previous line ensures it's not None
+
         expected_body = f"""--{multipart_boundary}
 Content-Disposition: form-data; name="login_id"
 
@@ -45,8 +49,14 @@ Content-Disposition: form-data; name="fname"; filename="deposition.xml"
 {deposition_xml}
 --{multipart_boundary}--
 """
-
-        actual_body = actual_request.body.replace(b'\r', b'').decode()
+        actual_body = actual_request.body
+        if actual_body:
+            try:
+                actual_body = actual_body.decode()  # type: ignore[union-attr] # we catch the AttrError when it's a str
+            except AttributeError:
+                pass
+            actual_body = cast(str, actual_body)
+            actual_body = actual_body.replace('\r', '')
         self.maxDiff = None
         self.assertEqual(expected_body, actual_body)
 

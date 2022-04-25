@@ -3,7 +3,7 @@ from .commands import info, reviews
 
 
 @click.group()
-def meca():
+def meca() -> None:
     """Interact with a MECA archive."""
     pass
 

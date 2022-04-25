@@ -3,8 +3,9 @@ from datetime import datetime
 from os import makedirs
 from pathlib import Path
 from typing import List, Union
-from src.meca import MECArchive
-from src.crossref import deposit as deposit_xml, generate_peer_review_deposition
+from src.meca.archive import MECArchive
+from src.crossref.api import deposit as deposit_xml
+from src.crossref.peer_review import generate_peer_review_deposition
 
 
 @dataclass
@@ -58,7 +59,7 @@ def batch_deposit(
 
 
 def process(
-    zip_file,
+    zip_file: Path,
     output_base_dir: str,
     verbose: int,
     strict_validation: bool,

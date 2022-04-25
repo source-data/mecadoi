@@ -3,7 +3,7 @@ import yaml
 
 from src.cli.crossref.options import verbose_output
 from src.cli.meca.options import strict_validation
-from src.batch import batch_deposit, BatchDepositRun
+from src.batch.deposit import batch_deposit, BatchDepositRun
 
 
 @click.command()
@@ -22,12 +22,12 @@ from src.batch import batch_deposit, BatchDepositRun
     default=True,
 )
 def deposit(
-    input_directory,
-    output_directory,
+    input_directory: str,
+    output_directory: str,
     verbose: int,
     strict_validation: bool,
     dry_run: bool,
-):
+) -> None:
     """
     Deposit DOIs for all peer reviews in the MECA archives found in the given directory.
     """
@@ -42,4 +42,4 @@ def deposit(
 
 
 def output(batch_deposit_run: BatchDepositRun) -> str:
-    return yaml.dump(batch_deposit_run, canonical=False)
+    return str(yaml.dump(batch_deposit_run, canonical=False))

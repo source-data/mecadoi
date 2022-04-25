@@ -1,14 +1,16 @@
+from pathlib import Path
 import lxml.etree
-from typing import Tuple
+from typing import Any, List, Optional, Tuple, Type, TypeVar, Union
 from xsdata.formats.dataclass.parsers import XmlParser
 from zipfile import ZipFile
 
-from .xml import (
-    Article,
-    Manifest,
-    ReviewGroup,
-    Transfer,
-)
+from .xml.article import Article
+from .xml.manifest import Manifest
+from .xml.review_group import ReviewGroup
+from .xml.transfer import Transfer
+
+
+T = TypeVar('T')
 
 
 class MECArchive:
@@ -20,11 +22,11 @@ class MECArchive:
     attributes. For the structure of these objects, see their respective file in the `.xml` module.
     A few commonly accessed attributes are also set on the new instance: the title, DOI, copyright year, and journal of
     the article within the archive.
-    """
 
+    """
     class MECAdata:
         """Describes a metadata file within a MECA archive."""
-        def __init__(self, filename, data_class, validation_schema=None) -> None:
+        def __init__(self, filename: str, data_class: Type[T], validation_schema: Optional[str] = None) -> None:
             self.filename = filename
             self.data_class = data_class
             self.validation_schema = validation_schema
@@ -37,9 +39,7 @@ class MECArchive:
     REQUIRED_FILES = [ARTICLE, MANIFEST, TRANSFER]
     METADATA_FILES = REQUIRED_FILES + [REVIEWS]
 
-    def __init__(self, path_to_archive: str, strict_validation=False, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-
+    def __init__(self, path_to_archive: Union[str, Path], strict_validation: bool = False) -> None:
         with ZipFile(path_to_archive, 'r') as archive:
             self._files_in_archive = archive.namelist()
 
@@ -47,31 +47,48 @@ class MECArchive:
             if not is_valid:
                 raise ValueError(f'not a valid MECA archive: {reason}')
 
-            def parse(meca_data):
+            def parse(meca_data: MECArchive.MECAdata) -> T:
                 if not self.is_present(meca_data):
-                    return None
+                    raise ValueError(f'{meca_data.filename} not found in MECA archive')
                 parser = XmlParser()
                 with archive.open(meca_data.filename) as xml_file:
                     return parser.parse(xml_file, clazz=meca_data.data_class)
 
-            self.article = parse(MECArchive.ARTICLE)
-            self.manifest = parse(MECArchive.MANIFEST)
-            self.transfer = parse(MECArchive.TRANSFER)
-            self.reviews = parse(MECArchive.REVIEWS)
+            article = parse(MECArchive.ARTICLE)  # type: Article
+            manifest = parse(MECArchive.MANIFEST)  # type: Manifest
+            transfer = parse(MECArchive.TRANSFER)  # type: Transfer
+            try:
+                reviews = parse(MECArchive.REVIEWS)  # type: Optional[ReviewGroup]
+            except ValueError:
+                reviews = None
 
-        self.article_title = self.article.front.article_meta.title_group.article_title
-        self.journal_title = self.article.front.journal_meta.journal_title_group.journal_title
-        self.copyright_year = self.article.front.article_meta.permissions.copyright_year
-        self.article_doi = self.get_el_with_attr(self.article.front.article_meta.article_id, 'pub_id_type', 'doi').value
+        self.article = article
+        self.manifest = manifest
+        self.transfer = transfer
+        self.reviews = reviews
+
+        self.article_title = article.front.article_meta.title_group.article_title
+        self.journal_title = (
+            article.front.journal_meta.journal_title_group.journal_title
+            if article.front.journal_meta.journal_title_group
+            else None
+        )
+        self.copyright_year = (
+            article.front.article_meta.permissions.copyright_year
+            if article.front.article_meta.permissions
+            else None
+        )
+        self.article_doi = self.get_el_with_attr(article.front.article_meta.article_id, 'pub_id_type', 'doi').value
 
         preprint_doi = None
-        for custom_meta_tag in self.article.front.article_meta.custom_meta_group.custom_meta:
-            tag_name = custom_meta_tag.meta_name
-            if tag_name == "Pre-existing BioRxiv Preprint DOI":
-                preprint_doi = custom_meta_tag.meta_value
+        if self.article.front.article_meta.custom_meta_group:
+            for custom_meta_tag in self.article.front.article_meta.custom_meta_group.custom_meta:
+                tag_name = custom_meta_tag.meta_name
+                if tag_name == "Pre-existing BioRxiv Preprint DOI":
+                    preprint_doi = custom_meta_tag.meta_value
         self.article_preprint_doi = preprint_doi
 
-    def is_valid(self, archive: ZipFile, strict=False) -> Tuple[bool, str]:
+    def is_valid(self, archive: ZipFile, strict: bool = False) -> Tuple[bool, str]:
         """
         Is this MECA archive valid?
 
@@ -128,7 +145,7 @@ class MECArchive:
         """Is the given metadata file present in this MECA archive?"""
         return meca_data.filename in self._files_in_archive
 
-    def get_el_with_attr(self, elements, attr: str, val: str):
+    def get_el_with_attr(self, elements: List[Any], attr: str, val: str) -> Any:
         """
         Returns the first of the given elements that has the given attribute with the given value.
 

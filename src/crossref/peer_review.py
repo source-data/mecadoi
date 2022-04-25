@@ -1,9 +1,11 @@
 from string import Template
-from time import strptime, time_ns
+from time import strptime, struct_time, time_ns
+from typing import Any
 from lxml import etree
 from src.config import DEPOSITOR_NAME, DEPOSITOR_EMAIL, REGISTRANT_NAME, INSTITUTION_NAME, RESOURCE_URL_TEMPLATE
-from src.meca import MECArchive
-from . import get_free_doi
+from src.meca.archive import MECArchive
+from src.meca.xml.review_group import Review
+from .dois import get_free_doi
 
 
 DEPOSITION_TEMPLATE = Template("""<doi_batch
@@ -58,7 +60,7 @@ PEER_REVIEW_TEMPLATE = Template("""
 """)
 
 
-def generate_peer_review_deposition(meca: MECArchive) -> bytes:
+def generate_peer_review_deposition(meca: MECArchive) -> Any:
     """
     Generate a CrossRef deposition file for the peer reviews in the given MECA archive.
 
@@ -88,13 +90,15 @@ def generate_peer_review_deposition(meca: MECArchive) -> bytes:
     return etree.tostring(deposition_xml, pretty_print=True)
 
 
-def generate_reviews(meca: MECArchive):
-    def assigned_date(meca_review):
+def generate_reviews(meca: MECArchive) -> Any:
+    def assigned_date(meca_review: Review) -> struct_time:
+        if not meca_review.history:
+            return strptime('1900-01-01')
         date = meca.get_el_with_attr(meca_review.history.date, 'date_type', 'assigned')
         return strptime(f'{date.year} {date.month} {date.day}', '%Y %m %d')
 
     article_doi = meca.article_preprint_doi
-    for revision_round in meca.reviews.version:
+    for revision_round in meca.reviews.version:  # type: ignore[union-attr] # we checked for existence in the caller
         revision = revision_round.revision
         for running_number, meca_review in enumerate(sorted(revision_round.review, key=assigned_date), start=1):
             review_date = meca.get_el_with_attr(meca_review.history.date, 'date_type', 'completed')

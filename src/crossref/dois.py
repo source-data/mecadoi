@@ -1,10 +1,14 @@
 from datetime import datetime
-import sqlite3
-from typing import List
+from sqlite3 import connect, Connection
+from typing import List, Optional
 from src.config import DOI_DB_FILE, DOI_DB_WARNING_THRESHOLD
 
 
-def get_free_doi(resource: str, doi_db_file: str = DOI_DB_FILE, warning_threshold: int = DOI_DB_WARNING_THRESHOLD):
+def get_free_doi(
+    resource: str,
+    doi_db_file: str = DOI_DB_FILE,
+    warning_threshold: Optional[int] = DOI_DB_WARNING_THRESHOLD
+) -> str:
     """
     Get an unused DOI from the DOI database.
 
@@ -20,7 +24,7 @@ def get_free_doi(resource: str, doi_db_file: str = DOI_DB_FILE, warning_threshol
     return doi_db.get_free_doi(resource)
 
 
-def notify_running_low_on_dois(num_free_dois: str):
+def notify_running_low_on_dois(num_free_dois: int) -> None:
     print(f'WARNING: running low on DOIs, only {num_free_dois} left!')
 
 
@@ -50,10 +54,10 @@ CREATE TABLE IF NOT EXISTS dois
     def __init__(self, db_file: str = DOI_DB_FILE) -> None:
         self.db_file = db_file
 
-    def conn(self):
-        return sqlite3.connect(self.db_file)
+    def conn(self) -> Connection:
+        return connect(self.db_file)
 
-    def get_free_doi(self, resource: str):
+    def get_free_doi(self, resource: str) -> str:
         if not resource:
             raise ValueError('Need to pass in resource to get DOI')
 
@@ -63,7 +67,7 @@ CREATE TABLE IF NOT EXISTS dois
             if result is None:
                 raise ValueError('No free DOIs available!')
 
-            doi = result[0]
+            doi = str(result[0])
             timestamp = datetime.now()
             cursor.execute(self.QUERY_SET_RESOURCE, {
                 'resource': resource,
@@ -73,20 +77,20 @@ CREATE TABLE IF NOT EXISTS dois
 
             return doi
 
-    def get_num_free_dois(self):
+    def get_num_free_dois(self) -> int:
         with self.conn() as conn:
             result = conn.cursor().execute(self.QUERY_NUM_FREE_DOIS).fetchone()
-        return result[0]
+        return int(result[0])
 
-    def get_num_total_dois(self):
+    def get_num_total_dois(self) -> int:
         with self.conn() as conn:
             result = conn.cursor().execute(self.QUERY_NUM_TOTAL_DOIS).fetchone()
-        return result[0]
+        return int(result[0])
 
-    def insert_dois(self, dois: List[str]):
+    def insert_dois(self, dois: List[str]) -> None:
         with self.conn() as conn:
             conn.cursor().executemany(self.QUERY_INSERT_DOIS, [(doi,) for doi in dois])
 
-    def initialize(self):
+    def initialize(self) -> None:
         with self.conn() as conn:
             conn.cursor().execute(self.CREATE_TABLE_STATEMENT)

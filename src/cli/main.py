@@ -6,7 +6,7 @@ from .meca import meca
 
 
 @click.group()
-def main():
+def main() -> None:
     pass
 
 

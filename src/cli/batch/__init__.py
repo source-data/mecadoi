@@ -3,7 +3,7 @@ from .commands import deposit
 
 
 @click.group()
-def batch():
+def batch() -> None:
     """Subcommands for batch depositing peer reviews from MECA archives."""
     pass
 

@@ -1,3 +1,4 @@
+from typing import TextIO
 import click
 from src.crossref.dois import DoiDatabase
 from .options import doi_db_path
@@ -9,7 +10,7 @@ from .options import doi_db_path
     'input',
     type=click.File(mode='r'),
 )
-def add(doi_db_path, input):
+def add(doi_db_path: str, input: TextIO) -> None:
     """
     Add the DOIs from the given input file to the given DOI database.
 
@@ -26,17 +27,19 @@ def add(doi_db_path, input):
         num_added_dois = len(dois)
         click.echo(f'Added {num_added_dois} {"DOI" if num_added_dois == 1 else "DOIs"} to "{doi_db.db_file}"')
     except Exception as e:
-        raise click.ClickException(e)
+        raise click.ClickException(str(e))
 
 
 @click.command()
-def info():
+def info() -> None:
     """Get info from the DOI database: how many unused DOIs are there and how many in total."""
     try:
         doi_db = DoiDatabase()
         num_free_dois = doi_db.get_num_free_dois()
         num_total_dois = doi_db.get_num_total_dois()
     except Exception as e:
-        raise click.ClickException(e)
+        raise click.ClickException(str(e))
 
-    click.echo(f'DOI database "{doi_db.db_file}" has {num_free_dois} unused {"DOI" if num_free_dois == 1 else "DOIs"} and {num_total_dois} in total.')
+    click.echo(f"""{doi_db.db_file}:
+  num-total-dois: {num_total_dois}
+  num-unused-dois: {num_free_dois}""")

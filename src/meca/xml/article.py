@@ -406,6 +406,12 @@ class ArticleMeta:
     class Meta:
         name = "article-meta"
 
+    title_group: TitleGroup = field(
+        metadata={
+            "name": "title-group",
+            "type": "Element",
+        }
+    )
     article_id: List[ArticleId] = field(
         default_factory=list,
         metadata={
@@ -417,13 +423,6 @@ class ArticleMeta:
         default=None,
         metadata={
             "name": "article-categories",
-            "type": "Element",
-        }
-    )
-    title_group: Optional[TitleGroup] = field(
-        default=None,
-        metadata={
-            "name": "title-group",
             "type": "Element",
         }
     )
@@ -501,8 +500,7 @@ class JournalMeta:
     class Meta:
         name = "journal-meta"
 
-    journal_id: Optional[JournalId] = field(
-        default=None,
+    journal_id: JournalId = field(
         metadata={
             "name": "journal-id",
             "type": "Element",
@@ -528,15 +526,13 @@ class Front:
     class Meta:
         name = "front"
 
-    journal_meta: Optional[JournalMeta] = field(
-        default=None,
+    journal_meta: JournalMeta = field(
         metadata={
             "name": "journal-meta",
             "type": "Element",
         }
     )
-    article_meta: Optional[ArticleMeta] = field(
-        default=None,
+    article_meta: ArticleMeta = field(
         metadata={
             "name": "article-meta",
             "type": "Element",
@@ -549,16 +545,15 @@ class Article:
     class Meta:
         name = "article"
 
+    front: Front = field(
+        metadata={
+            "type": "Element",
+        }
+    )
     dtd_version: Optional[str] = field(
         default=None,
         metadata={
             "name": "dtd-version",
             "type": "Attribute",
-        }
-    )
-    front: Optional[Front] = field(
-        default=None,
-        metadata={
-            "type": "Element",
         }
     )
