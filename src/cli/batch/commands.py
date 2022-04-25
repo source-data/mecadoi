@@ -13,7 +13,8 @@ from src.batch.deposit import batch_deposit, BatchDepositRun
 )
 @click.option(
     '-o', '--output-directory',
-    type=click.Path(),
+    required=True,
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, writable=True),
 )
 @verbose_output
 @strict_validation

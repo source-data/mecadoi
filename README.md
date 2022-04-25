@@ -2,7 +2,7 @@
 
 Deposit DOIs for peer reviews in MECA archives.
 
-This project consists of Python library thats reads [Manuscript Exchange Common Approach](https://www.niso.org/standards-committees/meca) (MECA) archives, extracts
+This project consists of a Python library thats reads [Manuscript Exchange Common Approach](https://www.niso.org/standards-committees/meca) (MECA) archives, extracts
 the metadata of any peer reviews within, and then creates a DOI for each review using the [CrossRef deposition API](https://www.crossref.org/documentation/member-setup/direct-deposit-xml/).
 
 It is currently used in the context of EMBO's [Review Commons](https://www.reviewcommons.org/) and [Early Evidence Base](https://eeb.embo.org/) projects and would require
@@ -16,65 +16,116 @@ changes for use in another environment.
 ## Quick Start
 
 Clone this repository, create a virtual env (optional), and install the dependencies:
-```
+```bash
 git clone https://github.com/source-data/mecadoi.git && cd mecadoi
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements/base.txt
 ```
 
-### CLI
-
-Explore the command line interface by adding the `--help` parameter to any command to see its usage instructions and subcommands.
+Set up your `.env` file:
+```bash
+cp .env.example .env
 ```
+
+You're now ready to use the CLI to get basic info about a MECA archive:
+
+```bash
+python3 -m src.cli.main meca info meca-archive.zip
+```
+
+## CLI
+
+You can explore the command line interface by adding the `--help` parameter to any command to see its usage instructions and subcommands:
+```bash
 python3 -m src.cli.main --help
 python3 -m src.cli.main meca --help
 python3 -m src.cli.main meca info --help
 ```
 
-Get basic information about a MECA archive:
-```
+The CLI has four groups of subcommands:
+- `meca` for getting basic information about a single MECA archive
+- `dois` for interacting with the DOI database
+- `crossref` to generate a deposition file from a MECA archive and send it to the Crossref API
+- `batch` to perform the MECA parsing, deposition file generation, & interaction with the Crossref API for multiple MECA archives.
+
+### `meca`
+
+Use the `info` subcommand to get basic information about a MECA archive:
+```bash
 python3 -m src.cli.main meca info src/test/test_data/mutagenesis.zip
 ```
+This will output the title of the article, any DOIs, the publisher, and the year of publishing.
 
-Generate a CrossRef deposition file:
-```
-python3 -m src.cli.main crossref generate -o deposition.xml src/test/test_data/mutagenesis.zip
+`reviews` prints the authors and completion dates of any reviews in the MECA archive:
+```bash
+python3 -m src.cli.main meca reviews src/test/test_data/mutagenesis.zip
 ```
 
-Add DOIs to the database of unused DOIs:
+### `dois`
+
+`info` prints the path of the database file as well as the number of used and unused DOIs in the database:
+```bash
+python3 -m src.cli.main dois info
 ```
+
+With `add`, you can add DOIs from a text file to the database of unused DOIs...
+```bash
 echo "1\n2\n3\n" > dois.txt
 python3 -m src.cli.main dois add dois.txt
 ```
 
-### Python libary
-
-Read a MECA archive
-```python
-from zipfile import ZipFile
-from src.meca import MECArchive
-
-with ZipFile('src/test/test_data/mutagenesis.zip', 'r') as archive:
-    meca = MECArchive(archive, strict_validation=strict_validation)
+or read them from standard input:
+```bash
+echo "1\n2\n3\n" | python3 -m src.cli.main dois add -
 ```
 
-Print some basic information:
-```python
-print(meca)
-```
-
+### `crossref`
 Generate a CrossRef deposition file:
-```python
-from src.crossref import generate_peer_review_deposition
-doi_db = 'data/dois.sqlite3'
-deposition_xml = generate_peer_review_deposition(meca, doi_db)
+```bash
+python3 -m src.cli.main crossref generate -o deposition.xml src/test/test_data/mutagenesis.zip
+```
+This generates a Crossref deposition file that can be used to create DOIs for every peer review in the MECA archive. The DOIs to be used are taken from the DOI database, and information such as the registrant and depositor name are taken from the `.env` file.
+
+Generated deposition files can then be sent to Crossref for DOI creation with the `deposit` command:
+```bash
+python3 -m src.cli.main crossref deposit deposition.xml
+```
+The Crossref API almost always returns a message indicating success even with obvious mistakes such as malformed DOIs. They do send an email with detailed information about every submission to the `<depositor>`'s `<email_address>` in the deposition XML, which can be set through the `DEPOSITOR_EMAIL` variable in the `.env` file.
+
+### `batch`
+
+The `deposit` subcommand finds all `.zip` files in the given input directory and tries to parse them as MECA archives. For every successfully parsed MECA archive that has reviews, a deposition file is generated in the given output directory. Then, if `--no-dry-run` is passed, all generated deposition files are sent to the Crossref API.
+
+```bash
+python3 -m src.cli.main batch deposit -o output/ input-dir/
 ```
 
-## Testing
+## Development
+
+Run `pip install -r requirements/dev.txt` to install all development dependencies.
+
+Continuous Integration is run with a Github Actions workflow that is defined in [.github/workflows/unit-tests.yml](.github/workflows/unit-tests.yml).
+### Linting & Type Checking
+
+Lint with [`flake8`](https://flake8.pycqa.org/en/latest/):
+
+```bash
+flake8
+```
+
+Type-check with [`mypy`](https://mypy.readthedocs.io/):
+
+```bash
+mypy .
+```
+
+The configuration for both is in [`.flake8`](.flake8) and [`mypy.ini`](mypy.ini), respectively.
+
+### Testing
 
 Tests are located in `src/test`, test data (including some sample MECA archives) in `src/test/test_data`.
 
 To run all tests:
-```
+```bash
 python3 -m unittest
 ```
