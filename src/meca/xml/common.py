@@ -54,6 +54,35 @@ class Phone:
 
 
 @dataclass
+class InstitutionId:
+    class Meta:
+        name = "institution-id"
+
+    value: str = field(
+        default=""
+    )
+
+@dataclass
+class InstitutionWrap:
+    class Meta:
+        name = "institution-wrap"
+
+    institution: List[Institution] = field(
+        default_factory=list,
+        metadata={
+            "name": "institution",
+            "type": "Element",
+        }
+    )
+    institution_id: List[InstitutionId] = field(
+        default_factory=list,
+        metadata={
+            "name": "institution-id",
+            "type": "Element",
+        }
+    )
+
+@dataclass
 class Aff:
     class Meta:
         name = "aff"
@@ -67,6 +96,13 @@ class Aff:
     institution: List[Union[str, Institution]] = field(
         default_factory=list,
         metadata={
+            "type": "Element",
+        }
+    )
+    institution_wrap: List[InstitutionWrap] = field(
+        default_factory=list,
+        metadata={
+            "name": "institution-wrap",
             "type": "Element",
         }
     )
