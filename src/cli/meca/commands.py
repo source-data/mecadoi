@@ -1,7 +1,7 @@
 from typing import Dict
 import click
 from time import gmtime, strptime, struct_time
-import yaml
+from yaml import dump
 
 from src.meca.xml.review_group import Review
 from .options import meca_archive, read_meca, strict_validation
@@ -50,4 +50,4 @@ def reviews(meca_archive: str, strict_validation: bool) -> None:
                 reviews[f'Review {running_number}'] = review_info
 
             revision_rounds[f'Revision round {revision_round.revision}'] = reviews
-        click.echo(yaml.dump(revision_rounds))
+        click.echo(dump(revision_rounds))

@@ -1,6 +1,5 @@
 import click
-import yaml
-
+from yaml import dump
 from src.cli.crossref.options import verbose_output
 from src.cli.meca.options import strict_validation
 from src.batch.deposit import batch_deposit, BatchDepositRun
@@ -39,8 +38,8 @@ def deposit(
         strict_validation=strict_validation,
         dry_run=dry_run,
     )
-    click.echo(output(result))
+    click.echo(output(result), nl=False)
 
 
 def output(batch_deposit_run: BatchDepositRun) -> str:
-    return str(yaml.dump(batch_deposit_run, canonical=False))
+    return str(dump(batch_deposit_run, canonical=False))

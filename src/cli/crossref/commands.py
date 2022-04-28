@@ -1,8 +1,10 @@
 from typing import BinaryIO, TextIO
 import click
+from yaml import dump
 from src.cli.meca.options import meca_archive, read_meca, strict_validation
 from src.crossref.api import deposit as deposit_xml
 from src.crossref.peer_review import generate_peer_review_deposition
+from src.crossref.verify import verify as verify_xml
 from .options import verbose_output
 
 
@@ -24,6 +26,21 @@ def generate(meca_archive: str, strict_validation: bool, output: BinaryIO) -> No
         raise click.ClickException(str(e))
 
     output.write(deposition_xml)
+
+
+@click.command()
+@click.argument(
+    'deposition-file',
+    type=click.File('rb'),
+)
+def verify(deposition_file: BinaryIO) -> None:
+    """Verify that the DOIs in the given deposition file link to existing resources."""
+    try:
+        result = verify_xml(deposition_file)
+    except Exception as e:
+        raise click.ClickException(str(e))
+
+    click.echo(str(dump(result, canonical=False)), nl=False)
 
 
 @click.command()

@@ -1,15 +1,23 @@
 import re
 from typing import cast
 import responses
-import unittest
+from unittest import TestCase
+from unittest.mock import Mock, patch
 from src.config import CROSSREF_DEPOSITION_URL, CROSSREF_USERNAME, CROSSREF_PASSWORD
 from src.crossref.api import deposit
+from src.crossref.verify import VerificationResult
 
 
-class TestDepositPeerReviews(unittest.TestCase):
+class TestDepositPeerReviews(TestCase):
 
     @responses.activate
-    def test_deposit_peer_reviews(self) -> None:
+    @patch(
+        'src.crossref.api.verify',
+        return_value=[
+            VerificationResult(all_reviews_present=True, error=None, preprint_doi='doi')
+        ],
+    )
+    def test_deposit_peer_reviews(self, _: Mock) -> None:
         """
         Test whether the correct request is sent to the Crossref API when depositing peer reviews.
         """
@@ -59,7 +67,3 @@ Content-Disposition: form-data; name="fname"; filename="deposition.xml"
             actual_body = actual_body.replace('\r', '')
         self.maxDiff = None
         self.assertEqual(expected_body, actual_body)
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -3,8 +3,7 @@ from os import listdir, mkdir
 from typing import List
 import responses
 from shutil import copy, rmtree
-
-import yaml
+from yaml import dump
 from src.batch.deposit import batch_deposit, BatchDepositRun, DepositionResult, MecaDeposition, MecaParsingResult
 from src.config import CROSSREF_DEPOSITION_URL
 from .common import DoiDbTestCase
@@ -128,7 +127,7 @@ class TestBatchDeposit(DoiDbTestCase):
 
     def assert_results_equal(self, expected: BatchDepositRun, actual: BatchDepositRun) -> None:
         expected.timestamp = actual.timestamp
-        self.assertEqual(yaml.dump(expected), yaml.dump(actual))
+        self.assertEqual(dump(expected), dump(actual))
 
     def setup_input_directory(self, input_dir: str, files: List[str]) -> None:
         mkdir(input_dir)

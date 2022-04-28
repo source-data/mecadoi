@@ -105,6 +105,7 @@ python3 -m src.cli.main batch deposit -o output/ input-dir/
 Run `pip install -r requirements/dev.txt` to install all development dependencies.
 
 Continuous Integration is run with a Github Actions workflow that is defined in [.github/workflows/unit-tests.yml](.github/workflows/unit-tests.yml).
+
 ### Linting & Type Checking
 
 Lint with [`flake8`](https://flake8.pycqa.org/en/latest/):
@@ -129,3 +130,7 @@ To run all tests:
 ```bash
 python3 -m unittest
 ```
+
+## Deployment
+
+The Ansible playbook [`provisioning/provision.yml`](provisioning/provision.yml) sets up the `mecadoi` server defined in [`provisioning/inventory`](provisioning/inventory) from scratch.

@@ -62,6 +62,7 @@ class InstitutionId:
         default=""
     )
 
+
 @dataclass
 class InstitutionWrap:
     class Meta:
@@ -81,6 +82,7 @@ class InstitutionWrap:
             "type": "Element",
         }
     )
+
 
 @dataclass
 class Aff:

@@ -1,0 +1,33 @@
+from src.crossref.xml.doi_batch import (
+    Anonymous,
+    Body,
+    Contributors,
+    Depositor,
+    DoiBatch,
+    DoiData,
+    Head,
+    Institution,
+    InterWorkRelation,
+    PeerReview,
+    Program,
+    RelatedItem,
+    ReviewDate,
+    Titles,
+)
+
+__all__ = [
+    "Anonymous",
+    "Body",
+    "Contributors",
+    "Depositor",
+    "DoiBatch",
+    "DoiData",
+    "Head",
+    "Institution",
+    "InterWorkRelation",
+    "PeerReview",
+    "Program",
+    "RelatedItem",
+    "ReviewDate",
+    "Titles",
+]

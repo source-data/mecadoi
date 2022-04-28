@@ -1,0 +1,295 @@
+from dataclasses import dataclass, field
+from typing import List, Union
+from xsdata.models.datatype import XmlPeriod
+
+
+@dataclass
+class InterWorkRelation:
+    class Meta:
+        name = "inter_work_relation"
+        namespace = "http://www.crossref.org/relations.xsd"
+
+    relationship_type: str = field(
+        metadata={
+            "name": "relationship-type",
+            "type": "Attribute",
+        }
+    )
+    identifier_type: str = field(
+        metadata={
+            "name": "identifier-type",
+            "type": "Attribute",
+        }
+    )
+    value: str = field(
+        default=""
+    )
+
+
+@dataclass
+class Anonymous:
+    class Meta:
+        name = "anonymous"
+        namespace = "http://www.crossref.org/schema/5.3.1"
+
+    sequence: str = field(
+        metadata={
+            "type": "Attribute",
+        }
+    )
+    contributor_role: str = field(
+        metadata={
+            "type": "Attribute",
+        }
+    )
+
+
+@dataclass
+class Depositor:
+    class Meta:
+        name = "depositor"
+        namespace = "http://www.crossref.org/schema/5.3.1"
+
+    depositor_name: str = field(
+        metadata={
+            "type": "Element",
+        }
+    )
+    email_address: str = field(
+        metadata={
+            "type": "Element",
+        }
+    )
+
+
+@dataclass
+class DoiData:
+    class Meta:
+        name = "doi_data"
+        namespace = "http://www.crossref.org/schema/5.3.1"
+
+    doi: str = field(
+        metadata={
+            "type": "Element",
+        }
+    )
+    resource: str = field(
+        metadata={
+            "type": "Element",
+        }
+    )
+
+
+@dataclass
+class Institution:
+    class Meta:
+        name = "institution"
+        namespace = "http://www.crossref.org/schema/5.3.1"
+
+    institution_name: str = field(
+        metadata={
+            "type": "Element",
+        }
+    )
+
+
+@dataclass
+class ReviewDate:
+    class Meta:
+        name = "review_date"
+        namespace = "http://www.crossref.org/schema/5.3.1"
+
+    month: Union[int, str] = field(
+        metadata={
+            "type": "Element",
+        }
+    )
+    day: Union[int, str] = field(
+        metadata={
+            "type": "Element",
+        }
+    )
+    year: int = field(
+        metadata={
+            "type": "Element",
+        }
+    )
+
+
+@dataclass
+class Titles:
+    class Meta:
+        name = "titles"
+        namespace = "http://www.crossref.org/schema/5.3.1"
+
+    title: str = field(
+        metadata={
+            "type": "Element",
+        }
+    )
+
+
+@dataclass
+class RelatedItem:
+    class Meta:
+        name = "related_item"
+        namespace = "http://www.crossref.org/relations.xsd"
+
+    inter_work_relation: InterWorkRelation = field(
+        metadata={
+            "type": "Element",
+        }
+    )
+
+
+@dataclass
+class Contributors:
+    class Meta:
+        name = "contributors"
+        namespace = "http://www.crossref.org/schema/5.3.1"
+
+    anonymous: Anonymous = field(
+        metadata={
+            "type": "Element",
+        }
+    )
+
+
+@dataclass
+class Head:
+    class Meta:
+        name = "head"
+        namespace = "http://www.crossref.org/schema/5.3.1"
+
+    doi_batch_id: XmlPeriod = field(
+        metadata={
+            "type": "Element",
+        }
+    )
+    timestamp: int = field(
+        metadata={
+            "type": "Element",
+        }
+    )
+    depositor: Depositor = field(
+        metadata={
+            "type": "Element",
+        }
+    )
+    registrant: str = field(
+        metadata={
+            "type": "Element",
+        }
+    )
+
+
+@dataclass
+class Program:
+    class Meta:
+        name = "program"
+        namespace = "http://www.crossref.org/relations.xsd"
+
+    related_item: RelatedItem = field(
+        metadata={
+            "type": "Element",
+        }
+    )
+
+
+@dataclass
+class PeerReview:
+    class Meta:
+        name = "peer_review"
+        namespace = "http://www.crossref.org/schema/5.3.1"
+
+    revision_round: int = field(
+        metadata={
+            "name": "revision-round",
+            "type": "Attribute",
+        }
+    )
+    type: str = field(
+        metadata={
+            "type": "Attribute",
+        }
+    )
+    contributors: Contributors = field(
+        metadata={
+            "type": "Element",
+        }
+    )
+    titles: Titles = field(
+        metadata={
+            "type": "Element",
+        }
+    )
+    review_date: ReviewDate = field(
+        metadata={
+            "type": "Element",
+        }
+    )
+    institution: Institution = field(
+        metadata={
+            "type": "Element",
+        }
+    )
+    running_number: int = field(
+        metadata={
+            "type": "Element",
+        }
+    )
+    program: Program = field(
+        metadata={
+            "type": "Element",
+            "namespace": "http://www.crossref.org/relations.xsd",
+        }
+    )
+    doi_data: DoiData = field(
+        metadata={
+            "type": "Element",
+        }
+    )
+
+
+@dataclass
+class Body:
+    class Meta:
+        name = "body"
+        namespace = "http://www.crossref.org/schema/5.3.1"
+
+    peer_review: List[PeerReview] = field(
+        default_factory=list,
+        metadata={
+            "type": "Element",
+        }
+    )
+
+
+@dataclass
+class DoiBatch:
+    class Meta:
+        name = "doi_batch"
+        namespace = "http://www.crossref.org/schema/5.3.1"
+
+    version: str = field(
+        metadata={
+            "type": "Attribute",
+        }
+    )
+    schema_location: str = field(
+        metadata={
+            "name": "schemaLocation",
+            "type": "Attribute",
+            "namespace": "http://www.w3.org/2001/XMLSchema-instance",
+        }
+    )
+    head: Head = field(
+        metadata={
+            "type": "Element",
+        }
+    )
+    body: Body = field(
+        metadata={
+            "type": "Element",
+        }
+    )

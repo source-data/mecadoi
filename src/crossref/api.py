@@ -1,5 +1,7 @@
+from io import BytesIO
 from requests import PreparedRequest, Request, Session
 from src.config import CROSSREF_DEPOSITION_URL, CROSSREF_USERNAME, CROSSREF_PASSWORD
+from src.crossref.verify import verify
 
 
 def pretty_print_request(req: PreparedRequest) -> None:
@@ -31,6 +33,14 @@ def deposit(deposition_file: bytes, verbose: int = 0) -> str:
     """Send a deposition file to the Crossref API."""
     if not (CROSSREF_USERNAME and CROSSREF_PASSWORD):
         raise ValueError('No CrossRef username or password given!')
+
+    verification_results = verify(BytesIO(deposition_file))
+    if len(verification_results) != 1:
+        raise ValueError('Given deposition file wants to deposit DOIs for reviews of multiple different articles')
+    verification_result = verification_results[0]
+    if not verification_result.all_reviews_present:
+        raise ValueError(f'Given deposition file failed verification with error "{verification_result.error}"')
+
     if verbose:
         pretty_print_request(prep_request(deposition_file, '***', '***'))
 

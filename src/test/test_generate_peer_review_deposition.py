@@ -1,4 +1,3 @@
-import unittest
 import lxml.etree
 from src.meca.archive import MECArchive
 from src.crossref.peer_review import generate_peer_review_deposition
@@ -75,7 +74,3 @@ class TestGeneratePeerReviewDeposition(DoiDbTestCase):
             write_xml(actual, f'src/test/tmp/{meca_name}.actual.xml')
 
         self.assertEqual(expected, actual)
-
-
-if __name__ == '__main__':
-    unittest.main()
