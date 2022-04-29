@@ -50,18 +50,18 @@ class TestBatchDeposit(DoiDbTestCase):
                 ),
                 MecaDeposition(
                     meca_parsing=MecaParsingResult(
-                        input='src/test/tmp/batch/input/no-reviews.zip',
+                        input='src/test/tmp/batch/input/no-preprint-doi.zip',
                         error=None,
-                        has_reviews=False,
+                        has_reviews=True,
                         has_preprint_doi=False,
                         doi_already_processed=None,
                     )
                 ),
                 MecaDeposition(
                     meca_parsing=MecaParsingResult(
-                        input='src/test/tmp/batch/input/no-preprint-doi.zip',
+                        input='src/test/tmp/batch/input/no-reviews.zip',
                         error=None,
-                        has_reviews=True,
+                        has_reviews=False,
                         has_preprint_doi=False,
                         doi_already_processed=None,
                     )
@@ -126,8 +126,7 @@ class TestBatchDeposit(DoiDbTestCase):
         self.assert_results_equal(expected_output_second_run, result_second_run)
 
     def assert_results_equal(self, expected: BatchDepositRun, actual: BatchDepositRun) -> None:
-        expected.timestamp = actual.timestamp
-        self.assertEqual(dump(expected), dump(actual))
+        self.assertCountEqual(expected.results, actual.results)
 
     def setup_input_directory(self, input_dir: str, files: List[str]) -> None:
         mkdir(input_dir)
