@@ -33,7 +33,7 @@ PEER_REVIEW_TEMPLATE = Template("""
         <anonymous sequence="first" contributor_role="author" />
     </contributors>
     <titles>
-        <title>Review of ${article_title}</title>
+        <title>Peer Review of ${article_title}</title>
     </titles>
     <review_date>
         <month>${review_date_month}</month>
