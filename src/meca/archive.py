@@ -1,12 +1,14 @@
+from dataclasses import dataclass
 from pathlib import Path
+from datetime import datetime
 import lxml.etree
-from typing import Any, List, Optional, Tuple, Type, TypeVar, Union
+from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar, Union
 from xsdata.formats.dataclass.parsers import XmlParser
 from zipfile import ZipFile
 
 from .xml.article import Article
 from .xml.manifest import Manifest
-from .xml.review_group import ReviewGroup
+from .xml.review_group import ReviewGroup, Review
 from .xml.transfer import Transfer
 
 
@@ -78,7 +80,7 @@ class MECArchive:
             if article.front.article_meta.permissions
             else None
         )
-        self.article_doi = self.get_el_with_attr(article.front.article_meta.article_id, 'pub_id_type', 'doi').value
+        self.article_doi = get_el_with_attr(article.front.article_meta.article_id, 'pub_id_type', 'doi').value
 
         preprint_doi = None
         if self.article.front.article_meta.custom_meta_group:
@@ -87,6 +89,39 @@ class MECArchive:
                 if tag_name == "Pre-existing BioRxiv Preprint DOI":
                     preprint_doi = custom_meta_tag.meta_value
         self.article_preprint_doi = preprint_doi
+
+        self.revision_rounds = [
+            RevisionRoundInfo(
+                revision=revision_round.revision,
+                reviews=[
+                    ReviewInfo(
+                        running_number=running_number,
+                        date_assigned=assigned_date(meca_review),
+                        date_completed=get_date('completed', meca_review),
+                        contributors=', '.join([
+                            f'{contrib.name.surname}, {contrib.name.given_names}'
+                            for contrib in meca_review.contrib_group.contrib
+                            if contrib.name
+                        ]) if meca_review.contrib_group else 'Unknown',
+                        text={
+                            review_item.review_item_question.title: review_item.review_item_response.text
+                            for review_item in meca_review.review_item_group.review_item
+                            if (
+                                review_item.review_item_question
+                                and review_item.review_item_question.title
+                                and review_item.review_item_response
+                                and review_item.review_item_response.text
+                            )
+                        } if meca_review.review_item_group else {},
+                    )
+                    for running_number, meca_review in enumerate(
+                        sorted(revision_round.review, key=assigned_date),
+                        start=1
+                    )
+                ],
+            )
+            for revision_round in self.reviews.version
+        ] if self.reviews else []
 
     def is_valid(self, archive: ZipFile, strict: bool = False) -> Tuple[bool, str]:
         """
@@ -145,16 +180,6 @@ class MECArchive:
         """Is the given metadata file present in this MECA archive?"""
         return meca_data.filename in self._files_in_archive
 
-    def get_el_with_attr(self, elements: List[Any], attr: str, val: str) -> Any:
-        """
-        Returns the first of the given elements that has the given attribute with the given value.
-
-        Use it like so to get the element that holds the article's DOI:
-        `meca.get_el_with_attr(meca.article.front.article_meta.article_id, 'pub_id_type', 'doi')`
-        """
-        el = [el for el in elements if getattr(el, attr) == val]
-        return el[0] if el else None
-
     def __str__(self) -> str:
         return f'''
 {self.article_title}
@@ -165,3 +190,41 @@ Preprint DOI: {self.article_preprint_doi if self.article_preprint_doi else "-"}
 
     def __repr__(self) -> str:
         return self.__str__()
+
+
+def get_el_with_attr(elements: List[Any], attr: str, val: str) -> Any:
+    """
+    Returns the first of the given elements that has the given attribute with the given value.
+
+    Use it like so to get the element that holds the article's DOI:
+    `meca.get_el_with_attr(meca.article.front.article_meta.article_id, 'pub_id_type', 'doi')`
+    """
+    el = [el for el in elements if getattr(el, attr) == val]
+    return el[0] if el else None
+
+
+def assigned_date(meca_review: Review) -> datetime:
+    return get_date('assigned', meca_review)
+
+
+def get_date(date_type: str, meca_review: Review) -> datetime:
+    if meca_review.history:
+        date = get_el_with_attr(meca_review.history.date, 'date_type', date_type)
+        if date:
+            return datetime(date.year, date.month, date.day)
+    return datetime.min  # return the lowest possible value for reviews with unknown history or date
+
+
+@dataclass
+class ReviewInfo:
+    running_number: int
+    date_assigned: datetime
+    date_completed: datetime
+    contributors: str
+    text: Dict[str, str]
+
+
+@dataclass
+class RevisionRoundInfo:
+    revision: Optional[int]
+    reviews: List[ReviewInfo]
