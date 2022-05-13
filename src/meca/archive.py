@@ -2,10 +2,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from datetime import datetime
 import lxml.etree
-from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar, Union
+from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
 from xsdata.formats.dataclass.parsers import XmlParser
 from zipfile import ZipFile
 
+from src.meca.xml.common import Aff, Contrib, ContribGroup
 from .xml.article import Article
 from .xml.manifest import Manifest
 from .xml.review_group import ReviewGroup, Review
@@ -87,7 +88,7 @@ class MECArchive:
             for custom_meta_tag in self.article.front.article_meta.custom_meta_group.custom_meta:
                 tag_name = custom_meta_tag.meta_name
                 if tag_name == "Pre-existing BioRxiv Preprint DOI":
-                    preprint_doi = custom_meta_tag.meta_value
+                    preprint_doi = str(custom_meta_tag.meta_value)
         self.article_preprint_doi = preprint_doi
 
         self.revision_rounds = [
@@ -119,6 +120,33 @@ class MECArchive:
                         start=1
                     )
                 ],
+                author_reply=(
+                    AuthorReplyInfo(
+                        contributors=[
+                            AuthorInfo(
+                                given_name=(
+                                    contrib.name.given_names if contrib.name and contrib.name.given_names else ''
+                                ),
+                                surname=contrib.name.surname if contrib.name and contrib.name.surname else '',
+                                orcid=OrcidInfo(
+                                    id=contrib.contrib_id.value,
+                                    is_authenticated=contrib.contrib_id.specific_use == 'authenticated',
+                                ) if contrib.contrib_id and contrib.contrib_id.contrib_id_type == 'orcid' else None,
+                                affiliation=get_affiliation(contrib, self.article.front.article_meta.contrib_group),
+                                is_corresponding=contrib.corresp is not None and contrib.corresp == 'yes',
+                            )
+                            for contrib in self.article.front.article_meta.contrib_group.contrib
+                            if contrib.contrib_type == 'author'
+                        ] if self.article.front.article_meta.contrib_group else []
+                    )
+                    if len(
+                        [
+                            item for item in self.manifest.item
+                            if item.type == 'Response to Reviewers' and item.version == revision_round.revision
+                        ]
+                    ) == 1
+                    else None
+                ),
             )
             for revision_round in self.reviews.version
         ] if self.reviews else []
@@ -192,12 +220,26 @@ Preprint DOI: {self.article_preprint_doi if self.article_preprint_doi else "-"}
         return self.__str__()
 
 
+def get_affiliation(contrib: Contrib, contrib_group: ContribGroup) -> Optional[str]:
+    if not (contrib.xref and contrib.xref.rid):
+        return None
+    affiliation = cast(Aff, get_el_with_attr(contrib_group.aff, 'id', contrib.xref.rid))
+    if not (affiliation and affiliation.institution):
+        return None
+    institution = affiliation.institution[0]
+    try:
+        institution_name = institution.value  # type: ignore[union-attr] # handled by try clause
+    except AttributeError:
+        institution_name = institution
+    return str(institution_name)
+
+
 def get_el_with_attr(elements: List[Any], attr: str, val: str) -> Any:
     """
     Returns the first of the given elements that has the given attribute with the given value.
 
     Use it like so to get the element that holds the article's DOI:
-    `meca.get_el_with_attr(meca.article.front.article_meta.article_id, 'pub_id_type', 'doi')`
+    `get_el_with_attr(meca_archive.article.front.article_meta.article_id, 'pub_id_type', 'doi')`
     """
     el = [el for el in elements if getattr(el, attr) == val]
     return el[0] if el else None
@@ -216,6 +258,26 @@ def get_date(date_type: str, meca_review: Review) -> datetime:
 
 
 @dataclass
+class OrcidInfo:
+    id: str
+    is_authenticated: bool
+
+
+@dataclass
+class AuthorInfo:
+    given_name: str
+    surname: str
+    orcid: Optional[OrcidInfo]
+    affiliation: Optional[str]
+    is_corresponding: bool
+
+
+@dataclass
+class AuthorReplyInfo:
+    contributors: List[AuthorInfo]
+
+
+@dataclass
 class ReviewInfo:
     running_number: int
     date_assigned: datetime
@@ -228,3 +290,4 @@ class ReviewInfo:
 class RevisionRoundInfo:
     revision: Optional[int]
     reviews: List[ReviewInfo]
+    author_reply: Optional[AuthorReplyInfo]

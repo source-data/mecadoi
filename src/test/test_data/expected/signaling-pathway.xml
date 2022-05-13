@@ -63,5 +63,126 @@ Implications in Aging and Cancer</title>
         <resource>https://eeb.embo.org/doi/10.1101/2022.02.15.480564#rev0-rr2</resource>
       </doi_data>
     </peer_review>
+    <peer_review revision-round="0" type="author-comment">
+      <contributors>
+        <person_name contributor_role="author" sequence="first">
+          <given_name>Pradipta</given_name>
+          <surname>Ghosh</surname>
+          <affiliations>
+            <institution>
+              <institution_name>UCSD</institution_name>
+            </institution>
+          </affiliations>
+        </person_name>
+        <person_name contributor_role="author" sequence="additional">
+          <given_name>Lee</given_name>
+          <surname>Swanson</surname>
+          <affiliations>
+            <institution>
+              <institution_name>UCSD</institution_name>
+            </institution>
+          </affiliations>
+        </person_name>
+        <person_name contributor_role="author" sequence="additional">
+          <given_name>Ibrahim M</given_name>
+          <surname>Sayed</surname>
+          <affiliations>
+            <institution>
+              <institution_name>UCSD</institution_name>
+            </institution>
+          </affiliations>
+        </person_name>
+        <person_name contributor_role="author" sequence="additional">
+          <given_name>Yash</given_name>
+          <surname>Mittal</surname>
+          <affiliations>
+            <institution>
+              <institution_name>UCSD</institution_name>
+            </institution>
+          </affiliations>
+        </person_name>
+        <person_name contributor_role="author" sequence="additional">
+          <given_name>Blaze</given_name>
+          <surname>Lim</surname>
+          <affiliations>
+            <institution>
+              <institution_name>UCSD</institution_name>
+            </institution>
+          </affiliations>
+        </person_name>
+        <person_name contributor_role="author" sequence="additional">
+          <given_name>Stella-Rita</given_name>
+          <surname>Ibeawuchi</surname>
+          <affiliations>
+            <institution>
+              <institution_name>UCSD</institution_name>
+            </institution>
+          </affiliations>
+        </person_name>
+        <person_name contributor_role="author" sequence="additional">
+          <given_name>Marc</given_name>
+          <surname>Foretz</surname>
+          <affiliations>
+            <institution>
+              <institution_name>Institut Cochin</institution_name>
+            </institution>
+          </affiliations>
+        </person_name>
+        <person_name contributor_role="author" sequence="additional">
+          <given_name>Benoit</given_name>
+          <surname>Viollet</surname>
+          <affiliations>
+            <institution>
+              <institution_name>Radboud University Medical Centre</institution_name>
+            </institution>
+          </affiliations>
+        </person_name>
+        <person_name contributor_role="author" sequence="additional">
+          <given_name>Debashish</given_name>
+          <surname>Sahoo</surname>
+          <affiliations>
+            <institution>
+              <institution_name>UCSD</institution_name>
+            </institution>
+          </affiliations>
+        </person_name>
+        <person_name contributor_role="author" sequence="additional">
+          <given_name>Soumita</given_name>
+          <surname>Das</surname>
+          <affiliations>
+            <institution>
+              <institution_name>University of California at San Diego</institution_name>
+            </institution>
+          </affiliations>
+        </person_name>
+      </contributors>
+      <titles>
+        <title>Author Reply to Peer Reviews of A Signaling Pathway to Detect and Repair the leaky Gut barrier: 
+Implications in Aging and Cancer</title>
+      </titles>
+      <review_date>
+        <month>05</month>
+        <day>13</day>
+        <year>2022</year>
+      </review_date>
+      <institution>
+        <institution_name>Review Commons</institution_name>
+      </institution>
+      <running_number>Author Reply</running_number>
+      <rel:program xmlns:rel="http://www.crossref.org/relations.xsd">
+        <rel:related_item>
+          <rel:inter_work_relation identifier-type="doi" relationship-type="isReviewOf">10.1101/2022.02.15.480564</rel:inter_work_relation>
+        </rel:related_item>
+        <rel:related_item>
+          <rel:inter_work_relation identifier-type="doi" relationship-type="isReplyTo">12.3456/78905</rel:inter_work_relation>
+        </rel:related_item>
+        <rel:related_item>
+          <rel:inter_work_relation identifier-type="doi" relationship-type="isReplyTo">12.3456/78906</rel:inter_work_relation>
+        </rel:related_item>
+      </rel:program>
+      <doi_data>
+        <resource>https://eeb.embo.org/doi/10.1101/2022.02.15.480564#rev0-ar</resource>
+      </doi_data>
+    </peer_review>
   </body>
 </doi_batch>

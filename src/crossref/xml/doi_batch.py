@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Union
+from typing import List, Optional, Union
 from xsdata.models.datatype import XmlPeriod
 
 
@@ -18,6 +18,23 @@ class InterWorkRelation:
     identifier_type: str = field(
         metadata={
             "name": "identifier-type",
+            "type": "Attribute",
+        }
+    )
+    value: str = field(
+        default=""
+    )
+
+
+@dataclass
+class Orcid:
+    class Meta:
+        name = "ORCID"
+        namespace = "http://www.crossref.org/schema/5.3.1"
+
+    authenticated: Optional[bool] = field(
+        default=None,
+        metadata={
             "type": "Attribute",
         }
     )
@@ -143,12 +160,12 @@ class RelatedItem:
 
 
 @dataclass
-class Contributors:
+class Affiliations:
     class Meta:
-        name = "contributors"
+        name = "affiliations"
         namespace = "http://www.crossref.org/schema/5.3.1"
 
-    anonymous: Anonymous = field(
+    institution: Institution = field(
         metadata={
             "type": "Element",
         }
@@ -189,7 +206,71 @@ class Program:
         name = "program"
         namespace = "http://www.crossref.org/relations.xsd"
 
-    related_item: RelatedItem = field(
+    related_item: List[RelatedItem] = field(
+        default_factory=list,
+        metadata={
+            "type": "Element",
+        }
+    )
+
+
+@dataclass
+class PersonName:
+    class Meta:
+        name = "person_name"
+        namespace = "http://www.crossref.org/schema/5.3.1"
+
+    surname: str = field(
+        metadata={
+            "type": "Element",
+        }
+    )
+    sequence: str = field(
+        metadata={
+            "type": "Attribute",
+        }
+    )
+    contributor_role: Optional[str] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
+        }
+    )
+    given_name: Optional[str] = field(
+        default=None,
+        metadata={
+            "type": "Element",
+        }
+    )
+    affiliations: Optional[Affiliations] = field(
+        default=None,
+        metadata={
+            "type": "Element",
+        }
+    )
+    orcid: Optional[Orcid] = field(
+        default=None,
+        metadata={
+            "name": "ORCID",
+            "type": "Element",
+        }
+    )
+
+
+@dataclass
+class Contributors:
+    class Meta:
+        name = "contributors"
+        namespace = "http://www.crossref.org/schema/5.3.1"
+
+    anonymous: Optional[Anonymous] = field(
+        default=None,
+        metadata={
+            "type": "Element",
+        }
+    )
+    person_name: List[PersonName] = field(
+        default_factory=list,
         metadata={
             "type": "Element",
         }
@@ -233,7 +314,7 @@ class PeerReview:
             "type": "Element",
         }
     )
-    running_number: int = field(
+    running_number: str = field(
         metadata={
             "type": "Element",
         }

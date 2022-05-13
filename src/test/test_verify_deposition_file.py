@@ -137,7 +137,17 @@ class TestVerifyDepositionFile(TestCase):
                             "doi": "10.1162/2e3983f5.0cb0c700"
                         },
                     ],
-                    'response': None,
+                    'response': {
+                        "source": "cross_ref",
+                        "posting_date": "2022-04-27",
+                        "review_idx": "1",
+                        "highlight": "Author Reply: Global projections of potential lives saved from COVID-19 [..]",
+                        "related_article_doi": "10.1101/2022.02.15.480564",
+                        "text": "Detailed comments to reviews:\n\n__Review 1: [..]",
+                        "reviewed_by": "MIT Press - Journals",
+                        "position_idx": 3,
+                        "doi": "10.1162/2e3983f5.0cb0c700"
+                    },
                     'annot': [],
                 },
                 'entities': [],

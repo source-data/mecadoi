@@ -87,6 +87,95 @@
         <resource>https://eeb.embo.org/doi/10.1101/2022.02.15.480564#rev0-rr3</resource>
       </doi_data>
     </peer_review>
+    <peer_review revision-round="0" type="author-comment">
+      <contributors>
+        <person_name contributor_role="author" sequence="first">
+          <given_name>Martin</given_name>
+          <surname>Veit</surname>
+          <affiliations>
+            <institution>
+              <institution_name>University of Kiel</institution_name>
+            </institution>
+          </affiliations>
+        </person_name>
+        <person_name contributor_role="author" sequence="additional">
+          <given_name>Björn</given_name>
+          <surname>Ahrens</surname>
+          <affiliations>
+            <institution>
+              <institution_name>University of Kiel</institution_name>
+            </institution>
+          </affiliations>
+        </person_name>
+        <person_name contributor_role="author" sequence="additional">
+          <given_name>Jana</given_name>
+          <surname>Seidel</surname>
+          <affiliations>
+            <institution>
+              <institution_name>Department of Dermatology and Allergology</institution_name>
+            </institution>
+          </affiliations>
+        </person_name>
+        <person_name contributor_role="author" sequence="additional">
+          <given_name>Anselm</given_name>
+          <surname>Sommer</surname>
+          <affiliations>
+            <institution>
+              <institution_name>University of Kiel</institution_name>
+            </institution>
+          </affiliations>
+        </person_name>
+        <person_name contributor_role="author" sequence="additional">
+          <given_name>Sucharit</given_name>
+          <surname>Bhakdi</surname>
+          <affiliations>
+            <institution>
+              <institution_name>University of Mainz</institution_name>
+            </institution>
+          </affiliations>
+        </person_name>
+        <person_name contributor_role="author" sequence="additional">
+          <given_name>Karina</given_name>
+          <surname>Reiss</surname>
+          <affiliations>
+            <institution>
+              <institution_name>University Hospital Schleswig-Holstein. Campus Kiel</institution_name>
+            </institution>
+          </affiliations>
+          <ORCID authenticated="true">https://orcid.org/0000-0001-5140-2235</ORCID>
+        </person_name>
+      </contributors>
+      <titles>
+        <title>Author Reply to Peer Reviews of Mutagenesis of the ADAM17-phosphatidylserine-binding motif leads to embryonic lethality in mice</title>
+      </titles>
+      <review_date>
+        <month>05</month>
+        <day>13</day>
+        <year>2022</year>
+      </review_date>
+      <institution>
+        <institution_name>Review Commons</institution_name>
+      </institution>
+      <running_number>Author Reply</running_number>
+      <rel:program xmlns:rel="http://www.crossref.org/relations.xsd">
+        <rel:related_item>
+          <rel:inter_work_relation identifier-type="doi" relationship-type="isReviewOf">10.1101/2022.02.15.480564</rel:inter_work_relation>
+        </rel:related_item>
+        <rel:related_item>
+          <rel:inter_work_relation identifier-type="doi" relationship-type="isReplyTo">12.3456/78900</rel:inter_work_relation>
+        </rel:related_item>
+        <rel:related_item>
+          <rel:inter_work_relation identifier-type="doi" relationship-type="isReplyTo">12.3456/78901</rel:inter_work_relation>
+        </rel:related_item>
+        <rel:related_item>
+          <rel:inter_work_relation identifier-type="doi" relationship-type="isReplyTo">12.3456/78902</rel:inter_work_relation>
+        </rel:related_item>
+      </rel:program>
+      <doi_data>
+        <doi>10.3456/78903</doi>
+        <resource>https://eeb.embo.org/doi/10.1101/2022.02.15.480564#rev0-ar</resource>
+      </doi_data>
+    </peer_review>
     <peer_review revision-round="1" type="referee-report">
       <contributors>
         <anonymous sequence="first" contributor_role="author" />
