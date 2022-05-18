@@ -44,7 +44,6 @@ python3 -m src.cli.main meca info --help
 
 The CLI has four groups of subcommands:
 - `meca` for getting basic information about a single MECA archive
-- `dois` for interacting with the DOI database
 - `crossref` to generate a deposition file from a MECA archive and send it to the Crossref API
 - `batch` to perform the MECA parsing, deposition file generation, & interaction with the Crossref API for multiple MECA archives.
 
@@ -59,24 +58,6 @@ This will output the title of the article, any DOIs, the publisher, and the year
 `reviews` prints the authors and completion dates of any reviews in the MECA archive:
 ```bash
 python3 -m src.cli.main meca reviews src/test/test_data/mutagenesis.zip
-```
-
-### `dois`
-
-`info` prints the path of the database file as well as the number of used and unused DOIs in the database:
-```bash
-python3 -m src.cli.main dois info
-```
-
-With `add`, you can add DOIs from a text file to the database of unused DOIs...
-```bash
-echo "1\n2\n3\n" > dois.txt
-python3 -m src.cli.main dois add dois.txt
-```
-
-or read them from standard input:
-```bash
-echo "1\n2\n3\n" | python3 -m src.cli.main dois add -
 ```
 
 ### `crossref`

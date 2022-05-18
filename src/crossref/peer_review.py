@@ -11,8 +11,8 @@ from src.config import (
     REVIEW_RESOURCE_URL_TEMPLATE,
     AUTHOR_REPLY_RESOURCE_URL_TEMPLATE,
 )
+from src.dois import get_free_doi
 from src.meca.archive import AuthorReplyInfo, AuthorInfo, MECArchive, ReviewInfo
-from .dois import get_free_doi
 
 
 DEPOSITION_TEMPLATE = Template("""<doi_batch

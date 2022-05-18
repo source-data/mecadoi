@@ -1,15 +1,14 @@
 from datetime import datetime
 from os import listdir, mkdir
 from typing import List
+from unittest import TestCase
 import responses
 from shutil import copy, rmtree
-from yaml import dump
 from src.batch.deposit import batch_deposit, BatchDepositRun, DepositionResult, MecaDeposition, MecaParsingResult
 from src.config import CROSSREF_DEPOSITION_URL
-from .common import DoiDbTestCase
 
 
-class TestBatchDeposit(DoiDbTestCase):
+class TestBatchDeposit(TestCase):
 
     def setUp(self) -> None:
         self.base_dir = 'src/test/tmp/batch'

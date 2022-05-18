@@ -1,10 +1,10 @@
+from unittest import TestCase
 import lxml.etree
 from src.meca.archive import MECArchive
 from src.crossref.peer_review import generate_peer_review_deposition
-from .common import DoiDbTestCase
 
 
-class TestGeneratePeerReviewDeposition(DoiDbTestCase):
+class TestGeneratePeerReviewDeposition(TestCase):
     def setUp(self) -> None:
         super().setUp()
 
@@ -47,9 +47,14 @@ class TestGeneratePeerReviewDeposition(DoiDbTestCase):
         ignore_xpaths = [
             './cr:head/cr:doi_batch_id',
             './cr:head/cr:timestamp',
-            './cr:body/cr:peer_review/cr:doi_data/cr:doi'
+            './cr:body/cr:peer_review/cr:doi_data/cr:doi',
+            './cr:body/cr:peer_review/rel:program/rel:related_item/rel:inter_work_relation',
+            './cr:body/cr:peer_review[@type="author-comment"]/cr:review_date',
         ]
-        ignore_namespaces = {'cr': 'http://www.crossref.org/schema/5.3.1'}
+        ignore_namespaces = {
+            'cr': 'http://www.crossref.org/schema/5.3.1',
+            'rel': 'http://www.crossref.org/relations.xsd',
+        }
 
         def canonicalize(xml_file: str) -> str:
             tree = lxml.etree.parse(xml_file)
