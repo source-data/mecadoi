@@ -1,7 +1,19 @@
+"""
+Provides configuration for the application.
+
+The configuration parameters are loaded from a file called ".env" in the working directory. If no such file exists, the
+parent folders of the working directory are searched.
+
+The configuration file can also be specified by setting the environment variable ENV_FILE when invoking the application.
+"""
+
 from dotenv import load_dotenv
 from os import getenv
 
-load_dotenv()
+# Use the ENV_FILE parameter to load the configuration file. If the parameter isn't set, the dotenv library searches
+# for a file called ".env", first in the current folder and then in its parents.
+env_file_path = getenv('ENV_FILE')
+load_dotenv(dotenv_path=getenv('ENV_FILE'))
 
 
 def getenv_or_raise(name: str) -> str:
@@ -24,3 +36,19 @@ DOI_TEMPLATE = getenv_or_raise('DOI_TEMPLATE')
 CROSSREF_DEPOSITION_URL = getenv_or_raise('CROSSREF_DEPOSITION_URL')
 CROSSREF_USERNAME = getenv_or_raise('CROSSREF_USERNAME')
 CROSSREF_PASSWORD = getenv_or_raise('CROSSREF_PASSWORD')
+
+__all__ = [
+    'DEPOSITOR_NAME',
+    'DEPOSITOR_EMAIL',
+    'REGISTRANT_NAME',
+    'INSTITUTION_NAME',
+    'REVIEW_RESOURCE_URL_TEMPLATE',
+    'AUTHOR_REPLY_RESOURCE_URL_TEMPLATE',
+
+    'DOI_DB_FILE',
+    'DOI_TEMPLATE',
+
+    'CROSSREF_DEPOSITION_URL',
+    'CROSSREF_USERNAME',
+    'CROSSREF_PASSWORD',
+]
