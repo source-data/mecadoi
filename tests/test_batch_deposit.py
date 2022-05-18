@@ -11,7 +11,7 @@ from src.config import CROSSREF_DEPOSITION_URL
 class TestBatchDeposit(TestCase):
 
     def setUp(self) -> None:
-        self.base_dir = 'src/test/tmp/batch'
+        self.base_dir = 'tests/tmp/batch'
         try:
             rmtree(self.base_dir)
         except FileNotFoundError:
@@ -36,20 +36,20 @@ class TestBatchDeposit(TestCase):
             results=[
                 MecaDeposition(
                     meca_parsing=MecaParsingResult(
-                        input='src/test/tmp/batch/input/mutagenesis.zip',
+                        input='tests/tmp/batch/input/mutagenesis.zip',
                         error=None,
                         has_reviews=True,
                         has_preprint_doi=True,
                         doi_already_processed=False,
                     ),
                     deposition_file_generation=DepositionResult(
-                        output='src/test/tmp/batch/output/10.1101/2022.02.15.480564/deposition.xml',
+                        output='tests/tmp/batch/output/10.1101/2022.02.15.480564/deposition.xml',
                         error=None,
                     ),
                 ),
                 MecaDeposition(
                     meca_parsing=MecaParsingResult(
-                        input='src/test/tmp/batch/input/no-preprint-doi.zip',
+                        input='tests/tmp/batch/input/no-preprint-doi.zip',
                         error=None,
                         has_reviews=True,
                         has_preprint_doi=False,
@@ -58,7 +58,7 @@ class TestBatchDeposit(TestCase):
                 ),
                 MecaDeposition(
                     meca_parsing=MecaParsingResult(
-                        input='src/test/tmp/batch/input/no-reviews.zip',
+                        input='tests/tmp/batch/input/no-reviews.zip',
                         error=None,
                         has_reviews=False,
                         has_preprint_doi=False,
@@ -85,14 +85,14 @@ class TestBatchDeposit(TestCase):
             results=[
                 MecaDeposition(
                     meca_parsing=MecaParsingResult(
-                        input='src/test/tmp/batch/input/mutagenesis.zip',
+                        input='tests/tmp/batch/input/mutagenesis.zip',
                         error=None,
                         has_reviews=True,
                         has_preprint_doi=True,
                         doi_already_processed=False,
                     ),
                     deposition_file_generation=DepositionResult(
-                        output='src/test/tmp/batch/output/10.1101/2022.02.15.480564/deposition.xml',
+                        output='tests/tmp/batch/output/10.1101/2022.02.15.480564/deposition.xml',
                         error=None,
                     ),
                 ),
@@ -103,7 +103,7 @@ class TestBatchDeposit(TestCase):
             results=[
                 MecaDeposition(
                     meca_parsing=MecaParsingResult(
-                        input='src/test/tmp/batch/input/mutagenesis.zip',
+                        input='tests/tmp/batch/input/mutagenesis.zip',
                         error=None,
                         has_reviews=True,
                         has_preprint_doi=True,
@@ -132,7 +132,7 @@ class TestBatchDeposit(TestCase):
         num_files_in_input_dir = len(listdir(input_dir))
         self.assertEqual(0, num_files_in_input_dir)
 
-        for file in [f'src/test/test_data/{filename}' for filename in files]:
+        for file in [f'tests/test_data/{filename}' for filename in files]:
             copy(file, input_dir)
 
         num_files_in_input_dir = len(listdir(input_dir))

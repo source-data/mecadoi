@@ -51,19 +51,19 @@ The CLI has four groups of subcommands:
 
 Use the `info` subcommand to get basic information about a MECA archive:
 ```bash
-python3 -m src.cli.main meca info src/test/test_data/mutagenesis.zip
+python3 -m src.cli.main meca info tests/test_data/mutagenesis.zip
 ```
 This will output the title of the article, any DOIs, the publisher, and the year of publishing.
 
 `reviews` prints the authors and completion dates of any reviews in the MECA archive:
 ```bash
-python3 -m src.cli.main meca reviews src/test/test_data/mutagenesis.zip
+python3 -m src.cli.main meca reviews tests/test_data/mutagenesis.zip
 ```
 
 ### `crossref`
 Generate a CrossRef deposition file:
 ```bash
-python3 -m src.cli.main crossref generate -o deposition.xml src/test/test_data/mutagenesis.zip
+python3 -m src.cli.main crossref generate -o deposition.xml tests/test_data/mutagenesis.zip
 ```
 This generates a Crossref deposition file that can be used to create DOIs for every peer review in the MECA archive. The DOIs to be used are taken from the DOI database, and information such as the registrant and depositor name are taken from the `.env` file.
 
@@ -105,7 +105,7 @@ The configuration for both is in [`.flake8`](.flake8) and [`mypy.ini`](mypy.ini)
 
 ### Testing
 
-Tests are located in `src/test`, test data (including some sample MECA archives) in `src/test/test_data`.
+Tests are located in `tests`, test data (including some sample MECA archives) in `tests/test_data`.
 
 To run all tests:
 ```bash

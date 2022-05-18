@@ -22,7 +22,7 @@ class TestGeneratePeerReviewDeposition(TestCase):
     def test_generate_peer_review_deposition_for_invalid_meca(self) -> None:
         for meca_name in self.invalid_fixtures:
             with self.subTest(meca_name=meca_name):
-                meca = MECArchive(f'src/test/test_data/{meca_name}.zip')
+                meca = MECArchive(f'tests/test_data/{meca_name}.zip')
 
                 with self.assertRaises(ValueError):
                     generate_peer_review_deposition(meca)
@@ -30,14 +30,14 @@ class TestGeneratePeerReviewDeposition(TestCase):
     def test_generate_peer_review_deposition(self) -> None:
         for meca_name in self.fixtures:
             with self.subTest(meca_name=meca_name):
-                meca_archive = f'src/test/test_data/{meca_name}.zip'
-                expected_xml = f'src/test/test_data/expected/{meca_name}.xml'
+                meca_archive = f'tests/test_data/{meca_name}.zip'
+                expected_xml = f'tests/test_data/expected/{meca_name}.xml'
                 actual_xml = self.generate_xml(meca_archive, meca_name)
                 self.assertXmlEquals(meca_name, expected_xml, actual_xml)
 
     def generate_xml(self, meca_archive: str, meca_name: str) -> str:
         meca = MECArchive(meca_archive)
-        output_filename = f'src/test/tmp/{meca_name}.xml'
+        output_filename = f'tests/tmp/{meca_name}.xml'
         deposition_xml = generate_peer_review_deposition(meca)
         with open(output_filename, 'wb') as f:
             f.write(deposition_xml)
@@ -75,7 +75,7 @@ class TestGeneratePeerReviewDeposition(TestCase):
             def write_xml(string: str, filename: str):
                 with open(filename, 'w') as out:
                     out.write(string)
-            write_xml(expected, f'src/test/tmp/{meca_name}.expected.xml')
-            write_xml(actual, f'src/test/tmp/{meca_name}.actual.xml')
+            write_xml(expected, f'tests/tmp/{meca_name}.expected.xml')
+            write_xml(actual, f'tests/tmp/{meca_name}.actual.xml')
 
         self.assertEqual(expected, actual)

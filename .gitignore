@@ -3,5 +3,5 @@ __pycache__/
 .DS_Store
 
 provisioning/buffer/
-src/test/tmp/*
+tests/tmp/*
 .env

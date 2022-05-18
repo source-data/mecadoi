@@ -14,7 +14,7 @@ class CliTestCase(TestCase):
         return self.runner.invoke(mecadoi, command)
 
     def test_meca_info(self) -> None:
-        test_file = 'src/test/test_data/mutagenesis.zip'
+        test_file = 'tests/test_data/mutagenesis.zip'
         title = 'Mutagenesis of the ADAM17-phosphatidylserine-binding motif leads to embryonic lethality in mice'
         doi = '10.26508/lsa.201900430'
         preprint_doi = '10.1101/2022.02.15.480564'

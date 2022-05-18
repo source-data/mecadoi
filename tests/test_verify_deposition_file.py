@@ -44,7 +44,7 @@ class TestVerifyDepositionFile(TestCase):
         )
 
     def setUp(self) -> None:
-        self.deposition_file = 'src/test/test_data/expected/mutagenesis.xml'
+        self.deposition_file = 'tests/test_data/expected/mutagenesis.xml'
         self.preprint_doi = '10.1101/2022.02.15.480564'
         self.eeb_api_response: List[Article] = [
             {
