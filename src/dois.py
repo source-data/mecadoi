@@ -1,4 +1,5 @@
 """Handles the creation of random DOIs and tries to ensure they are not reused."""
+
 __all__ = ['get_free_doi']
 
 from datetime import datetime
@@ -13,11 +14,12 @@ def get_free_doi(resource: str) -> str:
     Get an unused DOI for the given resource.
 
     The DOIs are created according to the template defined in the DOI_TEMPLATE configuration parameter. The template
-    must contain a $-substitution parameter of the name "random" which will be replaced with a string of 6 random
-    digits. For example, the template "10.15252/rc.2022.$random" produces DOIs like "10.15252/rc.2022.469810".
+    must contain two $-substitution parameters called "year" and "random" which will be replaced with the current year
+    and a string of 6 random digits, respectively. For example, the template "10.15252/rc.$year$random" produces DOIs
+    like "10.15252/rc.2022123456".
 
-    The DOI that is returned is stored, together with the given resource and a timestamp, in the DOI database. It's an
-    sqlite3 database located at the path set in the DOI_DB_FILE configuration parameter.
+    The DOI that this function returns is stored, with the given resource and a timestamp, in the DOI database. It's
+    an sqlite3 database located at the path set in the DOI_DB_FILE configuration parameter.
 
     IMPORTANT: wether a DOI is unused depends solely on wether it has already been marked as used in the currently
     configured DOI database. Therefore, if the database or its contents are modified, or a different database is
@@ -51,7 +53,8 @@ def _create_random_doi() -> str:
     population = digits
     k = 6
     random_part = ''.join([choice(population) for i in range(k)])
-    return Template(DOI_TEMPLATE).substitute(random=random_part)
+    year = str(datetime.now().year)
+    return Template(DOI_TEMPLATE).substitute(year=year, random=random_part)
 
 
 class DoiDatabase:
