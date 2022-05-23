@@ -1,9 +1,11 @@
-from typing import Optional
+from typing import List, Optional
 import click
 from yaml import dump
 
-from src.meca.archive import ReviewInfo
-from .options import meca_archive, read_meca, strict_validation
+from src.meca import parse_meca_archive
+from src.model import Author, Review
+
+from .options import meca_archive, strict_validation
 
 
 @click.command()
@@ -11,8 +13,24 @@ from .options import meca_archive, read_meca, strict_validation
 @strict_validation
 def info(meca_archive: str, strict_validation: bool) -> None:
     """Show information about the given MECA archive."""
-    meca = read_meca(meca_archive, strict_validation)
-    click.echo(meca)
+    article = parse_meca_archive(meca_archive)
+    output = {
+        'title': truncate(article.title),
+        'doi': article.doi,
+        'authors': get_contributors(article.authors),
+    }
+    if article.preprint_doi:
+        output['preprint_doi'] = article.preprint_doi
+    if article.journal:
+        output['journal'] = article.journal
+    if article.review_process:
+        num_revision_rounds = len(article.review_process)
+        num_total_reviews = sum([len(revision_round.reviews) for revision_round in article.review_process])
+        num_author_replies = sum(
+            [1 if revision_round.author_reply else 0 for revision_round in article.review_process]
+        )
+        output['review_process'] = f'{num_revision_rounds} revision rounds, {num_total_reviews} reviews, {num_author_replies} author replies'
+    click.echo(dump(output, width=120), nl=False)
 
 
 @click.command()
@@ -20,16 +38,14 @@ def info(meca_archive: str, strict_validation: bool) -> None:
 @strict_validation
 def reviews(meca_archive: str, strict_validation: bool) -> None:
     """Show information about the reviews in the given MECA archive."""
-    meca = read_meca(meca_archive, strict_validation)
+    article = parse_meca_archive(meca_archive)
 
-    if meca.revision_rounds:
+    if article.review_process:
         revision_rounds_info = {}
-        for revision_round in meca.revision_rounds:
+        for revision_round in article.review_process:
             revision_round_info = {
                 f'Review {review.running_number}': {
-                    'date_assigned': review.date_assigned.strftime('%Y-%m-%d'),
-                    'date_completed': review.date_completed.strftime('%Y-%m-%d'),
-                    'contributors': review.contributors,
+                    'contributors': get_contributors(review.authors),
                     'summary': (
                         get_summary('Evidence', review)
                         or get_summary('Significance', review)
@@ -41,17 +57,21 @@ def reviews(meca_archive: str, strict_validation: bool) -> None:
             }
             if revision_round.author_reply:
                 revision_round_info['Author Reply'] = {
-                    'contributors': truncate(', '.join([
-                        f'{contributor.given_name}, {contributor.surname}'
-                        for contributor in revision_round.author_reply.contributors
-                    ])),
+                    'contributors': get_contributors(revision_round.author_reply.authors),
                 }
 
-            revision_rounds_info[f'Revision round {revision_round.revision}'] = revision_round_info
+            revision_rounds_info[f'Revision round {revision_round.revision_id}'] = revision_round_info
         click.echo(dump(revision_rounds_info, width=150), nl=False)
 
 
-def get_summary(type: str, review: ReviewInfo) -> Optional[str]:
+def get_contributors(contributors: List[Author]) -> str:
+    return truncate(', '.join([
+        f'{contributor.given_name}, {contributor.surname}'
+        for contributor in contributors
+    ]))
+
+
+def get_summary(type: str, review: Review) -> Optional[str]:
     text = None
     for question_title, answer in review.text.items():
         if type in question_title:

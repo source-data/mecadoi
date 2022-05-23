@@ -1,10 +1,13 @@
+from datetime import datetime
 from typing import BinaryIO, TextIO
 import click
 from yaml import dump
-from src.cli.meca.options import meca_archive, read_meca, strict_validation
+from src.cli.meca.options import meca_archive, strict_validation
 from src.crossref.api import deposit as deposit_xml
 from src.crossref.peer_review import generate_peer_review_deposition
 from src.crossref.verify import verify as verify_xml
+from src.dois import get_free_doi
+from src.meca import parse_meca_archive
 from .options import verbose_output
 
 
@@ -20,8 +23,8 @@ from .options import verbose_output
 def generate(meca_archive: str, strict_validation: bool, output: BinaryIO) -> None:
     """Generate a CrossRef deposition file for any reviews within the given MECA archive."""
     try:
-        meca = read_meca(meca_archive, strict_validation)
-        deposition_xml = generate_peer_review_deposition(meca)
+        article = parse_meca_archive(meca_archive)
+        deposition_xml = generate_peer_review_deposition(article, datetime.now(), get_free_doi)
     except ValueError as e:
         raise click.ClickException(str(e))
 

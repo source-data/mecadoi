@@ -18,9 +18,9 @@
 Implications in Aging and Cancer</title>
       </titles>
       <review_date>
-        <month>07</month>
-        <day>25</day>
-        <year>2019</year>
+        <month>10</month>
+        <day>20</day>
+        <year>2020</year>
       </review_date>
       <institution>
         <institution_name>Review Commons</institution_name>
@@ -32,7 +32,7 @@ Implications in Aging and Cancer</title>
         </rel:related_item>
       </rel:program>
       <doi_data>
-        <doi>10.15252/rc.201900481.rev0.rr1</doi>
+        <doi>10.15252/rc.2020123456</doi>
         <resource>https://eeb.embo.org/doi/10.1101/2022.02.15.480564#rev0-rr1</resource>
       </doi_data>
     </peer_review>
@@ -45,8 +45,8 @@ Implications in Aging and Cancer</title>
 Implications in Aging and Cancer</title>
       </titles>
       <review_date>
-        <month>12</month>
-        <day>21</day>
+        <month>10</month>
+        <day>20</day>
         <year>2020</year>
       </review_date>
       <institution>
@@ -59,7 +59,7 @@ Implications in Aging and Cancer</title>
         </rel:related_item>
       </rel:program>
       <doi_data>
-        <doi>10.15252/rc.201900481.rev0.rr2</doi>
+        <doi>10.15252/rc.2020123456</doi>
         <resource>https://eeb.embo.org/doi/10.1101/2022.02.15.480564#rev0-rr2</resource>
       </doi_data>
     </peer_review>
@@ -161,9 +161,9 @@ Implications in Aging and Cancer</title>
 Implications in Aging and Cancer</title>
       </titles>
       <review_date>
-        <month>05</month>
-        <day>13</day>
-        <year>2022</year>
+        <month>10</month>
+        <day>20</day>
+        <year>2020</year>
       </review_date>
       <institution>
         <institution_name>Review Commons</institution_name>
@@ -174,13 +174,14 @@ Implications in Aging and Cancer</title>
           <rel:inter_work_relation identifier-type="doi" relationship-type="isReviewOf">10.1101/2022.02.15.480564</rel:inter_work_relation>
         </rel:related_item>
         <rel:related_item>
-          <rel:inter_work_relation identifier-type="doi" relationship-type="isReplyTo">12.3456/78905</rel:inter_work_relation>
+          <rel:inter_work_relation identifier-type="doi" relationship-type="isReplyTo">10.15252/rc.2020123456</rel:inter_work_relation>
         </rel:related_item>
         <rel:related_item>
-          <rel:inter_work_relation identifier-type="doi" relationship-type="isReplyTo">12.3456/78906</rel:inter_work_relation>
+          <rel:inter_work_relation identifier-type="doi" relationship-type="isReplyTo">10.15252/rc.2020123456</rel:inter_work_relation>
         </rel:related_item>
       </rel:program>
       <doi_data>
+        <doi>10.15252/rc.2020123456</doi>
         <resource>https://eeb.embo.org/doi/10.1101/2022.02.15.480564#rev0-ar</resource>
       </doi_data>
     </peer_review>

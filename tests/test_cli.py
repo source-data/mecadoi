@@ -14,16 +14,14 @@ class CliTestCase(TestCase):
         return self.runner.invoke(mecadoi, command)
 
     def test_meca_info(self) -> None:
-        test_file = 'tests/test_data/mutagenesis.zip'
+        test_file = 'tests/resources/meca/multiple-revision-rounds.zip'
         title = 'Mutagenesis of the ADAM17-phosphatidylserine-binding motif leads to embryonic lethality in mice'
         doi = '10.26508/lsa.201900430'
         preprint_doi = '10.1101/2022.02.15.480564'
         publisher = 'Review Commons - TEST'
-        year = '2020'
         result = self.run_mecadoi_command(['meca', 'info', test_file])
         self.assertEqual(0, result.exit_code)
         self.assertIn(title, result.output)
         self.assertIn(doi, result.output)
         self.assertIn(preprint_doi, result.output)
         self.assertIn(publisher, result.output)
-        self.assertIn(year, result.output)

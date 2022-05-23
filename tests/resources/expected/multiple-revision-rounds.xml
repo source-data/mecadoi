@@ -17,9 +17,9 @@
         <title>Peer Review of Mutagenesis of the ADAM17-phosphatidylserine-binding motif leads to embryonic lethality in mice</title>
       </titles>
       <review_date>
-        <month>05</month>
-        <day>31</day>
-        <year>2019</year>
+        <month>10</month>
+        <day>20</day>
+        <year>2020</year>
       </review_date>
       <institution>
         <institution_name>Review Commons</institution_name>
@@ -31,7 +31,7 @@
         </rel:related_item>
       </rel:program>
       <doi_data>
-        <doi>10.15252/lsa.201900430.rev0.rr1</doi>
+        <doi>10.15252/rc.2020123456</doi>
         <resource>https://eeb.embo.org/doi/10.1101/2022.02.15.480564#rev0-rr1</resource>
       </doi_data>
     </peer_review>
@@ -43,9 +43,9 @@
         <title>Peer Review of Mutagenesis of the ADAM17-phosphatidylserine-binding motif leads to embryonic lethality in mice</title>
       </titles>
       <review_date>
-        <month>05</month>
-        <day>29</day>
-        <year>2019</year>
+        <month>10</month>
+        <day>20</day>
+        <year>2020</year>
       </review_date>
       <institution>
         <institution_name>Review Commons</institution_name>
@@ -57,7 +57,7 @@
         </rel:related_item>
       </rel:program>
       <doi_data>
-        <doi>10.15252/lsa.201900430.rev0.rr2</doi>
+        <doi>10.15252/rc.2020123456</doi>
         <resource>https://eeb.embo.org/doi/10.1101/2022.02.15.480564#rev0-rr2</resource>
       </doi_data>
     </peer_review>
@@ -69,9 +69,9 @@
         <title>Peer Review of Mutagenesis of the ADAM17-phosphatidylserine-binding motif leads to embryonic lethality in mice</title>
       </titles>
       <review_date>
-        <month>06</month>
-        <day>06</day>
-        <year>2019</year>
+        <month>10</month>
+        <day>20</day>
+        <year>2020</year>
       </review_date>
       <institution>
         <institution_name>Review Commons</institution_name>
@@ -83,7 +83,7 @@
         </rel:related_item>
       </rel:program>
       <doi_data>
-        <doi>10.15252/lsa.201900430.rev0.rr3</doi>
+        <doi>10.15252/rc.2020123456</doi>
         <resource>https://eeb.embo.org/doi/10.1101/2022.02.15.480564#rev0-rr3</resource>
       </doi_data>
     </peer_review>
@@ -149,9 +149,9 @@
         <title>Author Reply to Peer Reviews of Mutagenesis of the ADAM17-phosphatidylserine-binding motif leads to embryonic lethality in mice</title>
       </titles>
       <review_date>
-        <month>05</month>
-        <day>13</day>
-        <year>2022</year>
+        <month>10</month>
+        <day>20</day>
+        <year>2020</year>
       </review_date>
       <institution>
         <institution_name>Review Commons</institution_name>
@@ -162,17 +162,17 @@
           <rel:inter_work_relation identifier-type="doi" relationship-type="isReviewOf">10.1101/2022.02.15.480564</rel:inter_work_relation>
         </rel:related_item>
         <rel:related_item>
-          <rel:inter_work_relation identifier-type="doi" relationship-type="isReplyTo">12.3456/78900</rel:inter_work_relation>
+          <rel:inter_work_relation identifier-type="doi" relationship-type="isReplyTo">10.15252/rc.2020123456</rel:inter_work_relation>
         </rel:related_item>
         <rel:related_item>
-          <rel:inter_work_relation identifier-type="doi" relationship-type="isReplyTo">12.3456/78901</rel:inter_work_relation>
+          <rel:inter_work_relation identifier-type="doi" relationship-type="isReplyTo">10.15252/rc.2020123456</rel:inter_work_relation>
         </rel:related_item>
         <rel:related_item>
-          <rel:inter_work_relation identifier-type="doi" relationship-type="isReplyTo">12.3456/78902</rel:inter_work_relation>
+          <rel:inter_work_relation identifier-type="doi" relationship-type="isReplyTo">10.15252/rc.2020123456</rel:inter_work_relation>
         </rel:related_item>
       </rel:program>
       <doi_data>
-        <doi>10.3456/78903</doi>
+        <doi>10.15252/rc.2020123456</doi>
         <resource>https://eeb.embo.org/doi/10.1101/2022.02.15.480564#rev0-ar</resource>
       </doi_data>
     </peer_review>
@@ -184,8 +184,8 @@
         <title>Peer Review of Mutagenesis of the ADAM17-phosphatidylserine-binding motif leads to embryonic lethality in mice</title>
       </titles>
       <review_date>
-        <month>12</month>
-        <day>21</day>
+        <month>10</month>
+        <day>20</day>
         <year>2020</year>
       </review_date>
       <institution>
@@ -198,7 +198,7 @@
         </rel:related_item>
       </rel:program>
       <doi_data>
-        <doi>10.15252/lsa.201900430.rev1.rr1</doi>
+        <doi>10.15252/rc.2020123456</doi>
         <resource>https://eeb.embo.org/doi/10.1101/2022.02.15.480564#rev1-rr1</resource>
       </doi_data>
     </peer_review>

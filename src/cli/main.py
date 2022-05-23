@@ -1,10 +1,10 @@
-import click
+from click import group
 from .batch import batch
 from .crossref import crossref
 from .meca import meca
 
 
-@click.group()
+@group()
 def main() -> None:
     pass
 

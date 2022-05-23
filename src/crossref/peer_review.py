@@ -1,7 +1,7 @@
 from datetime import datetime
 from string import Template
 from time import time_ns
-from typing import Any, List, Union
+from typing import Any, Callable, List, Union
 from lxml import etree
 from src.config import (
     DEPOSITOR_NAME,
@@ -9,10 +9,11 @@ from src.config import (
     REGISTRANT_NAME,
     INSTITUTION_NAME,
     REVIEW_RESOURCE_URL_TEMPLATE,
+    REVIEW_TITLE_TEMPLATE,
+    AUTHOR_REPLY_TITLE_TEMPLATE,
     AUTHOR_REPLY_RESOURCE_URL_TEMPLATE,
 )
-from src.dois import get_free_doi
-from src.meca.archive import AuthorReplyInfo, AuthorInfo, MECArchive, ReviewInfo
+from src.model import Article, Author, AuthorReply
 
 
 DEPOSITION_TEMPLATE = Template("""<doi_batch
@@ -35,17 +36,16 @@ DEPOSITION_TEMPLATE = Template("""<doi_batch
 """)
 
 
-def generate_peer_review_deposition(meca: MECArchive) -> Any:
+def generate_peer_review_deposition(
+    article: Article,
+    publication_date: datetime,
+    doi_generator: Callable[[str], str],
+) -> Any:
     """
-    Generate a CrossRef deposition file for the peer reviews in the given MECA archive.
+    Generate a CrossRef deposition file for the peer reviews in the given article.
 
-    If the archive does not contain any peer reviews, a ValueError is thrown.
+    If the article does not contain any peer reviews, a ValueError is thrown.
     """
-    if not meca.reviews:
-        raise ValueError('no reviews found in the given MECA archive')
-    if not meca.article_preprint_doi:
-        raise ValueError('no preprint DOI found in the given MECA archive')
-
     timestamp = time_ns()
     deposition_xml = etree.fromstring(
         DEPOSITION_TEMPLATE.substitute(
@@ -59,30 +59,69 @@ def generate_peer_review_deposition(meca: MECArchive) -> Any:
     )
 
     body = deposition_xml[1]
-    for review_xml in generate_reviews(meca):
+    for review_xml in generate_reviews(article, publication_date, doi_generator):
         body.append(review_xml)
 
     return etree.tostring(deposition_xml, pretty_print=True)
 
 
-def generate_reviews(meca: MECArchive) -> Any:
-    article_doi = meca.article_preprint_doi
-    if not article_doi:
-        raise ValueError()
-    article_title = meca.article_title
-    if not article_title:
-        raise ValueError()
-    revision = None
-    for index, revision_round in enumerate(meca.revision_rounds):
-        revision = revision_round.revision or index
+def generate_reviews(
+    article: Article,
+    publication_date: datetime,
+    doi_generator: Callable[[str], str],
+) -> Any:
+    if not article.preprint_doi:
+        raise ValueError('no preprint DOI found in the given MECA archive')
+
+    article_doi = article.preprint_doi
+    article_title = article.title
+
+    if not article.review_process:
+        raise ValueError('no reviews found in the given MECA archive')
+    for revision_round in article.review_process:
+        revision = revision_round.revision_id
         review_dois = []
         for review in revision_round.reviews:
-            doi, review_xml = generate_review(article_doi, article_title, revision, review)
+            title = Template(REVIEW_TITLE_TEMPLATE).substitute(article_title=article_title)
+            resource_url = Template(REVIEW_RESOURCE_URL_TEMPLATE).substitute(
+                article_doi=article_doi,
+                revision=revision,
+                running_number=review.running_number,
+            )
+            doi = doi_generator(resource_url)
+            review_xml = template_xml(
+                PEER_REVIEW_TEMPLATE,
+                revision_round=revision,
+                review_title=title,
+                publication_date_year=publication_date.year,
+                publication_date_month=f'{publication_date.month:02}',
+                publication_date_day=f'{publication_date.day:02}',
+                institution_name=INSTITUTION_NAME,
+                running_number=review.running_number,
+                article_doi=article_doi,
+                review_doi=doi,
+                review_resource=resource_url,
+            )
             review_dois.append(doi)
             yield review_xml
 
         if revision_round.author_reply:
-            yield generate_author_reply(article_doi, article_title, revision, review_dois, revision_round.author_reply)
+            title = Template(AUTHOR_REPLY_TITLE_TEMPLATE).substitute(article_title=article_title)
+            resource_url = Template(AUTHOR_REPLY_RESOURCE_URL_TEMPLATE).substitute(
+                article_doi=article_doi,
+                revision=revision,
+            )
+            doi = doi_generator(resource_url)
+            yield generate_author_reply(
+                author_reply=revision_round.author_reply,
+                title=title,
+                doi=doi,
+                resource_url=resource_url,
+                article_doi=article_doi,
+                revision=revision,
+                review_dois=review_dois,
+                publication_date=publication_date,
+            )
 
 
 PEER_REVIEW_TEMPLATE = Template("""
@@ -91,12 +130,12 @@ PEER_REVIEW_TEMPLATE = Template("""
         <anonymous sequence="first" contributor_role="author" />
     </contributors>
     <titles>
-        <title>Peer Review of ${article_title}</title>
+        <title>${review_title}</title>
     </titles>
     <review_date>
-        <month>${review_date_month}</month>
-        <day>${review_date_day}</day>
-        <year>${review_date_year}</year>
+        <month>${publication_date_month}</month>
+        <day>${publication_date_day}</day>
+        <year>${publication_date_year}</year>
     </review_date>
     <institution>
         <institution_name>${institution_name}</institution_name>
@@ -118,41 +157,16 @@ PEER_REVIEW_TEMPLATE = Template("""
 """)
 
 
-def generate_review(article_doi: str, article_title: str, revision: int, review: ReviewInfo) -> Any:
-    running_number = review.running_number
-    review_resource = Template(REVIEW_RESOURCE_URL_TEMPLATE).substitute(
-        article_doi=article_doi,
-        revision=revision,
-        running_number=running_number,
-    )
-    review_doi = get_free_doi(review_resource)
-    review_date = review.date_completed
-    review_xml = template_xml(
-        PEER_REVIEW_TEMPLATE,
-        revision_round=revision,
-        article_title=article_title,
-        review_date_year=review_date.year,
-        review_date_month=f'{review_date.month:02}',
-        review_date_day=f'{review_date.day:02}',
-        institution_name=INSTITUTION_NAME,
-        running_number=running_number,
-        article_doi=article_doi,
-        review_doi=review_doi,
-        review_resource=review_resource,
-    )
-    return review_doi, review_xml
-
-
 AUTHOR_REPLY_TEMPLATE = Template("""
 <peer_review revision-round="${revision_round}" type="author-comment">
     <contributors></contributors>
     <titles>
-        <title>Author Reply to Peer Reviews of ${article_title}</title>
+        <title>${author_reply_title}</title>
     </titles>
     <review_date>
-        <month>${review_date_month}</month>
-        <day>${review_date_day}</day>
-        <year>${review_date_year}</year>
+        <month>${publication_date_month}</month>
+        <day>${publication_date_day}</day>
+        <year>${publication_date_year}</year>
     </review_date>
     <institution>
         <institution_name>${institution_name}</institution_name>
@@ -182,29 +196,31 @@ AUTHOR_REPLY_REVIEW_RELATION_TEMPLATE = Template("""
 """)
 
 
-def generate_author_reply(article_doi: str, article_title: str, revision: int, review_dois: List[str],
-                          author_reply: AuthorReplyInfo) -> Any:
-    author_reply_resource = Template(AUTHOR_REPLY_RESOURCE_URL_TEMPLATE).substitute(
-        article_doi=article_doi,
-        revision=revision,
-    )
-    author_reply_doi = get_free_doi(author_reply_resource)
-    author_reply_date = datetime.now()
+def generate_author_reply(
+    author_reply: AuthorReply,
+    title: str,
+    doi: str,
+    resource_url: str,
+    article_doi: str,
+    revision: str,
+    review_dois: List[str],
+    publication_date: datetime,
+) -> Any:
     author_reply_xml = template_xml(
         AUTHOR_REPLY_TEMPLATE,
+        author_reply_title=title,
         revision_round=revision,
-        article_title=article_title,
-        review_date_year=author_reply_date.year,
-        review_date_month=f'{author_reply_date.month:02}',
-        review_date_day=f'{author_reply_date.day:02}',
+        publication_date_year=publication_date.year,
+        publication_date_month=f'{publication_date.month:02}',
+        publication_date_day=f'{publication_date.day:02}',
         institution_name=INSTITUTION_NAME,
         running_number="Author Reply",
         article_doi=article_doi,
-        doi=author_reply_doi,
-        resource=author_reply_resource,
+        doi=doi,
+        resource=resource_url,
     )
 
-    for contributor in generate_contributors(author_reply.contributors):
+    for contributor in generate_contributors(author_reply.authors):
         author_reply_xml[0].append(contributor)
 
     for review_doi in review_dois:
@@ -230,7 +246,7 @@ AFFILIATION_TEMPLATE = Template("""
 ORCID_TEMPLATE = Template('<ORCID authenticated="${is_authenticated}">${orcid}</ORCID>')
 
 
-def generate_contributors(contributors: List[AuthorInfo]) -> Any:
+def generate_contributors(contributors: List[Author]) -> Any:
     sequence = 'first'
     for contributor in contributors:
         contributor_xml = template_xml(

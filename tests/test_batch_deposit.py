@@ -28,7 +28,7 @@ class TestBatchDeposit(TestCase):
     @responses.activate
     def test_batch_deposit(self) -> None:
         input_files = [
-            'mutagenesis.zip',
+            'multiple-revision-rounds.zip',
             'no-preprint-doi.zip',
             'no-reviews.zip',
         ]
@@ -36,7 +36,7 @@ class TestBatchDeposit(TestCase):
             results=[
                 MecaDeposition(
                     meca_parsing=MecaParsingResult(
-                        input='tests/tmp/batch/input/mutagenesis.zip',
+                        input='tests/tmp/batch/input/multiple-revision-rounds.zip',
                         error=None,
                         has_reviews=True,
                         has_preprint_doi=True,
@@ -79,13 +79,13 @@ class TestBatchDeposit(TestCase):
     @responses.activate
     def test_batch_deposit_same_file(self) -> None:
         input_files = [
-            'mutagenesis.zip',
+            'multiple-revision-rounds.zip',
         ]
         expected_output_first_run = BatchDepositRun(
             results=[
                 MecaDeposition(
                     meca_parsing=MecaParsingResult(
-                        input='tests/tmp/batch/input/mutagenesis.zip',
+                        input='tests/tmp/batch/input/multiple-revision-rounds.zip',
                         error=None,
                         has_reviews=True,
                         has_preprint_doi=True,
@@ -103,7 +103,7 @@ class TestBatchDeposit(TestCase):
             results=[
                 MecaDeposition(
                     meca_parsing=MecaParsingResult(
-                        input='tests/tmp/batch/input/mutagenesis.zip',
+                        input='tests/tmp/batch/input/multiple-revision-rounds.zip',
                         error=None,
                         has_reviews=True,
                         has_preprint_doi=True,
@@ -132,7 +132,7 @@ class TestBatchDeposit(TestCase):
         num_files_in_input_dir = len(listdir(input_dir))
         self.assertEqual(0, num_files_in_input_dir)
 
-        for file in [f'tests/test_data/{filename}' for filename in files]:
+        for file in [f'tests/resources/meca/{filename}' for filename in files]:
             copy(file, input_dir)
 
         num_files_in_input_dir = len(listdir(input_dir))

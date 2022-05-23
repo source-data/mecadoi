@@ -3,9 +3,10 @@ from datetime import datetime
 from os import makedirs
 from pathlib import Path
 from typing import List, Union
-from src.meca.archive import MECArchive
 from src.crossref.api import deposit as deposit_xml
 from src.crossref.peer_review import generate_peer_review_deposition
+from src.dois import get_free_doi
+from src.meca import parse_meca_archive
 
 
 @dataclass
@@ -51,7 +52,7 @@ def batch_deposit(
     batch_deposit_run = BatchDepositRun(
         timestamp=datetime.now(),
         results=[
-            process(zip, output_directory, verbose, strict_validation, dry_run)
+            process(zip, output_directory, verbose, dry_run)
             for zip in zips
         ],
     )
@@ -62,23 +63,22 @@ def process(
     zip_file: Path,
     output_base_dir: str,
     verbose: int,
-    strict_validation: bool,
     dry_run: bool,
 ) -> MecaDeposition:
     result = MecaDeposition(meca_parsing=MecaParsingResult(input=str(zip_file)))
 
     try:
-        meca = MECArchive(zip_file, strict_validation=strict_validation)
+        article = parse_meca_archive(zip_file)
     except ValueError as e:
         result.meca_parsing.error = str(e)
         return result
 
-    result.meca_parsing.has_reviews = True if meca.reviews else False
-    result.meca_parsing.has_preprint_doi = True if meca.article_preprint_doi else False
+    result.meca_parsing.has_reviews = True if article.review_process else False
+    result.meca_parsing.has_preprint_doi = True if article.preprint_doi is not None else False
     if not (result.meca_parsing.has_reviews and result.meca_parsing.has_preprint_doi):
         return result
 
-    output_dir = f'{output_base_dir}/{meca.article_preprint_doi}'
+    output_dir = f'{output_base_dir}/{article.preprint_doi}'
 
     try:
         makedirs(output_dir)
@@ -89,7 +89,8 @@ def process(
 
     result.deposition_file_generation = DepositionResult()
     try:
-        deposition_xml = generate_peer_review_deposition(meca)
+        publication_date = datetime.now()
+        deposition_xml = generate_peer_review_deposition(article, publication_date, get_free_doi)
         deposition_file = f'{output_dir}/deposition.xml'
         with open(deposition_file, 'w') as f:
             f.write(deposition_xml.decode("utf-8"))
