@@ -1,7 +1,6 @@
 import click
 from yaml import dump
 from src.cli.crossref.options import verbose_output
-from src.cli.meca.options import strict_validation
 from src.batch.deposit import batch_deposit, BatchDepositRun
 
 
@@ -16,7 +15,6 @@ from src.batch.deposit import batch_deposit, BatchDepositRun
     type=click.Path(exists=True, file_okay=False, dir_okay=True, writable=True),
 )
 @verbose_output
-@strict_validation
 @click.option(
     '--dry-run/--no-dry-run',
     default=True,
@@ -25,7 +23,6 @@ def deposit(
     input_directory: str,
     output_directory: str,
     verbose: int,
-    strict_validation: bool,
     dry_run: bool,
 ) -> None:
     """
@@ -35,7 +32,6 @@ def deposit(
         input_directory,
         output_directory,
         verbose=verbose,
-        strict_validation=strict_validation,
         dry_run=dry_run,
     )
     click.echo(output(result), nl=False)

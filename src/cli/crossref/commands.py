@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import BinaryIO, TextIO
 import click
 from yaml import dump
-from src.cli.meca.options import meca_archive, strict_validation
+from src.cli.meca.options import meca_archive
 from src.crossref.api import deposit as deposit_xml
 from src.crossref.peer_review import generate_peer_review_deposition
 from src.crossref.verify import verify as verify_xml
@@ -13,14 +13,13 @@ from .options import verbose_output
 
 @click.command()
 @meca_archive
-@strict_validation
 @click.option(
     '-o', '--output',
     default='-',
     help='Write the CrossRef deposition file to this file. Defaults to stdout.',
     type=click.File('wb'),
 )
-def generate(meca_archive: str, strict_validation: bool, output: BinaryIO) -> None:
+def generate(meca_archive: str, output: BinaryIO) -> None:
     """Generate a CrossRef deposition file for any reviews within the given MECA archive."""
     try:
         article = parse_meca_archive(meca_archive)

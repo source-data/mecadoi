@@ -143,5 +143,4 @@ class TestBatchDeposit(TestCase):
             input_directory,
             output_directory,
             verbose=False,
-            strict_validation=False,
         )

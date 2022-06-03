@@ -5,13 +5,12 @@ from yaml import dump
 from src.meca import parse_meca_archive
 from src.model import Author, Review
 
-from .options import meca_archive, strict_validation
+from .options import meca_archive
 
 
 @click.command()
 @meca_archive
-@strict_validation
-def info(meca_archive: str, strict_validation: bool) -> None:
+def info(meca_archive: str) -> None:
     """Show information about the given MECA archive."""
     article = parse_meca_archive(meca_archive)
     output = {
@@ -35,8 +34,7 @@ def info(meca_archive: str, strict_validation: bool) -> None:
 
 @click.command()
 @meca_archive
-@strict_validation
-def reviews(meca_archive: str, strict_validation: bool) -> None:
+def reviews(meca_archive: str) -> None:
     """Show information about the reviews in the given MECA archive."""
     article = parse_meca_archive(meca_archive)
 

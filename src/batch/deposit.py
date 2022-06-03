@@ -41,7 +41,6 @@ def batch_deposit(
     input_directory: str,
     output_directory: str,
     verbose: int = 0,
-    strict_validation: bool = True,
     dry_run: bool = True,
 ) -> BatchDepositRun:
     """
