@@ -4,6 +4,7 @@ __all__ = ['parse_meca_archive']
 
 from dataclasses import dataclass
 from datetime import datetime
+from html import unescape
 from lxml.etree import parse, tostring
 from pathlib import Path
 from typing import IO, Any, List, Optional, Set, Union
@@ -34,25 +35,26 @@ def parse_meca_archive(path_to_archive: Union[str, Path], use_preprint_doi: bool
     else:
         review_process = None
 
+    abstract_node = article_xml.find('front/article-meta/abstract')
     return Article(
         authors=article_authors,
-        doi=article_xml.find('front/article-meta/article-id[@pub-id-type="doi"]').text,
+        doi=_text(article_xml.find('front/article-meta/article-id[@pub-id-type="doi"]')),
         preprint_doi=_get_preprint_doi(article_xml),
-        journal=article_xml.find('front/journal-meta/journal-title-group/journal-title').text,
+        journal=_text_or_default(article_xml.find('front/journal-meta/journal-title-group/journal-title')),
         review_process=review_process,
         text={
-            'abstract': tostring(article_xml.find('front/article-meta/abstract'), method='text', encoding=str).strip(),
-        },
-        title=article_xml.find('front/article-meta/title-group/article-title').text,
+            'abstract': _text(abstract_node),
+        } if abstract_node is not None else {},
+        title=_text(article_xml.find('front/article-meta/title-group/article-title')),
     )
 
 
 def _assigned_date(review_xml: Any) -> datetime:
     date_assigned_xml = review_xml.find('history/date[@date-type="assigned"]')
     return datetime(
-        int(date_assigned_xml.find('year').text),
-        int(date_assigned_xml.find('month').text),
-        int(date_assigned_xml.find('day').text),
+        _int(date_assigned_xml.find('year')),
+        _int(date_assigned_xml.find('month')),
+        _int(date_assigned_xml.find('day')),
     )
 
 
@@ -76,8 +78,8 @@ def _get_review_process(
                     authors=_get_authors(review_xml.find('contrib-group'), contrib_type='reviewer'),
                     running_number=str(running_number),
                     text={
-                        review_item_xml.find('review-item-question/alt-title').text: review_item_xml.find(
-                            'review-item-response/text').text
+                        _text(review_item_xml.find('review-item-question/alt-title')): _text(review_item_xml.find(
+                            'review-item-response/text'))
                         for review_item_xml in review_xml.findall('review-item-group/review-item')
                     },
                 )
@@ -97,8 +99,8 @@ def _get_review_process(
 
 def _get_preprint_doi(article_xml: Any) -> Optional[str]:
     for custom_meta in article_xml.findall('front/article-meta/custom-meta-group/custom-meta'):
-        if 'Pre-existing BioRxiv Preprint DOI' == custom_meta.find('meta-name').text:
-            return str(custom_meta.find('meta-value').text)
+        if 'Pre-existing BioRxiv Preprint DOI' == _text(custom_meta.find('meta-name')):
+            return _text(custom_meta.find('meta-value'))
     return None
 
 
@@ -110,10 +112,10 @@ def _get_authors(contrib_group_xml: Any, contrib_type: str) -> List[Author]:
         orcid_xml = author_xml.find('contrib-id[@contrib-id-type="orcid"]')
         authors.append(
             Author(
-                given_name=author_xml.find('name/given-names').text,
-                surname=author_xml.find('name/surname').text,
+                given_name=_text(author_xml.find('name/given-names')),
+                surname=_text(author_xml.find('name/surname')),
                 orcid=Orcid(
-                    id=orcid_xml.text,
+                    id=_text(orcid_xml),
                     is_authenticated=orcid_xml.get('specific-use') == 'authenticated',
                 ) if orcid_xml is not None else None,
                 affiliation=_get_affiliation(contrib_group_xml, author_xml),
@@ -130,8 +132,30 @@ def _get_affiliation(contrib_group_xml: Any, author_xml: Any) -> Optional[str]:
         if aff_id is not None:
             institution = contrib_group_xml.find(f'aff[@id="{aff_id}"]/institution')
             if institution is not None:
-                return str(institution.text)
+                return _text(institution)
     return None
+
+
+def _text(node: Any) -> str:
+    return unescape(  # replace all entity references like &scedil; to their corresponding unicode characters
+        str(
+            tostring(
+                node,
+                method='text',  # return only text content, no <tag>s
+                encoding=str,  # return an unencoded unicode string
+            ).strip()  # remove trailing whitespace
+        )
+    )
+
+
+def _text_or_default(node: Any, default: Optional[str] = None) -> Optional[str]:
+    if node is None:
+        return default
+    return _text(node)
+
+
+def _int(node: Any) -> int:
+    return int(_text(node))
 
 
 @dataclass(unsafe_hash=True)
