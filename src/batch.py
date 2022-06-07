@@ -1,7 +1,18 @@
+""""""
+
+__all__ = [
+    'batch_deposit',
+    'BatchDepositRun',
+    'DepositionResult',
+    'MecaDeposition',
+    'MecaParsingResult',
+]
+
 from dataclasses import dataclass
 from datetime import datetime
 from os import makedirs
 from pathlib import Path
+from shutil import move
 from typing import List, Union
 from src.crossref.api import deposit as deposit_xml
 from src.crossref.peer_review import generate_peer_review_deposition
@@ -46,15 +57,25 @@ def batch_deposit(
     """
     Deposit DOIs for all peer reviews in the MECA archives found in the given directory.
     """
-    # find all MECA archives in the given input directory whose peer reviews can be deposited
-    zips = Path(input_directory).glob('*.zip')
+    # find all .zips in the given input directory: these are the potential MECA archives
+    zips = [file for file in Path(input_directory).glob('*.zip')]
+
+    # Process each .zip and if it's a MECA with a preprint DOI and reviews, then generate and deposit DOIs for them
+    timestamp = datetime.now()
     batch_deposit_run = BatchDepositRun(
-        timestamp=datetime.now(),
+        timestamp=timestamp,
         results=[
             process(zip, output_directory, verbose, dry_run)
             for zip in zips
         ],
     )
+
+    # Move all processed files to an archive directory
+    meca_archive_dir = f'{output_directory}/archive/{timestamp.timestamp()}/'
+    makedirs(meca_archive_dir)
+    for processed_meca in zips:
+        move(processed_meca, meca_archive_dir)
+
     return batch_deposit_run
 
 

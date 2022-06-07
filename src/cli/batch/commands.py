@@ -1,7 +1,7 @@
 import click
 from yaml import dump
 from src.cli.crossref.options import verbose_output
-from src.batch.deposit import batch_deposit, BatchDepositRun
+from src.batch import batch_deposit, BatchDepositRun
 
 
 @click.command()

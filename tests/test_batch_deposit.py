@@ -1,10 +1,12 @@
 from datetime import datetime
+from glob import glob
 from os import listdir, mkdir
+from pathlib import Path
 from typing import List
 from unittest import TestCase
 import responses
 from shutil import copy, rmtree
-from src.batch.deposit import batch_deposit, BatchDepositRun, DepositionResult, MecaDeposition, MecaParsingResult
+from src.batch import batch_deposit, BatchDepositRun, DepositionResult, MecaDeposition, MecaParsingResult
 from src.config import CROSSREF_DEPOSITION_URL
 
 
@@ -76,6 +78,15 @@ class TestBatchDeposit(TestCase):
         result = self.do_batch_deposit(input_directory, output_directory)
         self.assert_results_equal(expected_output, result)
 
+        num_files_in_input_directory = len(glob(f'{input_directory}/*'))
+        self.assertEqual(0, num_files_in_input_directory)
+
+        expected_deposition_file = 'tests/tmp/batch/output/10.1101/2022.02.15.480564/deposition.xml'
+        self.assertTrue(Path(expected_deposition_file).exists())
+
+        files_in_archive = [Path(file).name for file in glob(f'{output_directory}/archive/**/*')]
+        self.assertListEqual(sorted(input_files), sorted(files_in_archive))
+
     @responses.activate
     def test_batch_deposit_same_file(self) -> None:
         input_files = [
@@ -121,6 +132,8 @@ class TestBatchDeposit(TestCase):
         result_first_run = self.do_batch_deposit(input_directory, output_directory)
         self.assert_results_equal(expected_output_first_run, result_first_run)
 
+        # Setup the input directory again since the MECAs are archived after each run
+        self.setup_input_directory(input_directory, input_files)
         result_second_run = self.do_batch_deposit(input_directory, output_directory)
         self.assert_results_equal(expected_output_second_run, result_second_run)
 
@@ -128,6 +141,10 @@ class TestBatchDeposit(TestCase):
         self.assertCountEqual(expected.results, actual.results)
 
     def setup_input_directory(self, input_dir: str, files: List[str]) -> None:
+        try:
+            rmtree(input_dir)
+        except FileNotFoundError:
+            pass
         mkdir(input_dir)
         num_files_in_input_dir = len(listdir(input_dir))
         self.assertEqual(0, num_files_in_input_dir)
@@ -139,8 +156,4 @@ class TestBatchDeposit(TestCase):
         self.assertEqual(len(files), num_files_in_input_dir)
 
     def do_batch_deposit(self, input_directory: str, output_directory: str) -> BatchDepositRun:
-        return batch_deposit(
-            input_directory,
-            output_directory,
-            verbose=False,
-        )
+        return batch_deposit(input_directory, output_directory, verbose=False)
