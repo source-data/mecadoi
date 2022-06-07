@@ -7,8 +7,10 @@
     sync_user: mecadoi
     sync_user_home_dir: '/home/{{ sync_user }}'
     sync_dir: '{{ sync_user_home_dir }}/storage-box-local'
-    script_dir: '{{ sync_user_home_dir }}/bin'
+    scripts_dir: '{{ sync_user_home_dir }}/bin'
     code_dir: '{{ sync_user_home_dir }}/mecadoi'
+    depositions_dir: '{{ sync_user_home_dir }}/depositions'
+    logs_dir: '{{ sync_user_home_dir }}/logs'
     s3_bucket_name: mecadoi-archives
 
   tasks:
@@ -75,14 +77,15 @@
       owner: '{{ sync_user }}'
       group: '{{ sync_user }}'
     loop:
-      - bin
-      - logs
-      - storage-box-local
+      - '{{ scripts_dir }}'
+      - '{{ sync_dir }}'
+      - '{{ logs_dir }}'
+      - '{{ depositions_dir }}'
 
-  - name: Copy the sync script to the server
+  - name: Copy the scripts to the server
     ansible.builtin.copy:
-      src: resources/sync-storage-box.sh
-      dest: '{{ script_dir }}/'
+      src: 'resources/scripts/'
+      dest: '{{ scripts_dir }}/'
       owner: '{{ sync_user }}'
       group: '{{ sync_user }}'
       mode: u=rwx,g=r,o=r
@@ -94,24 +97,16 @@
       name: Sync MECA archives every day at 03:00
       minute: 0
       hour: 3
-      job: '{{ script_dir }}/sync-storage-box.sh "{{ sync_dir }}" "{{ s3_bucket_name }}" | tee -a "{{ sync_user_home_dir }}/logs/sync-storage-box.log"'
+      job: '{{ scripts_dir }}/sync-storage-box.sh "{{ sync_dir }}" "{{ s3_bucket_name }}" | tee -a "{{ logs_dir }}/sync-storage-box.log"'
 
-  - name: Copy the notification script to the server
-    ansible.builtin.copy:
-      src: resources/notify-about-new-files.sh
-      dest: '{{ script_dir }}/'
-      owner: '{{ sync_user }}'
-      group: '{{ sync_user }}'
-      mode: u=rwx,g=r,o=r
-
-  - name: Set up cron job for syncing the storage box
+  - name: Set up cron job for notification about new files
     become: yes
     become_user: '{{ sync_user }}'
     ansible.builtin.cron:
       name: Notify about new MECA archives every day at 04:00
       minute: 0
       hour: 4
-      job: '{{ script_dir }}/notify-about-new-files.sh "{{ sync_dir }}"'
+      job: '{{ scripts_dir }}/notify-about-new-files.sh "{{ sync_dir }}"'
 
   - name: Copy the Python files to the server
     ansible.posix.synchronize:
@@ -143,3 +138,12 @@
       requirements: '{{ code_dir }}/requirements/base.txt'
       virtualenv: '{{ code_dir }}/.venv'
       virtualenv_command: /usr/bin/python3.9 -m venv
+
+  - name: Set up cron job for generating deposition files
+    become: yes
+    become_user: '{{ sync_user }}'
+    ansible.builtin.cron:
+      name: Generate Crossref deposition files from MECA archives every day at 05:00
+      minute: 0
+      hour: 5
+      job: '{{ scripts_dir }}/generate-deposition-files.sh "{{ code_dir }}" "{{ sync_dir }}" "{{ depositions_dir }}" "{{ s3_bucket_name }}" "{{ logs_dir }}" | tee -a "{{ logs_dir }}/generate-deposition-files.log"'
