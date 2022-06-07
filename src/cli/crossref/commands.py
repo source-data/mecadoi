@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import BinaryIO, TextIO
+from typing import BinaryIO, Optional, TextIO
 import click
 from yaml import dump
 from src.cli.meca.options import meca_archive
@@ -19,11 +19,17 @@ from .options import verbose_output
     help='Write the CrossRef deposition file to this file. Defaults to stdout.',
     type=click.File('wb'),
 )
-def generate(meca_archive: str, output: BinaryIO) -> None:
+@click.option('--preprint-doi', default=None)
+def generate(meca_archive: str, output: BinaryIO, preprint_doi: Optional[str] = None) -> None:
     """Generate a CrossRef deposition file for any reviews within the given MECA archive."""
     try:
         article = parse_meca_archive(meca_archive)
-        deposition_xml = generate_peer_review_deposition(article, datetime.now(), get_free_doi)
+        deposition_xml = generate_peer_review_deposition(
+            article,
+            datetime.now(),
+            get_free_doi,
+            preprint_doi=preprint_doi
+        )
     except ValueError as e:
         raise click.ClickException(str(e))
 

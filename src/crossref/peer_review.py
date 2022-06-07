@@ -1,7 +1,7 @@
 from datetime import datetime
 from string import Template
 from time import time_ns
-from typing import Any, Callable, List, Union
+from typing import Any, Callable, List, Optional, Union
 from lxml import etree
 from src.config import (
     DEPOSITOR_NAME,
@@ -13,7 +13,7 @@ from src.config import (
     AUTHOR_REPLY_TITLE_TEMPLATE,
     AUTHOR_REPLY_RESOURCE_URL_TEMPLATE,
 )
-from src.model import Article, Author, AuthorReply
+from src.model import Article, Author, AuthorReply, RevisionRound
 
 
 DEPOSITION_TEMPLATE = Template("""<doi_batch
@@ -40,12 +40,23 @@ def generate_peer_review_deposition(
     article: Article,
     publication_date: datetime,
     doi_generator: Callable[[str], str],
+    preprint_doi: Optional[str] = None,
 ) -> Any:
     """
     Generate a CrossRef deposition file for the peer reviews in the given article.
 
     If the article does not contain any peer reviews, a ValueError is thrown.
     """
+    if preprint_doi is not None:
+        article_doi = preprint_doi
+    elif article.preprint_doi is not None:
+        article_doi = article.preprint_doi
+    else:
+        raise ValueError('no preprint DOI found in the given MECA archive')
+
+    if not article.review_process:
+        raise ValueError('no reviews found in the given MECA archive')
+
     timestamp = time_ns()
     deposition_xml = etree.fromstring(
         DEPOSITION_TEMPLATE.substitute(
@@ -59,26 +70,26 @@ def generate_peer_review_deposition(
     )
 
     body = deposition_xml[1]
-    for review_xml in generate_reviews(article, publication_date, doi_generator):
+    for review_xml in generate_reviews(
+        article.review_process,
+        article.title,
+        article_doi,
+        publication_date,
+        doi_generator,
+    ):
         body.append(review_xml)
 
     return etree.tostring(deposition_xml, pretty_print=True)
 
 
 def generate_reviews(
-    article: Article,
+    review_process: List[RevisionRound],
+    article_title: str,
+    article_doi: str,
     publication_date: datetime,
     doi_generator: Callable[[str], str],
 ) -> Any:
-    if not article.preprint_doi:
-        raise ValueError('no preprint DOI found in the given MECA archive')
-
-    article_doi = article.preprint_doi
-    article_title = article.title
-
-    if not article.review_process:
-        raise ValueError('no reviews found in the given MECA archive')
-    for revision_round in article.review_process:
+    for revision_round in review_process:
         revision = revision_round.revision_id
         review_dois = []
         for review in revision_round.reviews:
