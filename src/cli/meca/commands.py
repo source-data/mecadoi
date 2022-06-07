@@ -28,7 +28,11 @@ def info(meca_archive: str) -> None:
         num_author_replies = sum(
             [1 if revision_round.author_reply else 0 for revision_round in article.review_process]
         )
-        output['review_process'] = f'{num_revision_rounds} revision rounds, {num_total_reviews} reviews, {num_author_replies} author replies'
+        output['review_process'] = (
+            f'{num_revision_rounds} revision round{"s" if num_revision_rounds != 1 else ""},'
+            + f' {num_total_reviews} review{"s" if num_total_reviews != 1 else ""},'
+            + f' {num_author_replies} author repl{"ies" if num_author_replies != 1 else "y"}'
+        )
     click.echo(dump(output, width=120), nl=False)
 
 
