@@ -1,5 +1,5 @@
 import click
-from .commands import deposit
+from .commands import generate
 
 
 @click.group()
@@ -8,4 +8,4 @@ def batch() -> None:
     pass
 
 
-batch.add_command(deposit)
+batch.add_command(generate)

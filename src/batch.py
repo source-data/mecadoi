@@ -1,10 +1,10 @@
 """"""
 
 __all__ = [
-    'batch_deposit',
-    'BatchDepositRun',
+    'batch_generate',
+    'BatchGenerateRun',
     'DepositionResult',
-    'MecaDeposition',
+    'DepositionFileGenerationResult',
     'MecaParsingResult',
 ]
 
@@ -14,7 +14,6 @@ from os import makedirs
 from pathlib import Path
 from shutil import move
 from typing import List, Union
-from src.crossref.api import deposit as deposit_xml
 from src.crossref.peer_review import generate_peer_review_deposition
 from src.dois import get_free_doi
 from src.meca import parse_meca_archive
@@ -36,33 +35,32 @@ class MecaParsingResult:
 
 
 @dataclass
-class MecaDeposition:
+class DepositionFileGenerationResult:
     meca_parsing: MecaParsingResult
     deposition_file_generation: Union[DepositionResult, None] = None
-    crossref_deposition: Union[DepositionResult, None] = None
 
 
 @dataclass
-class BatchDepositRun:
-    results: List[MecaDeposition]
+class BatchGenerateRun:
+    results: List[DepositionFileGenerationResult]
     timestamp: datetime
 
 
-def batch_deposit(
+def batch_generate(
     input_directory: str,
     output_directory: str,
     verbose: int = 0,
     dry_run: bool = True,
-) -> BatchDepositRun:
+) -> BatchGenerateRun:
     """
-    Deposit DOIs for all peer reviews in the MECA archives found in the given directory.
+    Generate deposition files for all peer reviews in the MECA archives found in the given directory.
     """
     # find all .zips in the given input directory: these are the potential MECA archives
     zips = [file for file in Path(input_directory).glob('*.zip')]
 
-    # Process each .zip and if it's a MECA with a preprint DOI and reviews, then generate and deposit DOIs for them
+    # Process each .zip and if it's a MECA with a preprint DOI and reviews, then generate deposition files for them
     timestamp = datetime.now()
-    batch_deposit_run = BatchDepositRun(
+    batch_generate_run = BatchGenerateRun(
         timestamp=timestamp,
         results=[
             process(zip, output_directory, verbose, dry_run)
@@ -76,7 +74,7 @@ def batch_deposit(
     for processed_meca in zips:
         move(processed_meca, meca_archive_dir)
 
-    return batch_deposit_run
+    return batch_generate_run
 
 
 def process(
@@ -84,8 +82,8 @@ def process(
     output_base_dir: str,
     verbose: int,
     dry_run: bool,
-) -> MecaDeposition:
-    result = MecaDeposition(meca_parsing=MecaParsingResult(input=str(zip_file)))
+) -> DepositionFileGenerationResult:
+    result = DepositionFileGenerationResult(meca_parsing=MecaParsingResult(input=str(zip_file)))
 
     try:
         article = parse_meca_archive(zip_file)
@@ -117,18 +115,5 @@ def process(
         result.deposition_file_generation.output = deposition_file
     except Exception as e:
         result.deposition_file_generation.error = str(e)
-        return result
-
-    if dry_run:
-        return result
-
-    result.crossref_deposition = DepositionResult()
-
-    try:
-        response = deposit_xml(deposition_xml, verbose=verbose)
-        result.crossref_deposition.output = response
-    except Exception as e:
-        result.crossref_deposition.error = str(e)
-        return result
 
     return result

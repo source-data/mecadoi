@@ -1,7 +1,7 @@
 import click
 from yaml import dump
 from src.cli.crossref.options import verbose_output
-from src.batch import batch_deposit, BatchDepositRun
+from src.batch import batch_generate, BatchGenerateRun
 
 
 @click.command()
@@ -19,16 +19,16 @@ from src.batch import batch_deposit, BatchDepositRun
     '--dry-run/--no-dry-run',
     default=True,
 )
-def deposit(
+def generate(
     input_directory: str,
     output_directory: str,
     verbose: int,
     dry_run: bool,
 ) -> None:
     """
-    Deposit DOIs for all peer reviews in the MECA archives found in the given directory.
+    Generate deposition files for all peer reviews in the MECA archives found in the given directory.
     """
-    result = batch_deposit(
+    result = batch_generate(
         input_directory,
         output_directory,
         verbose=verbose,
@@ -37,5 +37,5 @@ def deposit(
     click.echo(output(result), nl=False)
 
 
-def output(batch_deposit_run: BatchDepositRun) -> str:
-    return str(dump(batch_deposit_run, canonical=False))
+def output(batch_generate_run: BatchGenerateRun) -> str:
+    return str(dump(batch_generate_run, canonical=False))
