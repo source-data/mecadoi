@@ -45,11 +45,11 @@ class TestVerifyDepositionFile(TestCase):
 
     def setUp(self) -> None:
         self.deposition_file = 'tests/resources/expected/multiple-revision-rounds.xml'
-        self.preprint_doi = '10.1101/2022.02.15.480564'
+        self.preprint_doi = '10.1101/multiple-revision-rounds.123.456.7890'
         self.eeb_api_response: List[Article] = [
             {
                 'id': 20585310,
-                'doi': '10.1101/2022.02.15.480564',
+                'doi': '10.1101/multiple-revision-rounds.123.456.7890',
                 'version': '1.2',
                 'source': '660d7c89-6c99-1014-8a48-df2e55f654d0.meca',
                 'journal': 'bioRxiv',
@@ -97,7 +97,7 @@ class TestVerifyDepositionFile(TestCase):
                             "posting_date": "2022-04-14",
                             "review_idx": "1",
                             "highlight": "Review 1: Global projections of potential lives saved from COVID-19 [..]",
-                            "related_article_doi": "10.1101/2022.02.15.480564",
+                            "related_article_doi": "10.1101/multiple-revision-rounds.123.456.7890",
                             "text": "This study has been evaluated by _MIT Press - Journals_.\n\n__Review 1: [..]",
                             "reviewed_by": "MIT Press - Journals",
                             "position_idx": 0,
@@ -108,7 +108,7 @@ class TestVerifyDepositionFile(TestCase):
                             "posting_date": "2022-04-15",
                             "review_idx": "2",
                             "highlight": "Review 2: Global projections of potential lives saved from COVID-19 [..]",
-                            "related_article_doi": "10.1101/2022.02.15.480564",
+                            "related_article_doi": "10.1101/multiple-revision-rounds.123.456.7890",
                             "text": "This study has been evaluated by _MIT Press - Journals_.\n\n__Review 1: [..]",
                             "reviewed_by": "MIT Press - Journals",
                             "position_idx": 1,
@@ -119,7 +119,7 @@ class TestVerifyDepositionFile(TestCase):
                             "posting_date": "2022-04-16",
                             "review_idx": "3",
                             "highlight": "Review 3: Global projections of potential lives saved from COVID-19 [..]",
-                            "related_article_doi": "10.1101/2022.02.15.480564",
+                            "related_article_doi": "10.1101/multiple-revision-rounds.123.456.7890",
                             "text": "This study has been evaluated by _MIT Press - Journals_.\n\n__Review 1: [..]",
                             "reviewed_by": "MIT Press - Journals",
                             "position_idx": 2,
@@ -130,7 +130,7 @@ class TestVerifyDepositionFile(TestCase):
                             "posting_date": "2022-04-17",
                             "review_idx": "4",
                             "highlight": "Review 4: Global projections of potential lives saved from COVID-19 [..]",
-                            "related_article_doi": "10.1101/2022.02.15.480564",
+                            "related_article_doi": "10.1101/multiple-revision-rounds.123.456.7890",
                             "text": "This study has been evaluated by _MIT Press - Journals_.\n\n__Review 1: [..]",
                             "reviewed_by": "MIT Press - Journals",
                             "position_idx": 3,
@@ -142,7 +142,7 @@ class TestVerifyDepositionFile(TestCase):
                         "posting_date": "2022-04-27",
                         "review_idx": "1",
                         "highlight": "Author Reply: Global projections of potential lives saved from COVID-19 [..]",
-                        "related_article_doi": "10.1101/2022.02.15.480564",
+                        "related_article_doi": "10.1101/multiple-revision-rounds.123.456.7890",
                         "text": "Detailed comments to reviews:\n\n__Review 1: [..]",
                         "reviewed_by": "MIT Press - Journals",
                         "position_idx": 3,

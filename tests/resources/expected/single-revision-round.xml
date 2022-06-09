@@ -14,8 +14,7 @@
         <anonymous sequence="first" contributor_role="author"></anonymous>
       </contributors>
       <titles>
-        <title>Peer Review of A Signaling Pathway to Detect and Repair the leaky Gut barrier: 
-Implications in Aging and Cancer</title>
+        <title>Peer Review of An article with a single revision round.</title>
       </titles>
       <review_date>
         <month>10</month>
@@ -28,12 +27,12 @@ Implications in Aging and Cancer</title>
       <running_number>1</running_number>
       <rel:program xmlns:rel="http://www.crossref.org/relations.xsd">
         <rel:related_item>
-          <rel:inter_work_relation relationship-type="isReviewOf" identifier-type="doi">10.1101/2022.02.15.480564</rel:inter_work_relation>
+          <rel:inter_work_relation relationship-type="isReviewOf" identifier-type="doi">10.1101/single-revision-round.123.456.7890</rel:inter_work_relation>
         </rel:related_item>
       </rel:program>
       <doi_data>
         <doi>10.15252/rc.2020123456</doi>
-        <resource>https://eeb.embo.org/doi/10.1101/2022.02.15.480564#rev0-rr1</resource>
+        <resource>https://eeb.embo.org/doi/10.1101/single-revision-round.123.456.7890#rev0-rr1</resource>
       </doi_data>
     </peer_review>
     <peer_review revision-round="0" type="referee-report">
@@ -41,8 +40,7 @@ Implications in Aging and Cancer</title>
         <anonymous sequence="first" contributor_role="author"></anonymous>
       </contributors>
       <titles>
-        <title>Peer Review of A Signaling Pathway to Detect and Repair the leaky Gut barrier: 
-Implications in Aging and Cancer</title>
+        <title>Peer Review of An article with a single revision round.</title>
       </titles>
       <review_date>
         <month>10</month>
@@ -55,110 +53,38 @@ Implications in Aging and Cancer</title>
       <running_number>2</running_number>
       <rel:program xmlns:rel="http://www.crossref.org/relations.xsd">
         <rel:related_item>
-          <rel:inter_work_relation relationship-type="isReviewOf" identifier-type="doi">10.1101/2022.02.15.480564</rel:inter_work_relation>
+          <rel:inter_work_relation relationship-type="isReviewOf" identifier-type="doi">10.1101/single-revision-round.123.456.7890</rel:inter_work_relation>
         </rel:related_item>
       </rel:program>
       <doi_data>
         <doi>10.15252/rc.2020123456</doi>
-        <resource>https://eeb.embo.org/doi/10.1101/2022.02.15.480564#rev0-rr2</resource>
+        <resource>https://eeb.embo.org/doi/10.1101/single-revision-round.123.456.7890#rev0-rr2</resource>
       </doi_data>
     </peer_review>
     <peer_review revision-round="0" type="author-comment">
       <contributors>
         <person_name contributor_role="author" sequence="first">
-          <given_name>Pradipta</given_name>
-          <surname>Ghosh</surname>
+          <given_name>Jane</given_name>
+          <surname>Doe</surname>
           <affiliations>
             <institution>
-              <institution_name>UCSD</institution_name>
+              <institution_name>EMBL</institution_name>
             </institution>
           </affiliations>
+          <ORCID authenticated="true">https://orcid.org/0000-0012-3456-7890</ORCID>
         </person_name>
         <person_name contributor_role="author" sequence="additional">
-          <given_name>Lee</given_name>
-          <surname>Swanson</surname>
+          <given_name>John</given_name>
+          <surname>Doe</surname>
           <affiliations>
             <institution>
-              <institution_name>UCSD</institution_name>
-            </institution>
-          </affiliations>
-        </person_name>
-        <person_name contributor_role="author" sequence="additional">
-          <given_name>Ibrahim M</given_name>
-          <surname>Sayed</surname>
-          <affiliations>
-            <institution>
-              <institution_name>UCSD</institution_name>
-            </institution>
-          </affiliations>
-        </person_name>
-        <person_name contributor_role="author" sequence="additional">
-          <given_name>Yash</given_name>
-          <surname>Mittal</surname>
-          <affiliations>
-            <institution>
-              <institution_name>UCSD</institution_name>
-            </institution>
-          </affiliations>
-        </person_name>
-        <person_name contributor_role="author" sequence="additional">
-          <given_name>Blaze</given_name>
-          <surname>Lim</surname>
-          <affiliations>
-            <institution>
-              <institution_name>UCSD</institution_name>
-            </institution>
-          </affiliations>
-        </person_name>
-        <person_name contributor_role="author" sequence="additional">
-          <given_name>Stella-Rita</given_name>
-          <surname>Ibeawuchi</surname>
-          <affiliations>
-            <institution>
-              <institution_name>UCSD</institution_name>
-            </institution>
-          </affiliations>
-        </person_name>
-        <person_name contributor_role="author" sequence="additional">
-          <given_name>Marc</given_name>
-          <surname>Foretz</surname>
-          <affiliations>
-            <institution>
-              <institution_name>Institut Cochin</institution_name>
-            </institution>
-          </affiliations>
-        </person_name>
-        <person_name contributor_role="author" sequence="additional">
-          <given_name>Benoit</given_name>
-          <surname>Viollet</surname>
-          <affiliations>
-            <institution>
-              <institution_name>Radboud University Medical Centre</institution_name>
-            </institution>
-          </affiliations>
-        </person_name>
-        <person_name contributor_role="author" sequence="additional">
-          <given_name>Debashish</given_name>
-          <surname>Sahoo</surname>
-          <affiliations>
-            <institution>
-              <institution_name>UCSD</institution_name>
-            </institution>
-          </affiliations>
-        </person_name>
-        <person_name contributor_role="author" sequence="additional">
-          <given_name>Soumita</given_name>
-          <surname>Das</surname>
-          <affiliations>
-            <institution>
-              <institution_name>University of California at San Diego</institution_name>
+              <institution_name>EMBL</institution_name>
             </institution>
           </affiliations>
         </person_name>
       </contributors>
       <titles>
-        <title>Author Reply to Peer Reviews of A Signaling Pathway to Detect and Repair the leaky Gut barrier: 
-Implications in Aging and Cancer</title>
+        <title>Author Reply to Peer Reviews of An article with a single revision round.</title>
       </titles>
       <review_date>
         <month>10</month>
@@ -171,7 +97,7 @@ Implications in Aging and Cancer</title>
       <running_number>Author Reply</running_number>
       <rel:program xmlns:rel="http://www.crossref.org/relations.xsd">
         <rel:related_item>
-          <rel:inter_work_relation identifier-type="doi" relationship-type="isReviewOf">10.1101/2022.02.15.480564</rel:inter_work_relation>
+          <rel:inter_work_relation identifier-type="doi" relationship-type="isReviewOf">10.1101/single-revision-round.123.456.7890</rel:inter_work_relation>
         </rel:related_item>
         <rel:related_item>
           <rel:inter_work_relation identifier-type="doi" relationship-type="isReplyTo">10.15252/rc.2020123456</rel:inter_work_relation>
@@ -182,7 +108,7 @@ Implications in Aging and Cancer</title>
       </rel:program>
       <doi_data>
         <doi>10.15252/rc.2020123456</doi>
-        <resource>https://eeb.embo.org/doi/10.1101/2022.02.15.480564#rev0-ar</resource>
+        <resource>https://eeb.embo.org/doi/10.1101/single-revision-round.123.456.7890#rev0-ar</resource>
       </doi_data>
     </peer_review>
   </body>

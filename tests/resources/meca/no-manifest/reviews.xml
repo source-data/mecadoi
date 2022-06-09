@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE review-group SYSTEM "reviews.dtd">
+<review-group>
+  <version revision="0">
+    <review>
+      <history>
+        <date date-type="assigned">
+          <day>15</day>
+          <month>07</month>
+          <year>2019</year>
+        </date>
+        <date date-type="due">
+          <day>26</day>
+          <month>07</month>
+          <year>2019</year>
+        </date>
+        <date date-type="completed">
+          <day>25</day>
+          <month>07</month>
+          <year>2019</year>
+        </date>
+      </history>
+      <contrib-group>
+        <contrib contrib-type="reviewer">
+          <name>
+            <surname>redacted</surname>
+            <given-names />
+          </name>
+          <email />
+        </contrib>
+      </contrib-group>
+      <review-item-group>
+        <review-item is-confidential="no" review-item-type="comments" sequence-number="6">
+          <review-item-question>
+            <title>&lt;b&gt;Significance:&lt;/b&gt;</title>
+            <alt-title>Significance (Required)</alt-title>
+            <text />
+          </review-item-question>
+          <review-item-response>
+            <text>Lorem ipsum dolor sit amet.</text>
+          </review-item-response>
+        </review-item>
+        <review-item is-confidential="no" review-item-type="single-choice" sequence-number="2">
+          <review-item-question>
+            <title>&lt;b&gt;How much time do you estimate the authors will need to complete the suggested revisions:&lt;/b&gt;</title>
+            <alt-title>Estimated time to Complete Revisions (Required)</alt-title>
+            <text>(Decision Recommendation)</text>
+          </review-item-question>
+          <review-item-response>
+            <text>Cannot tell / Not applicable</text>
+          </review-item-response>
+        </review-item>
+      </review-item-group>
+    </review>
+    <review>
+      <history>
+        <date date-type="assigned">
+          <day>16</day>
+          <month>07</month>
+          <year>2019</year>
+        </date>
+        <date date-type="due">
+          <day>26</day>
+          <month>07</month>
+          <year>2019</year>
+        </date>
+        <date date-type="completed">
+          <day>21</day>
+          <month>12</month>
+          <year>2020</year>
+        </date>
+      </history>
+      <contrib-group>
+        <contrib contrib-type="reviewer">
+          <name>
+            <surname>redacted</surname>
+            <given-names>redacted</given-names>
+            <prefix>redacted</prefix>
+          </name>
+          <email>redacted</email>
+          <xref ref-type="aff" rid="aff1" />
+        </contrib>
+        <aff id="aff1">redacted</aff>
+      </contrib-group>
+      <review-item-group>
+        <review-item is-confidential="no" review-item-type="comments" sequence-number="5">
+          <review-item-question>
+            <title>&lt;b&gt;Evidence, reproducibility and clarity:&lt;/b&gt;</title>
+            <alt-title>Evidence, reproducibility and clarity (Required)</alt-title>
+            <text />
+          </review-item-question>
+          <review-item-response>
+            <text>Summary: this is a test</text>
+          </review-item-response>
+        </review-item>
+        <review-item is-confidential="no" review-item-type="comments" sequence-number="6">
+          <review-item-question>
+            <title>&lt;b&gt;Significance:&lt;/b&gt;</title>
+            <alt-title>Significance (Required)</alt-title>
+            <text />
+          </review-item-question>
+          <review-item-response>
+            <text>Signification: also a test</text>
+          </review-item-response>
+        </review-item>
+        <review-item is-confidential="no" review-item-type="single-choice" sequence-number="2">
+          <review-item-question>
+            <title>&lt;b&gt;How much time do you estimate the authors will need to complete the suggested revisions:&lt;/b&gt;</title>
+            <alt-title>Estimated time to Complete Revisions (Required)</alt-title>
+            <text>(Decision Recommendation)</text>
+          </review-item-question>
+          <review-item-response>
+            <text>Between 3 and 6 months</text>
+          </review-item-response>
+        </review-item>
+      </review-item-group>
+    </review>
+  </version>
+</review-group>

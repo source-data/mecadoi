@@ -3,7 +3,6 @@ from glob import glob
 from os import listdir, mkdir
 from pathlib import Path
 from typing import List
-from unittest import TestCase
 import responses
 from shutil import copy, rmtree
 from src.batch import (
@@ -13,9 +12,10 @@ from src.batch import (
     DepositionFileGenerationResult,
     MecaParsingResult,
 )
+from tests.common import MecaArchiveTestCase
 
 
-class TestBatchDeposit(TestCase):
+class TestBatchDeposit(MecaArchiveTestCase):
 
     def setUp(self) -> None:
         self.base_dir = 'tests/tmp/batch'
@@ -47,7 +47,7 @@ class TestBatchDeposit(TestCase):
                         doi_already_processed=False,
                     ),
                     deposition_file_generation=DepositionResult(
-                        output='tests/tmp/batch/output/10.1101/2022.02.15.480564/deposition.xml',
+                        output='tests/tmp/batch/output/10.1101/multiple-revision-rounds.123.456.7890/deposition.xml',
                         error=None,
                     ),
                 ),
@@ -65,7 +65,7 @@ class TestBatchDeposit(TestCase):
                         input='tests/tmp/batch/input/no-reviews.zip',
                         error=None,
                         has_reviews=False,
-                        has_preprint_doi=False,
+                        has_preprint_doi=True,
                         doi_already_processed=None,
                     )
                 ),
@@ -83,7 +83,7 @@ class TestBatchDeposit(TestCase):
         num_files_in_input_directory = len(glob(f'{input_directory}/*'))
         self.assertEqual(0, num_files_in_input_directory)
 
-        expected_deposition_file = 'tests/tmp/batch/output/10.1101/2022.02.15.480564/deposition.xml'
+        expected_deposition_file = 'tests/tmp/batch/output/10.1101/multiple-revision-rounds.123.456.7890/deposition.xml'
         self.assertTrue(Path(expected_deposition_file).exists())
 
         files_in_archive = [Path(file).name for file in glob(f'{output_directory}/archive/**/*')]
@@ -105,7 +105,7 @@ class TestBatchDeposit(TestCase):
                         doi_already_processed=False,
                     ),
                     deposition_file_generation=DepositionResult(
-                        output='tests/tmp/batch/output/10.1101/2022.02.15.480564/deposition.xml',
+                        output='tests/tmp/batch/output/10.1101/multiple-revision-rounds.123.456.7890/deposition.xml',
                         error=None,
                     ),
                 ),
@@ -151,7 +151,7 @@ class TestBatchDeposit(TestCase):
         num_files_in_input_dir = len(listdir(input_dir))
         self.assertEqual(0, num_files_in_input_dir)
 
-        for file in [f'tests/resources/meca/{filename}' for filename in files]:
+        for file in [f'{self.MECA_TARGET_DIR}/{filename}' for filename in files]:
             copy(file, input_dir)
 
         num_files_in_input_dir = len(listdir(input_dir))

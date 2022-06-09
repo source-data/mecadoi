@@ -1,11 +1,11 @@
 from datetime import datetime
-from unittest import TestCase
 import lxml.etree
 from src.meca import parse_meca_archive
 from src.crossref.peer_review import generate_peer_review_deposition
+from tests.common import MecaArchiveTestCase
 
 
-class TestGeneratePeerReviewDeposition(TestCase):
+class TestGeneratePeerReviewDeposition(MecaArchiveTestCase):
     def setUp(self) -> None:
         super().setUp()
 
@@ -26,7 +26,7 @@ class TestGeneratePeerReviewDeposition(TestCase):
     def test_generate_peer_review_deposition_for_invalid_meca(self) -> None:
         for meca_name in self.invalid_fixtures:
             with self.subTest(meca_name=meca_name):
-                article = parse_meca_archive(f'tests/resources/meca/{meca_name}.zip')
+                article = parse_meca_archive(f'{self.MECA_TARGET_DIR}/{meca_name}.zip')
 
                 with self.assertRaises(ValueError):
                     generate_peer_review_deposition(article, datetime.now(), str)
@@ -34,7 +34,7 @@ class TestGeneratePeerReviewDeposition(TestCase):
     def test_generate_peer_review_deposition(self) -> None:
         for meca_name in self.fixtures:
             with self.subTest(meca_name=meca_name):
-                meca_archive = f'tests/resources/meca/{meca_name}.zip'
+                meca_archive = f'{self.MECA_TARGET_DIR}/{meca_name}.zip'
                 expected_xml = f'tests/resources/expected/{meca_name}.xml'
                 actual_xml = self.generate_xml(meca_archive, meca_name)
                 self.assertXmlEquals(meca_name, expected_xml, actual_xml)

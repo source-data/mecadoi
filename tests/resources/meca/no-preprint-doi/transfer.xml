@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE transfer SYSTEM "transfer.dtd">
+<transfer xmlns="" version="1.0">
+  <source>
+    <service-provider>
+      <provider-name>eJournalPress</provider-name>
+      <contact role="Project Manager">
+        <contact-name>
+          <surname>Support</surname>
+          <given-names>eJournalPress</given-names>
+        </contact-name>
+        <email></email>
+        <phone></phone>
+      </contact>
+    </service-provider>
+    <publication type="journal">
+      <title>Review Commons - TEST</title>
+      <acronym>reviewcommonstest</acronym>
+      <contact role="Managing Editor">
+        <contact-name>
+          <surname />
+          <given-names />
+        </contact-name>
+        <email></email>
+        <phone />
+      </contact>
+    </publication>
+  </source>
+  <destination>
+    <service-provider>
+      <provider-name />
+      <contact>
+        <contact-name>
+          <surname />
+          <given-names />
+        </contact-name>
+        <email />
+        <phone />
+      </contact>
+    </service-provider>
+    <publication type="journal">
+      <title>eLife Test</title>
+      <acronym>elifetest</acronym>
+      <contact>
+        <contact-name>
+          <surname />
+          <given-names />
+        </contact-name>
+        <email></email>
+        <phone />
+      </contact>
+    </publication>
+  </destination>
+  <processing-instructions>
+    <comments />
+  </processing-instructions>
+</transfer>

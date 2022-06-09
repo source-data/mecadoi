@@ -1,10 +1,10 @@
 from typing import List
-from unittest import TestCase
 from click.testing import CliRunner, Result
 from src.cli.main import main as mecadoi
+from tests.common import MecaArchiveTestCase
 
 
-class CliTestCase(TestCase):
+class CliTestCase(MecaArchiveTestCase):
 
     def setUp(self) -> None:
         self.runner = CliRunner()
@@ -14,10 +14,10 @@ class CliTestCase(TestCase):
         return self.runner.invoke(mecadoi, command)
 
     def test_meca_info(self) -> None:
-        test_file = 'tests/resources/meca/multiple-revision-rounds.zip'
-        title = 'Mutagenesis of the ADAM17-phosphatidylserine-binding motif leads to embryonic lethality in mice'
-        doi = '10.26508/lsa.201900430'
-        preprint_doi = '10.1101/2022.02.15.480564'
+        test_file = f'{self.MECA_TARGET_DIR}/multiple-revision-rounds.zip'
+        title = 'An article with multiple revision rounds.'
+        doi = '10.12345/multiple-revision-rounds.1234567890'
+        preprint_doi = '10.1101/multiple-revision-rounds.123.456.7890'
         publisher = 'Review Commons - TEST'
         result = self.run_mecadoi_command(['meca', 'info', test_file])
         self.assertEqual(0, result.exit_code)

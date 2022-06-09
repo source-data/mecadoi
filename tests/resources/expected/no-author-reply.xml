@@ -14,7 +14,7 @@
         <anonymous sequence="first" contributor_role="author" />
       </contributors>
       <titles>
-        <title>Peer Review of Mutagenesis of the ADAM17-phosphatidylserine-binding motif leads to embryonic lethality in mice</title>
+        <title>Peer Review of An article without author reply.</title>
       </titles>
       <review_date>
         <month>10</month>
@@ -27,12 +27,12 @@
       <running_number>1</running_number>
       <rel:program xmlns:rel="http://www.crossref.org/relations.xsd">
         <rel:related_item>
-          <rel:inter_work_relation relationship-type="isReviewOf" identifier-type="doi">10.1101/2022.02.15.480564</rel:inter_work_relation>
+          <rel:inter_work_relation relationship-type="isReviewOf" identifier-type="doi">10.1101/no-author-reply.123.456.7890</rel:inter_work_relation>
         </rel:related_item>
       </rel:program>
       <doi_data>
         <doi>10.15252/rc.2020123456</doi>
-        <resource>https://eeb.embo.org/doi/10.1101/2022.02.15.480564#rev0-rr1</resource>
+        <resource>https://eeb.embo.org/doi/10.1101/no-author-reply.123.456.7890#rev0-rr1</resource>
       </doi_data>
     </peer_review>
     <peer_review revision-round="0" type="referee-report">
@@ -40,7 +40,7 @@
         <anonymous sequence="first" contributor_role="author" />
       </contributors>
       <titles>
-        <title>Peer Review of Mutagenesis of the ADAM17-phosphatidylserine-binding motif leads to embryonic lethality in mice</title>
+        <title>Peer Review of An article without author reply.</title>
       </titles>
       <review_date>
         <month>10</month>
@@ -53,12 +53,12 @@
       <running_number>2</running_number>
       <rel:program xmlns:rel="http://www.crossref.org/relations.xsd">
         <rel:related_item>
-          <rel:inter_work_relation relationship-type="isReviewOf" identifier-type="doi">10.1101/2022.02.15.480564</rel:inter_work_relation>
+          <rel:inter_work_relation relationship-type="isReviewOf" identifier-type="doi">10.1101/no-author-reply.123.456.7890</rel:inter_work_relation>
         </rel:related_item>
       </rel:program>
       <doi_data>
         <doi>10.15252/rc.2020123456</doi>
-        <resource>https://eeb.embo.org/doi/10.1101/2022.02.15.480564#rev0-rr2</resource>
+        <resource>https://eeb.embo.org/doi/10.1101/no-author-reply.123.456.7890#rev0-rr2</resource>
       </doi_data>
     </peer_review>
     <peer_review revision-round="0" type="referee-report">
@@ -66,7 +66,7 @@
         <anonymous sequence="first" contributor_role="author" />
       </contributors>
       <titles>
-        <title>Peer Review of Mutagenesis of the ADAM17-phosphatidylserine-binding motif leads to embryonic lethality in mice</title>
+        <title>Peer Review of An article without author reply.</title>
       </titles>
       <review_date>
         <month>10</month>
@@ -79,12 +79,12 @@
       <running_number>3</running_number>
       <rel:program xmlns:rel="http://www.crossref.org/relations.xsd">
         <rel:related_item>
-          <rel:inter_work_relation relationship-type="isReviewOf" identifier-type="doi">10.1101/2022.02.15.480564</rel:inter_work_relation>
+          <rel:inter_work_relation relationship-type="isReviewOf" identifier-type="doi">10.1101/no-author-reply.123.456.7890</rel:inter_work_relation>
         </rel:related_item>
       </rel:program>
       <doi_data>
         <doi>10.15252/rc.2020123456</doi>
-        <resource>https://eeb.embo.org/doi/10.1101/2022.02.15.480564#rev0-rr3</resource>
+        <resource>https://eeb.embo.org/doi/10.1101/no-author-reply.123.456.7890#rev0-rr3</resource>
       </doi_data>
     </peer_review>
     <peer_review revision-round="1" type="referee-report">
@@ -92,7 +92,7 @@
         <anonymous sequence="first" contributor_role="author" />
       </contributors>
       <titles>
-        <title>Peer Review of Mutagenesis of the ADAM17-phosphatidylserine-binding motif leads to embryonic lethality in mice</title>
+        <title>Peer Review of An article without author reply.</title>
       </titles>
       <review_date>
         <month>10</month>
@@ -105,12 +105,12 @@
       <running_number>1</running_number>
       <rel:program xmlns:rel="http://www.crossref.org/relations.xsd">
         <rel:related_item>
-          <rel:inter_work_relation relationship-type="isReviewOf" identifier-type="doi">10.1101/2022.02.15.480564</rel:inter_work_relation>
+          <rel:inter_work_relation relationship-type="isReviewOf" identifier-type="doi">10.1101/no-author-reply.123.456.7890</rel:inter_work_relation>
         </rel:related_item>
       </rel:program>
       <doi_data>
         <doi>10.15252/rc.2020123456</doi>
-        <resource>https://eeb.embo.org/doi/10.1101/2022.02.15.480564#rev1-rr1</resource>
+        <resource>https://eeb.embo.org/doi/10.1101/no-author-reply.123.456.7890#rev1-rr1</resource>
       </doi_data>
     </peer_review>
   </body>

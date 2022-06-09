@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE article SYSTEM "JATS-archivearticle1.dtd">
+<article xmlns:xlink="http://www.w3.org/1999/xlink" dtd-version="1.2d1">
+  <front>
+    <journal-meta>
+      <journal-id journal-id-type="publisher">reviewcommonstest</journal-id>
+      <journal-title-group>
+        <journal-title>Review Commons - TEST</journal-title>
+        <abbrev-journal-title abbrev-type="nlm-ta" />
+      </journal-title-group>
+      <issn pub-type="ppub">2575-1077</issn>
+      <issn pub-type="epub">2575-1077</issn>
+    </journal-meta>
+    <article-meta>
+      <article-id pub-id-type="doi">10.12345/multiple-revision-rounds.1234567890</article-id>
+      <article-id pub-id-type="manuscript">multiple-revision-rounds-2020-1234</article-id>
+      <article-categories>
+        <subj-group subj-group-type="Article Type">
+          <subject>Research Article</subject>
+        </subj-group>
+      </article-categories>
+      <title-group>
+        <article-title>An article with multiple revision rounds.</article-title>
+      </title-group>
+      <contrib-group>
+        <contrib contrib-type="author" corresp="yes">
+          <name>
+            <surname>Doe</surname>
+            <given-names>Jane</given-names>
+            <prefix>Dr.</prefix>
+          </name>
+          <email>janedoe@example.com</email>
+          <role content-type="1" />
+          <xref ref-type="aff" rid="aff1" />
+        </contrib>
+        <contrib contrib-type="author">
+          <name>
+            <surname>Doe</surname>
+            <given-names>John</given-names>
+          </name>
+          <email>johndoe@example.com</email>
+          <role content-type="2" />
+          <xref ref-type="aff" rid="aff1" />
+        </contrib>
+        <aff id="aff1">
+          <institution>EMBL</institution>
+          <institution content-type="dept">Medicinal Chemistry</institution>
+          <addr-line content-type="addrline1">Meyerhofstr. 1</addr-line>
+          <addr-line content-type="city">Heidelberg</addr-line>
+          <addr-line content-type="zipcode">69120</addr-line>
+          <country>Germany</country>
+          <phone content-type="primary">123-456-789</phone>
+        </aff>
+      </contrib-group>
+      <author-notes>
+        <corresp id="cor1">
+          <label>*</label>
+          <bold>Corresponding Author:</bold>
+          Jane Doe, Medicinal Chemistry, EMBL
+        </corresp>
+        <fn fn-type="con">
+          <p>Author contributions: J.D. conceptualization; J.D. data curation.</p>
+        </fn>
+      </author-notes>
+      <pub-date pub-type="epub" />
+      <pub-date pub-type="ppub" />
+      <elocation-id>1234-5678.multiple-revision-rounds-2020-1234</elocation-id>
+      <history>
+        <date date-type="received">
+          <day>12</day>
+          <month>12</month>
+          <year>2020</year>
+        </date>
+      </history>
+      <permissions>
+        <copyright-statement></copyright-statement>
+        <copyright-year>2020</copyright-year>
+      </permissions>
+      <abstract abstract-type="primary">
+        <p>This article has multiple revision rounds and thus in ...</p>
+      </abstract>
+      <kwd-group>
+        <kwd>test</kwd>
+        <kwd>test1</kwd>
+        <kwd>test2</kwd>
+      </kwd-group>
+      <funding-group>
+        <award-group>
+          <funding-source>
+            EMBO
+            <named-content content-type="funder-id">http://dx.doi.org/10.12345/asdf1234567890</named-content>
+          </funding-source>
+          <principal-award-recipient></principal-award-recipient>
+        </award-group>
+      </funding-group>
+      <custom-meta-group>
+        <custom-meta>
+          <meta-name>dual_publication</meta-name>
+          <meta-value>0</meta-value>
+        </custom-meta>
+        <custom-meta>
+          <meta-name>human_subjects</meta-name>
+          <meta-value>0</meta-value>
+        </custom-meta>
+        <custom-meta>
+          <meta-name>animal_subjects</meta-name>
+          <meta-value>0</meta-value>
+        </custom-meta>
+        <custom-meta>
+          <meta-name>Rebuttal Submitted to Hypothes.is</meta-name>
+          <meta-value>Yes</meta-value>
+        </custom-meta>
+        <custom-meta>
+          <meta-name>Pre-existing BioRxiv Preprint</meta-name>
+          <meta-value>Yes</meta-value>
+        </custom-meta>
+        <custom-meta>
+          <meta-name>Pre-existing BioRxiv Preprint DOI</meta-name>
+          <meta-value>10.1101/multiple-revision-rounds.123.456.7890</meta-value>
+        </custom-meta>
+        <custom-meta>
+          <meta-name>BioRxiv Preprint Submitted on Author's Behalf</meta-name>
+          <meta-value>Yes</meta-value>
+        </custom-meta>
+        <custom-meta>
+          <meta-name>Acknowledgment of Policy on Original Data</meta-name>
+          <meta-value>EJ</meta-value>
+        </custom-meta>
+      </custom-meta-group>
+    </article-meta>
+  </front>
+</article>

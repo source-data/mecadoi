@@ -256,9 +256,9 @@ class MECArchive:
         files_of_type = self._get_files_of_type(file_type, version=version)
         num_files_found = len(files_of_type)
         if num_files_found < 1:
-            raise ValueError('Found no file of type "{file_type}" and version "{version}"')
+            raise ValueError(f'Found no file of type "{file_type}" and version "{version}"')
         if num_files_found > 1:
-            raise ValueError('Found multiple files of type "{file_type}" and version "{version}"')
+            raise ValueError(f'Found multiple files of type "{file_type}" and version "{version}"')
         return files_of_type[0]
 
     def get_xml(self, file_type: str, version: Optional[str] = None) -> Any:
