@@ -86,9 +86,6 @@ class TestBatchDeposit(MecaArchiveTestCase):
         expected_deposition_file = 'tests/tmp/batch/output/10.1101/multiple-revision-rounds.123.456.7890/deposition.xml'
         self.assertTrue(Path(expected_deposition_file).exists())
 
-        files_in_archive = [Path(file).name for file in glob(f'{output_directory}/archive/**/*')]
-        self.assertListEqual(sorted(input_files), sorted(files_in_archive))
-
     @responses.activate
     def test_batch_generate_same_file(self) -> None:
         input_files = [
@@ -134,7 +131,7 @@ class TestBatchDeposit(MecaArchiveTestCase):
         result_first_run = self.do_batch_generate(input_directory, output_directory)
         self.assert_results_equal(expected_output_first_run, result_first_run)
 
-        # Setup the input directory again since the MECAs are archived after each run
+        # Setup the input directory again since the input MECAs are deleted after each run
         self.setup_input_directory(input_directory, input_files)
         result_second_run = self.do_batch_generate(input_directory, output_directory)
         self.assert_results_equal(expected_output_second_run, result_second_run)

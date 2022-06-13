@@ -10,7 +10,7 @@ __all__ = [
 
 from dataclasses import dataclass
 from datetime import datetime
-from os import makedirs
+from os import makedirs, remove
 from pathlib import Path
 from shutil import move
 from typing import List, Union
@@ -63,16 +63,13 @@ def batch_generate(
     batch_generate_run = BatchGenerateRun(
         timestamp=timestamp,
         results=[
-            process(zip, output_directory, verbose, dry_run)
-            for zip in zips
+            process(zip_file, output_directory, verbose, dry_run)
+            for zip_file in zips
         ],
     )
 
-    # Move all processed files to an archive directory
-    meca_archive_dir = f'{output_directory}/archive/{timestamp.timestamp()}/'
-    makedirs(meca_archive_dir)
-    for processed_meca in zips:
-        move(processed_meca, meca_archive_dir)
+    for zip_file in zips:
+        remove(zip_file)
 
     return batch_generate_run
 
