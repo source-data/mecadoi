@@ -1,4 +1,11 @@
-""""""
+"""
+Functionality for interacting with Manuscript Exchange Common Approach (MECA) archives.
+
+This data format was introduced as an interface between various publishing systems to allow the transferral of
+manuscripts between different publishers.
+
+parse_meca_archive is the main entrypoint that parses a MECA archive into the intermediate format defined in src.model.
+"""
 
 __all__ = ['parse_meca_archive']
 
@@ -14,7 +21,12 @@ from src.model import Article, Author, AuthorReply, Orcid, Review, RevisionRound
 
 
 def parse_meca_archive(path_to_archive: Union[str, Path], use_preprint_doi: bool = True) -> Article:
-    """Read the MECA archive at the given path and construct an Article from it."""
+    """
+    Read the MECA archive at the given path and construct an Article from it.
+    
+    Raises exceptions if the MECA archive does not contain the necessary data that is required by the MECA standard
+    such as a file with article metadata.
+    """
 
     meca = MECArchive(path_to_archive)
     article_xml = meca.get_xml(MECArchive.ARTICLE)
@@ -176,13 +188,22 @@ class MECArchive:
     """
     Encapsulates a MECA archive.
 
-    To get started, pass a zipfile.ZipFile to the constructor of this class: `meca = MECArchive(zip_file)`.
+    A MECA archive is a ZIP-compressed folder of files. Within it, a file called "manifest.xml" must be present and
+    contain an index of all files in the archive. Further, the archive must contain files with transfer and article
+    metadata and can contain files with the peer review process and author reply.
+    These can have custom names but must be listed in the manifest file with the file types specified in the class
+    variables below.
+
+    To get started, pass a zipfile.ZipFile to the constructor of this class: `meca = MECArchive(zip_file)`. This parses
+    the manifest and raises a ValueError if it is not present. Then, call `meca.get_xml(MECArchive.ARTICLE)` to parse
+    the XML file that contains metadata about the manuscript.
+
+    For simplicity, the ZIP archive is opened and closed during every read of files within the archive, i.e. once at
+    instantiation of this class and again during every call to get_xml().
     """
 
-    _MEDIA_TYPE_XML = 'application/xml'
-
-    MANIFEST = 'manifest'
-    TRANSFER = 'transfer-metadata'
+    # The file types of entries in the manifest file that are of interest to us. AUTHOR_REPLY is likely specific to
+    # MECA archives exported from eJP.
     ARTICLE = 'article-metadata'
     REVIEWS = 'review-metadata'
     AUTHOR_REPLY = 'Response to Reviewers'

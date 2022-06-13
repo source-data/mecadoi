@@ -51,19 +51,19 @@ The CLI has four groups of subcommands:
 
 Use the `info` subcommand to get basic information about a MECA archive:
 ```bash
-python3 -m src.cli.main meca info tests/resources/meca/multiple-revision-rounds.zip
+python3 -m src.cli.main meca info meca-archive.zip
 ```
 This will output the title of the article, any DOIs, the publisher, and the year of publishing.
 
 `reviews` prints the authors and completion dates of any reviews in the MECA archive:
 ```bash
-python3 -m src.cli.main meca reviews tests/resources/meca/multiple-revision-rounds.zip
+python3 -m src.cli.main meca reviews meca-archive.zip
 ```
 
 ### `crossref`
 Generate a CrossRef deposition file:
 ```bash
-python3 -m src.cli.main crossref generate -o deposition.xml tests/resources/meca/multiple-revision-rounds.zip
+python3 -m src.cli.main crossref generate -o deposition.xml meca-archive.zip
 ```
 This generates a Crossref deposition file that can be used to create DOIs for every peer review in the MECA archive. The DOIs to be used are taken from the DOI database, and information such as the registrant and depositor name are taken from the `.env` file.
 
@@ -75,11 +75,15 @@ The Crossref API almost always returns a message indicating success even with ob
 
 ### `batch`
 
-The `deposit` subcommand finds all `.zip` files in the given input directory and tries to parse them as MECA archives. For every successfully parsed MECA archive that has reviews, a deposition file is generated in the given output directory. Then, if `--no-dry-run` is passed, all generated deposition files are sent to the Crossref API.
+The `generate` subcommand finds all `.zip` files in the given input directory and tries to parse them as MECA archives. For every successfully parsed MECA archive that has reviews, a deposition file is generated in the given output directory. Then, all input files are removed. Inside the output directory, the deposition files are placed within subfolders corresponding to the DOI of the preprint the article belongs to. No deposition file is generated for any invalid MECA archive, any archive without a preprint DOI, and any archive for whose preprint a deposition file is already present.
 
 ```bash
 python3 -m src.cli.main batch deposit -o output/ input-dir/
 ```
+
+## Workflow Pipeline
+
+The MECA processing workflow of fetching files from the input FTP directory, archiving them to S3, generating deposition files out of the MECA archives, sending these deposition files to the Crossref API, and finally exporting the created DOIs is currently defined as a series of cron jobs. These are set up through the Ansible playbook in [provisioning](provisioning).
 
 ## Development
 
