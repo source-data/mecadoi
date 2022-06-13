@@ -6,12 +6,13 @@ from typing import List
 import responses
 from shutil import copy, rmtree
 from src.batch import (
-    batch_generate,
-    BatchGenerateRun,
+    batch_deposit,
+    BatchDepositRun,
     DepositionResult,
-    DepositionFileGenerationResult,
+    MecaDeposition,
     MecaParsingResult,
 )
+from src.config import CROSSREF_DEPOSITION_URL
 from tests.common import MecaArchiveTestCase
 
 
@@ -27,18 +28,21 @@ class TestBatchDeposit(MecaArchiveTestCase):
 
         self.maxDiff = None
 
+        self.expected_response = '<html><head><title>SUCCESS</title></head><body><h2>SUCCESS</h2></body></html>'
+        responses.add(responses.POST, CROSSREF_DEPOSITION_URL, body=self.expected_response, status=200)
+
         return super().setUp()
 
     @responses.activate
-    def test_batch_generate(self) -> None:
+    def test_batch_deposit(self) -> None:
         input_files = [
             'multiple-revision-rounds.zip',
             'no-preprint-doi.zip',
             'no-reviews.zip',
         ]
-        expected_output = BatchGenerateRun(
+        expected_output = BatchDepositRun(
             results=[
-                DepositionFileGenerationResult(
+                MecaDeposition(
                     meca_parsing=MecaParsingResult(
                         input='tests/tmp/batch/input/multiple-revision-rounds.zip',
                         error=None,
@@ -50,8 +54,12 @@ class TestBatchDeposit(MecaArchiveTestCase):
                         output='tests/tmp/batch/output/10.1101/multiple-revision-rounds.123.456.7890/deposition.xml',
                         error=None,
                     ),
+                    crossref_deposition=DepositionResult(
+                        output=self.expected_response,
+                        error=None,
+                    ),
                 ),
-                DepositionFileGenerationResult(
+                MecaDeposition(
                     meca_parsing=MecaParsingResult(
                         input='tests/tmp/batch/input/no-preprint-doi.zip',
                         error=None,
@@ -60,7 +68,7 @@ class TestBatchDeposit(MecaArchiveTestCase):
                         doi_already_processed=None,
                     )
                 ),
-                DepositionFileGenerationResult(
+                MecaDeposition(
                     meca_parsing=MecaParsingResult(
                         input='tests/tmp/batch/input/no-reviews.zip',
                         error=None,
@@ -77,23 +85,25 @@ class TestBatchDeposit(MecaArchiveTestCase):
         self.setup_input_directory(input_directory, input_files)
 
         output_directory = f'{self.base_dir}/output'
-        result = self.do_batch_generate(input_directory, output_directory)
+        result = self.do_batch_deposit(input_directory, output_directory)
         self.assert_results_equal(expected_output, result)
 
         num_files_in_input_directory = len(glob(f'{input_directory}/*'))
         self.assertEqual(0, num_files_in_input_directory)
 
         expected_deposition_file = 'tests/tmp/batch/output/10.1101/multiple-revision-rounds.123.456.7890/deposition.xml'
-        self.assertTrue(Path(expected_deposition_file).exists())
+        deposition_files_in_output_directory = list(glob(f'{output_directory}/**/*.xml', recursive=True))
+        self.assertEqual(1, len(deposition_files_in_output_directory))
+        self.assertEqual(expected_deposition_file, deposition_files_in_output_directory[0])
 
     @responses.activate
-    def test_batch_generate_same_file(self) -> None:
+    def test_batch_deposit_same_file(self) -> None:
         input_files = [
             'multiple-revision-rounds.zip',
         ]
-        expected_output_first_run = BatchGenerateRun(
+        expected_output_first_run = BatchDepositRun(
             results=[
-                DepositionFileGenerationResult(
+                MecaDeposition(
                     meca_parsing=MecaParsingResult(
                         input='tests/tmp/batch/input/multiple-revision-rounds.zip',
                         error=None,
@@ -105,13 +115,17 @@ class TestBatchDeposit(MecaArchiveTestCase):
                         output='tests/tmp/batch/output/10.1101/multiple-revision-rounds.123.456.7890/deposition.xml',
                         error=None,
                     ),
+                    crossref_deposition=DepositionResult(
+                        output=self.expected_response,
+                        error=None,
+                    ),
                 ),
             ],
             timestamp=datetime.now(),
         )
-        expected_output_second_run = BatchGenerateRun(
+        expected_output_second_run = BatchDepositRun(
             results=[
-                DepositionFileGenerationResult(
+                MecaDeposition(
                     meca_parsing=MecaParsingResult(
                         input='tests/tmp/batch/input/multiple-revision-rounds.zip',
                         error=None,
@@ -128,16 +142,18 @@ class TestBatchDeposit(MecaArchiveTestCase):
         self.setup_input_directory(input_directory, input_files)
 
         output_directory = f'{self.base_dir}/output'
-        result_first_run = self.do_batch_generate(input_directory, output_directory)
+        result_first_run = self.do_batch_deposit(input_directory, output_directory)
         self.assert_results_equal(expected_output_first_run, result_first_run)
 
         # Setup the input directory again since the input MECAs are deleted after each run
         self.setup_input_directory(input_directory, input_files)
-        result_second_run = self.do_batch_generate(input_directory, output_directory)
+        result_second_run = self.do_batch_deposit(input_directory, output_directory)
         self.assert_results_equal(expected_output_second_run, result_second_run)
 
-    def assert_results_equal(self, expected: BatchGenerateRun, actual: BatchGenerateRun) -> None:
-        self.assertCountEqual(expected.results, actual.results)
+    def assert_results_equal(self, expected: BatchDepositRun, actual: BatchDepositRun) -> None:
+        def sorted_results(items: List[MecaDeposition]) -> List[MecaDeposition]:
+            return sorted(items, key=lambda i: i.meca_parsing.input)
+        self.assertEqual(sorted_results(expected.results), sorted_results(actual.results))
 
     def setup_input_directory(self, input_dir: str, files: List[str]) -> None:
         try:
@@ -154,5 +170,5 @@ class TestBatchDeposit(MecaArchiveTestCase):
         num_files_in_input_dir = len(listdir(input_dir))
         self.assertEqual(len(files), num_files_in_input_dir)
 
-    def do_batch_generate(self, input_directory: str, output_directory: str) -> BatchGenerateRun:
-        return batch_generate(input_directory, output_directory, verbose=False)
+    def do_batch_deposit(self, input_directory: str, output_directory: str) -> BatchDepositRun:
+        return batch_deposit(input_directory, output_directory, verbose=False, dry_run=False)
