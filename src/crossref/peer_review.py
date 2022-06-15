@@ -1,7 +1,10 @@
-from datetime import datetime
+""""""
+
+__all__ = ['generate_peer_review_deposition']
+
 from string import Template
 from time import time_ns
-from typing import Any, Callable, List, Optional, Union
+from typing import Any, List, Union, cast
 from lxml import etree
 from src.config import (
     DEPOSITOR_NAME,
@@ -13,7 +16,8 @@ from src.config import (
     AUTHOR_REPLY_TITLE_TEMPLATE,
     AUTHOR_REPLY_RESOURCE_URL_TEMPLATE,
 )
-from src.model import Article, Author, AuthorReply, RevisionRound
+from src.article import Article, AuthorReply
+from src.model import Author
 
 
 DEPOSITION_TEMPLATE = Template("""<doi_batch
@@ -36,27 +40,12 @@ DEPOSITION_TEMPLATE = Template("""<doi_batch
 """)
 
 
-def generate_peer_review_deposition(
-    article: Article,
-    publication_date: datetime,
-    doi_generator: Callable[[str], str],
-    preprint_doi: Optional[str] = None,
-) -> Any:
+def generate_peer_review_deposition(article: Article) -> str:
     """
     Generate a CrossRef deposition file for the peer reviews in the given article.
 
     If the article does not contain any peer reviews, a ValueError is thrown.
     """
-    if preprint_doi is not None:
-        article_doi = preprint_doi
-    elif article.preprint_doi is not None:
-        article_doi = article.preprint_doi
-    else:
-        raise ValueError('no preprint DOI found in the given MECA archive')
-
-    if not article.review_process:
-        raise ValueError('no reviews found in the given MECA archive')
-
     timestamp = time_ns()
     deposition_xml = etree.fromstring(
         DEPOSITION_TEMPLATE.substitute(
@@ -70,68 +59,49 @@ def generate_peer_review_deposition(
     )
 
     body = deposition_xml[1]
-    for review_xml in generate_reviews(
-        article.review_process,
-        article.title,
-        article_doi,
-        publication_date,
-        doi_generator,
-    ):
+    for review_xml in generate_reviews(article):
         body.append(review_xml)
 
-    return etree.tostring(deposition_xml, pretty_print=True)
+    return cast(str, etree.tostring(deposition_xml, encoding=str, pretty_print=True))
 
 
-def generate_reviews(
-    review_process: List[RevisionRound],
-    article_title: str,
-    article_doi: str,
-    publication_date: datetime,
-    doi_generator: Callable[[str], str],
-) -> Any:
-    for revision_round in review_process:
-        revision = revision_round.revision_id
-        review_dois = []
-        for review in revision_round.reviews:
-            title = Template(REVIEW_TITLE_TEMPLATE).substitute(article_title=article_title)
+def generate_reviews(article: Article) -> Any:
+    for revision, revision_round in enumerate(article.review_process):
+        for running_number, review in enumerate(revision_round.reviews, start=1):
+            title = Template(REVIEW_TITLE_TEMPLATE).substitute(article_title=article.title)
             resource_url = Template(REVIEW_RESOURCE_URL_TEMPLATE).substitute(
-                article_doi=article_doi,
+                article_doi=article.doi,
                 revision=revision,
-                running_number=review.running_number,
+                running_number=running_number,
             )
-            doi = doi_generator(resource_url)
             review_xml = template_xml(
                 PEER_REVIEW_TEMPLATE,
                 revision_round=revision,
                 review_title=title,
-                publication_date_year=publication_date.year,
-                publication_date_month=f'{publication_date.month:02}',
-                publication_date_day=f'{publication_date.day:02}',
+                publication_date_year=review.publication_date.year,
+                publication_date_month=f'{review.publication_date.month:02}',
+                publication_date_day=f'{review.publication_date.day:02}',
                 institution_name=INSTITUTION_NAME,
-                running_number=review.running_number,
-                article_doi=article_doi,
-                review_doi=doi,
+                running_number=running_number,
+                article_doi=article.doi,
+                review_doi=review.doi,
                 review_resource=resource_url,
             )
-            review_dois.append(doi)
             yield review_xml
 
         if revision_round.author_reply:
-            title = Template(AUTHOR_REPLY_TITLE_TEMPLATE).substitute(article_title=article_title)
+            title = Template(AUTHOR_REPLY_TITLE_TEMPLATE).substitute(article_title=article.title)
             resource_url = Template(AUTHOR_REPLY_RESOURCE_URL_TEMPLATE).substitute(
-                article_doi=article_doi,
+                article_doi=article.doi,
                 revision=revision,
             )
-            doi = doi_generator(resource_url)
             yield generate_author_reply(
                 author_reply=revision_round.author_reply,
                 title=title,
-                doi=doi,
                 resource_url=resource_url,
-                article_doi=article_doi,
-                revision=revision,
-                review_dois=review_dois,
-                publication_date=publication_date,
+                article_doi=article.doi,
+                revision=str(revision),
+                review_dois=[review.doi for review in revision_round.reviews],
             )
 
 
@@ -210,24 +180,22 @@ AUTHOR_REPLY_REVIEW_RELATION_TEMPLATE = Template("""
 def generate_author_reply(
     author_reply: AuthorReply,
     title: str,
-    doi: str,
     resource_url: str,
     article_doi: str,
     revision: str,
     review_dois: List[str],
-    publication_date: datetime,
 ) -> Any:
     author_reply_xml = template_xml(
         AUTHOR_REPLY_TEMPLATE,
         author_reply_title=title,
         revision_round=revision,
-        publication_date_year=publication_date.year,
-        publication_date_month=f'{publication_date.month:02}',
-        publication_date_day=f'{publication_date.day:02}',
+        publication_date_year=author_reply.publication_date.year,
+        publication_date_month=f'{author_reply.publication_date.month:02}',
+        publication_date_day=f'{author_reply.publication_date.day:02}',
         institution_name=INSTITUTION_NAME,
         running_number="Author Reply",
         article_doi=article_doi,
-        doi=doi,
+        doi=author_reply.doi,
         resource=resource_url,
     )
 

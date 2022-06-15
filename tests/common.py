@@ -4,6 +4,7 @@ __all__ = ['MecaArchiveTestCase']
 
 from os import listdir, mkdir
 from os.path import isdir, isfile, join
+import lxml.etree
 from shutil import rmtree
 from unittest import TestCase
 from zipfile import ZipFile, ZIP_DEFLATED
@@ -51,8 +52,40 @@ class MecaArchiveTestCase(TestCase):
         for meca_source in listdir(self.MECA_SOURCE_DIR):
             file_path = f'{self.MECA_SOURCE_DIR}/{meca_source}'
             if isdir(file_path):
-                zip_path = f'{self.MECA_TARGET_DIR}/{meca_source}.zip'
+                zip_path = self.get_meca_archive_path(meca_source)
                 create_zip(zip_path, file_path)
                 self.meca_archives.append(zip_path)
 
         return super().setUp()
+
+    def get_meca_archive_path(self, meca_name: str) -> str:
+        return f'{self.MECA_TARGET_DIR}/{meca_name}.zip'
+
+
+class DepositionFileTestCase(TestCase):
+
+    def assertDepositionFileEquals(self, expected_deposition_file: str, actual_deposition_file: str) -> None:
+        ignore_namespaces = {
+            'cr': 'http://www.crossref.org/schema/5.3.1',
+        }
+        ignore_xpaths = [
+            './cr:head/cr:doi_batch_id',
+            './cr:head/cr:timestamp',
+        ]
+
+        def canonicalize(xml_file: str) -> str:
+            tree = lxml.etree.parse(xml_file)
+            root = tree.getroot()
+            for ignore_xpath in ignore_xpaths:
+                for element_to_ignore in root.findall(ignore_xpath, namespaces=ignore_namespaces):
+                    parent = element_to_ignore.getparent()
+                    parent.remove(element_to_ignore)
+
+            return lxml.etree.canonicalize(  # type: ignore[no-any-return]  # lxml docs say this does return a string
+                xml_data=lxml.etree.tostring(root, encoding='unicode')
+            )
+
+        expected = canonicalize(expected_deposition_file)
+        actual = canonicalize(actual_deposition_file)
+
+        self.assertEqual(expected, actual)

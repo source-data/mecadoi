@@ -14,7 +14,7 @@ class CliTestCase(MecaArchiveTestCase):
         return self.runner.invoke(mecadoi, command)
 
     def test_meca_info(self) -> None:
-        test_file = f'{self.MECA_TARGET_DIR}/multiple-revision-rounds.zip'
+        test_file = self.get_meca_archive_path('multiple-revision-rounds')
         title = 'An article with multiple revision rounds.'
         doi = '10.12345/multiple-revision-rounds.1234567890'
         preprint_doi = '10.1101/multiple-revision-rounds.123.456.7890'

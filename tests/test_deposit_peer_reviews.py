@@ -2,7 +2,6 @@ import re
 from typing import cast
 import responses
 from unittest import TestCase
-from unittest.mock import Mock, patch
 from src.config import CROSSREF_DEPOSITION_URL, CROSSREF_USERNAME, CROSSREF_PASSWORD
 from src.crossref.api import deposit
 
@@ -19,7 +18,7 @@ class TestDepositPeerReviews(TestCase):
         responses.add(responses.POST, CROSSREF_DEPOSITION_URL, body=expected_response, status=200)
 
         deposition_xml = '<doi_batch><head></head><body></body></doi_batch>'
-        actual_response = deposit(deposition_xml.encode())
+        actual_response = deposit(deposition_xml)
         self.assertEqual(expected_response, actual_response)
 
         self.assertEqual(1, len(responses.calls))

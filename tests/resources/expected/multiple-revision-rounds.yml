@@ -1,0 +1,47 @@
+doi: 10.1101/multiple-revision-rounds.123.456.7890
+review_process:
+- author_reply:
+    authors:
+    - affiliation: EMBL
+      given_name: Jane
+      is_corresponding_author: true
+      orcid: null
+      surname: Doe
+    - affiliation: EMBL
+      given_name: John
+      is_corresponding_author: false
+      orcid: null
+      surname: Doe
+    doi: 10.15252/rc.2020123456
+    publication_date: 2020-10-20 00:00:00
+    text: {}
+  reviews:
+  - authors: []
+    doi: 10.15252/rc.2020123456
+    publication_date: 2020-10-20 00:00:00
+    text:
+      Estimated time to Complete Revisions (Required): Cannot tell / Not applicable
+      Significance (Required): Lorem ipsum dolor sit amet.
+  - authors: []
+    doi: 10.15252/rc.2020123456
+    publication_date: 2020-10-20 00:00:00
+    text:
+      Estimated time to Complete Revisions (Required): Cannot tell / Not applicable
+      Significance (Required): Consectetur adipiscing elit.
+  - authors: []
+    doi: 10.15252/rc.2020123456
+    publication_date: 2020-10-20 00:00:00
+    text:
+      Estimated time to Complete Revisions (Required): Cannot tell / Not applicable
+      Significance (Required): Sed do eiusmod tempor incididunt ut labore.
+- author_reply: null
+  reviews:
+  - authors: []
+    doi: 10.15252/rc.2020123456
+    publication_date: 2020-10-20 00:00:00
+    text:
+      Estimated time to Complete Revisions (Required): Cannot tell / Not applicable
+      Evidence, reproducibility and clarity (Required): This is sample of evidence
+        answer
+      Significance (Required): This is a sample of significance
+title: An article with multiple revision rounds.

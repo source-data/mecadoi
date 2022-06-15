@@ -1,7 +1,8 @@
 from datetime import datetime
-from typing import BinaryIO, Optional, TextIO
+from typing import Optional, TextIO
 import click
 from yaml import dump
+from src.article import from_meca_manuscript
 from src.cli.meca.options import meca_archive
 from src.crossref.api import deposit as deposit_xml
 from src.crossref.peer_review import generate_peer_review_deposition
@@ -17,19 +18,15 @@ from .options import verbose_output
     '-o', '--output',
     default='-',
     help='Write the CrossRef deposition file to this file. Defaults to stdout.',
-    type=click.File('wb'),
+    type=click.File('w'),
 )
 @click.option('--preprint-doi', default=None)
-def generate(meca_archive: str, output: BinaryIO, preprint_doi: Optional[str] = None) -> None:
+def generate(meca_archive: str, output: TextIO, preprint_doi: Optional[str] = None) -> None:
     """Generate a CrossRef deposition file for any reviews within the given MECA archive."""
     try:
-        article = parse_meca_archive(meca_archive)
-        deposition_xml = generate_peer_review_deposition(
-            article,
-            datetime.now(),
-            get_free_doi,
-            preprint_doi=preprint_doi
-        )
+        manuscript = parse_meca_archive(meca_archive)
+        article = from_meca_manuscript(manuscript, datetime.now(), get_free_doi, preprint_doi=preprint_doi)
+        deposition_xml = generate_peer_review_deposition(article)
     except ValueError as e:
         raise click.ClickException(str(e))
 
@@ -39,12 +36,12 @@ def generate(meca_archive: str, output: BinaryIO, preprint_doi: Optional[str] = 
 @click.command()
 @click.argument(
     'deposition-file',
-    type=click.File('rb'),
+    type=click.File('r'),
 )
-def verify(deposition_file: BinaryIO) -> None:
+def verify(deposition_file: TextIO) -> None:
     """Verify that the DOIs in the given deposition file link to existing resources."""
     try:
-        result = verify_xml(deposition_file)
+        result = verify_xml(deposition_file.read())
     except Exception as e:
         raise click.ClickException(str(e))
 
@@ -54,7 +51,7 @@ def verify(deposition_file: BinaryIO) -> None:
 @click.command()
 @click.argument(
     'deposition-file',
-    type=click.File('rb'),
+    type=click.File('r'),
 )
 @verbose_output
 @click.option(
@@ -63,7 +60,7 @@ def verify(deposition_file: BinaryIO) -> None:
     help='Write the response returned by the CrossRef API to this file. Defaults to stdout.',
     type=click.File('w'),
 )
-def deposit(deposition_file: BinaryIO, verbose: int, output: TextIO) -> None:
+def deposit(deposition_file: TextIO, verbose: int, output: TextIO) -> None:
     """Send the given deposition XML to CrossRef."""
     try:
         response = deposit_xml(deposition_file.read(), verbose=verbose)

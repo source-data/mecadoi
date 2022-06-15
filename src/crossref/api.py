@@ -1,4 +1,3 @@
-from io import BytesIO
 from requests import PreparedRequest, Request, Session
 from src.config import CROSSREF_DEPOSITION_URL, CROSSREF_USERNAME, CROSSREF_PASSWORD
 
@@ -17,7 +16,7 @@ def pretty_print_request(req: PreparedRequest) -> None:
     print(output)
 
 
-def prep_request(deposition_file: bytes, crossref_username: str, crossref_password: str) -> PreparedRequest:
+def prep_request(deposition_file: str, crossref_username: str, crossref_password: str) -> PreparedRequest:
     files = {'fname': ('deposition.xml', deposition_file)}
     data = {
         'login_id': crossref_username,
@@ -28,7 +27,7 @@ def prep_request(deposition_file: bytes, crossref_username: str, crossref_passwo
     return req.prepare()
 
 
-def deposit(deposition_file: bytes, verbose: int = 0) -> str:
+def deposit(deposition_file: str, verbose: int = 0) -> str:
     """Send a deposition file to the Crossref API."""
     if not (CROSSREF_USERNAME and CROSSREF_PASSWORD):
         raise ValueError('No CrossRef username or password given!')

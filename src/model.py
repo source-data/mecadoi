@@ -1,20 +1,35 @@
 """
 Data classes that act as interfaces between the modules of this project.
 
-The main entrypoint is the Article class that represents the article within a MECA archive.
+The main entrypoint is the `Article` class.
 """
 
 __all__ = [
-    'Article',
     'Author',
-    'AuthorReply',
+    'DigitalObject',
     'Orcid',
-    'Review',
-    'RevisionRound',
+    'Work',
 ]
 
 from dataclasses import dataclass
 from typing import Dict, List, Optional
+
+
+@dataclass
+class DigitalObject:
+    """
+    Something that has a Digital Object Identifier (DOI).
+
+    Could be a journal article, a book, etc.
+    """
+
+    doi: str
+    """
+    The Digital Object Identifier (DOI) of this digital object.
+
+    Is of the form `prefix/suffix` where `prefix` is usually something like "10.1111" and identifies the registrant of
+    this DOI, and suffix is chosen by the registrant and usually a random string of numbers and letters.
+    """
 
 
 @dataclass
@@ -57,7 +72,11 @@ class Work:
     """Represents a scholarly work such as an article, a referee report, or an author reply."""
 
     authors: List[Author]
-    """The authors of this piece of scholarly work."""
+    """
+    The author(s) of this piece of scholarly work.
+
+    If no authors are given the work was produced by anonymous author(s).
+    """
 
     text: Dict[str, str]
     """
@@ -66,72 +85,3 @@ class Work:
     It's represented as a dict where the keys are the title of its section and the values the actual text. An article
     would have an "abstract" section, a referee report a "Significance" section, etc.
     """
-
-
-@dataclass
-class Review(Work):
-    """A referee report that reviews an article."""
-
-    running_number: str
-    """
-    The running number of the referee reports in a revision round signifies their order within that round.
-
-    As these reports are usually anonymous, the running number (or index) for example is important for the authors to
-    identify which report they're replying to.
-    """
-
-
-@dataclass
-class AuthorReply(Work):
-    """The reply by the article authors to its reviews."""
-    pass
-
-
-@dataclass
-class RevisionRound:
-    """
-    A round of revisions as they happen in the Review Commons workflow.
-
-    They consist of multiple referee reports (the reviews) and, optionally, a single reply to them by the authors of
-    the article.
-    """
-
-    revision_id: str
-    """
-    The ID of this revision round. This is taken from the MECA archive and is *probably* unique, but not guaranteed to
-    be.
-    """
-
-    reviews: List[Review]
-    """The referee reports written by the referees."""
-
-    author_reply: Optional[AuthorReply]
-    """The reply by the article authors to its reviews."""
-
-
-@dataclass
-class Article(Work):
-    """
-    Represents the article packaged in the MECA archive.
-    """
-
-    doi: str
-    """The DOI of this article."""
-
-    preprint_doi: Optional[str]
-    """
-    The DOI of the preprint that this article is based on, if such a preprint exists. It's taken from a custom-meta
-    field in the article metadata.
-    """
-
-    journal: Optional[str]
-    """The journal in which this article is or will be published."""
-
-    review_process: Optional[List[RevisionRound]]
-    """
-    The review process this article went through, represented by a list of revision rounds. Is None if the MECA did not
-    contain any information about the review process.
-    """
-
-    title: str
-    """The title of this article."""

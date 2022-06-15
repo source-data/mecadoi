@@ -2,8 +2,8 @@ from typing import List, Optional
 import click
 from yaml import dump
 
-from src.meca import parse_meca_archive
-from src.model import Author, Review
+from src.meca import parse_meca_archive, Review
+from src.model import Author
 
 from .options import meca_archive
 
@@ -12,21 +12,21 @@ from .options import meca_archive
 @meca_archive
 def info(meca_archive: str) -> None:
     """Show information about the given MECA archive."""
-    article = parse_meca_archive(meca_archive)
+    manuscript = parse_meca_archive(meca_archive)
     output = {
-        'title': truncate(article.title),
-        'doi': article.doi,
-        'authors': get_contributors(article.authors),
+        'title': truncate(manuscript.title),
+        'doi': manuscript.doi,
+        'authors': get_contributors(manuscript.authors),
     }
-    if article.preprint_doi:
-        output['preprint_doi'] = article.preprint_doi
-    if article.journal:
-        output['journal'] = article.journal
-    if article.review_process:
-        num_revision_rounds = len(article.review_process)
-        num_total_reviews = sum([len(revision_round.reviews) for revision_round in article.review_process])
+    if manuscript.preprint_doi:
+        output['preprint_doi'] = manuscript.preprint_doi
+    if manuscript.journal:
+        output['journal'] = manuscript.journal
+    if manuscript.review_process:
+        num_revision_rounds = len(manuscript.review_process)
+        num_total_reviews = sum([len(revision_round.reviews) for revision_round in manuscript.review_process])
         num_author_replies = sum(
-            [1 if revision_round.author_reply else 0 for revision_round in article.review_process]
+            [1 if revision_round.author_reply else 0 for revision_round in manuscript.review_process]
         )
         output['review_process'] = (
             f'{num_revision_rounds} revision round{"s" if num_revision_rounds != 1 else ""},'
@@ -40,11 +40,11 @@ def info(meca_archive: str) -> None:
 @meca_archive
 def reviews(meca_archive: str) -> None:
     """Show information about the reviews in the given MECA archive."""
-    article = parse_meca_archive(meca_archive)
+    manuscript = parse_meca_archive(meca_archive)
 
-    if article.review_process:
+    if manuscript.review_process:
         revision_rounds_info = {}
-        for revision_round in article.review_process:
+        for revision_round in manuscript.review_process:
             revision_round_info = {
                 f'Review {review.running_number}': {
                     'contributors': get_contributors(review.authors),
@@ -66,7 +66,10 @@ def reviews(meca_archive: str) -> None:
         click.echo(dump(revision_rounds_info, width=150), nl=False)
 
 
-def get_contributors(contributors: List[Author]) -> str:
+def get_contributors(contributors: Optional[List[Author]]) -> str:
+    if not contributors:
+        return 'Anonymous'
+
     return truncate(', '.join([
         f'{contributor.given_name}, {contributor.surname}'
         for contributor in contributors

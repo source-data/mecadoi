@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import BinaryIO, Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple
 from xsdata.formats.dataclass.parsers import XmlParser
 from src.crossref.xml.doi_batch import DoiBatch, PeerReview
 from src.eeb.api import get_articles
@@ -13,7 +13,7 @@ class VerificationResult:
     error: Optional[str] = None
 
 
-def verify(deposition_file: Union[str, bytes, BinaryIO]) -> List[VerificationResult]:
+def verify(deposition_file: str) -> List[VerificationResult]:
     """
     Checks that all DOIs to be created from the given deposition file resolve to an actual document.
 

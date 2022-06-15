@@ -2,28 +2,101 @@
 Functionality for interacting with Manuscript Exchange Common Approach (MECA) archives.
 
 This data format was introduced as an interface between various publishing systems to allow the transferral of
-manuscripts between different publishers.
+manuscripts between different publishers. A single MECA archive contains a single manuscript, optionally peer
+reviews of that manuscript, and can contain any further data related to the manuscript.
 
-parse_meca_archive is the main entrypoint that parses a MECA archive into the intermediate format defined in src.model.
+`parse_meca_archive()` is the main entrypoint that parses a MECA archive into a `Manuscript`, the intermediate format
+defined in this module.
 """
 
-__all__ = ['parse_meca_archive']
+__all__ = [
+    'parse_meca_archive',
+    'AuthorReply',
+    'Manuscript',
+    'Review',
+    'RevisionRound',
+]
 
 from dataclasses import dataclass
 from datetime import datetime
 from html import unescape
 from lxml.etree import parse, tostring
 from pathlib import Path
-from typing import IO, Any, List, Optional, Set, Union
+from typing import Any, IO, List, Optional, Set, Union
 from zipfile import ZipFile
 
-from src.model import Article, Author, AuthorReply, Orcid, Review, RevisionRound
+from src.model import Author, DigitalObject, Orcid, Work
 
 
-def parse_meca_archive(path_to_archive: Union[str, Path], use_preprint_doi: bool = True) -> Article:
+@dataclass
+class Review(Work):
+    """A referee report that reviews an article, as it appears in a MECA archive."""
+
+    running_number: str
+    """
+    The running number of the referee reports in a revision round signifies their order within that round.
+
+    As these reports are usually anonymous, the running number (or index) for example is important for the authors to
+    identify which report they're replying to.
+    """
+
+
+@dataclass
+class AuthorReply(Work):
+    """The reply by the article authors to its reviews, as it appears in a MECA archive."""
+    pass
+
+
+@dataclass
+class RevisionRound:
+    """
+    A round of revisions as they appear in a MECA archive.
+
+    Each round consists of multiple reviews and an optional reply by the authors.
+    """
+
+    revision_id: str
+    """
+    The ID of this revision round. This is taken from the MECA archive and is *probably* unique, but not guaranteed to
+    be.
+    """
+
+    reviews: List[Review]
+    """The reviews written by the referees."""
+
+    author_reply: Optional[AuthorReply]
+    """The reply by the authors to the reviews in this revision round."""
+
+
+@dataclass
+class Manuscript(DigitalObject, Work):
+    """
+    Represents the article packaged in a MECA archive.
+    """
+
+    title: str
+    """The title of this article."""
+
+    preprint_doi: Optional[str]
+    """
+    The DOI of the preprint that this article is based on, if such a preprint exists. It's taken from a custom-meta
+    field in the article metadata.
+    """
+
+    journal: Optional[str]
+    """The journal in which this article is or will be published."""
+
+    review_process: Optional[List[RevisionRound]]
+    """
+    The review process this article went through, represented by a list of revision rounds. Is None if the MECA did not
+    contain any information about the review process.
+    """
+
+
+def parse_meca_archive(path_to_archive: Union[str, Path], use_preprint_doi: bool = True) -> Manuscript:
     """
     Read the MECA archive at the given path and construct an Article from it.
-    
+
     Raises exceptions if the MECA archive does not contain the necessary data that is required by the MECA standard
     such as a file with article metadata.
     """
@@ -48,7 +121,7 @@ def parse_meca_archive(path_to_archive: Union[str, Path], use_preprint_doi: bool
         review_process = None
 
     abstract_node = article_xml.find('front/article-meta/abstract')
-    return Article(
+    return Manuscript(
         authors=article_authors,
         doi=_text(article_xml.find('front/article-meta/article-id[@pub-id-type="doi"]')),
         preprint_doi=_get_preprint_doi(article_xml),
