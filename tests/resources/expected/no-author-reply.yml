@@ -1,0 +1,33 @@
+doi: 10.1101/no-author-reply.123.456.7890
+review_process:
+- author_reply: null
+  reviews:
+  - authors: []
+    doi: 10.15252/rc.2020123456
+    publication_date: 2020-10-20 00:00:00
+    text:
+      Estimated time to Complete Revisions (Required): Cannot tell / Not applicable
+      Significance (Required): Consectetur adipiscing elit.
+  - authors: []
+    doi: 10.15252/rc.2020123456
+    publication_date: 2020-10-20 00:00:00
+    text:
+      Estimated time to Complete Revisions (Required): Cannot tell / Not applicable
+      Significance (Required): Sed do eiusmod tempor incididunt ut labore et dolore.
+  - authors: []
+    doi: 10.15252/rc.2020123456
+    publication_date: 2020-10-20 00:00:00
+    text:
+      Estimated time to Complete Revisions (Required): Cannot tell / Not applicable
+      Significance (Required): Cras adipiscing enim eu turpis egestas pretium aenean.
+- author_reply: null
+  reviews:
+  - authors: []
+    doi: 10.15252/rc.2020123456
+    publication_date: 2020-10-20 00:00:00
+    text:
+      Estimated time to Complete Revisions (Required): Cannot tell / Not applicable
+      Evidence, reproducibility and clarity (Required): This is sample of evidence
+        answer
+      Significance (Required): This is a sample of significance
+title: An article without author reply.

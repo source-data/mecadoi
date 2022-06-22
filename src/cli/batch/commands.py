@@ -19,7 +19,7 @@ from src.batch import batch_deposit, BatchDepositRun
     '--dry-run/--no-dry-run',
     default=True,
 )
-def generate(
+def deposit(
     input_directory: str,
     output_directory: str,
     verbose: int,

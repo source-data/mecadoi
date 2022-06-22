@@ -1,4 +1,3 @@
-from datetime import datetime
 from glob import glob
 from os import listdir, mkdir
 from typing import Any, List, Tuple
@@ -7,13 +6,7 @@ import responses
 from shutil import copy, rmtree
 
 from yaml import safe_load
-from src.batch import (
-    batch_deposit,
-    BatchDepositRun,
-    DepositionResult,
-    MecaDeposition,
-    MecaParsingResult,
-)
+from src.batch import batch_deposit, BatchDepositRun
 from src.config import CROSSREF_DEPOSITION_URL
 from tests.common import DepositionFileTestCase, MecaArchiveTestCase
 from tests.test_article import DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES, PUBLICATION_DATE
@@ -34,164 +27,79 @@ class TestBatchDeposit(MecaArchiveTestCase, DepositionFileTestCase):
         self.input_directory = f'{self.base_dir}/input'
         self.output_directory = f'{self.base_dir}/output'
 
-        self.maxDiff = None
-
-        self.expected_response = '<html><head><title>SUCCESS</title></head><body><h2>SUCCESS</h2></body></html>'
-        responses.add(responses.POST, CROSSREF_DEPOSITION_URL, body=self.expected_response, status=200)
-
-        return super().setUp()
-
-    @responses.activate
-    def test_batch_deposit(self, datetime_mock: Mock, get_free_doi_mock: Mock) -> None:
-        input_files = [
-            'multiple-revision-rounds',
-            'single-revision-round',
+        self.input_files = [
+            'no-article',
+            'no-author-reply',
+            'no-manifest',
             'no-preprint-doi',
             'no-reviews',
+            'multiple-revision-rounds',
+            'single-revision-round',
         ]
-        self.setup_input_directory(input_files)
-        expected_output = BatchDepositRun(
-            results=[
-                MecaDeposition(
-                    meca_parsing=MecaParsingResult(
-                        input=f'{self.input_directory}/multiple-revision-rounds.zip',
-                        error=None,
-                        has_reviews=True,
-                        has_preprint_doi=True,
-                        doi_already_processed=False,
-                    ),
-                    deposition_file_generation=DepositionResult(
-                        output=f'{self.output_directory}/10.1101/multiple-revision-rounds.123.456.7890/deposition.xml',
-                        error=None,
-                    ),
-                    crossref_deposition=DepositionResult(
-                        output=self.expected_response,
-                        error=None,
-                    ),
-                ),
-                MecaDeposition(
-                    meca_parsing=MecaParsingResult(
-                        input=f'{self.input_directory}/single-revision-round.zip',
-                        error=None,
-                        has_reviews=True,
-                        has_preprint_doi=True,
-                        doi_already_processed=False,
-                    ),
-                    deposition_file_generation=DepositionResult(
-                        output=f'{self.output_directory}/10.1101/single-revision-round.123.456.7890/deposition.xml',
-                        error=None,
-                    ),
-                    crossref_deposition=DepositionResult(
-                        output=self.expected_response,
-                        error=None,
-                    ),
-                ),
-                MecaDeposition(
-                    meca_parsing=MecaParsingResult(
-                        input=f'{self.input_directory}/no-preprint-doi.zip',
-                        error=None,
-                        has_reviews=True,
-                        has_preprint_doi=False,
-                        doi_already_processed=None,
-                    )
-                ),
-                MecaDeposition(
-                    meca_parsing=MecaParsingResult(
-                        input=f'{self.input_directory}/no-reviews.zip',
-                        error=None,
-                        has_reviews=False,
-                        has_preprint_doi=True,
-                        doi_already_processed=None,
-                    )
-                ),
+        self.setup_input_directory(self.input_files)
+
+        self.expected_output = BatchDepositRun(
+            timestamp=PUBLICATION_DATE,
+            invalid=[
+                f'{self.input_directory}/no-article.zip',
+                f'{self.input_directory}/no-manifest.zip',
             ],
-            timestamp=datetime.now(),
+            incomplete=[
+                f'{self.input_directory}/no-reviews.zip',
+                f'{self.input_directory}/no-preprint-doi.zip',
+            ],
+            processed=[
+                f'{self.input_directory}/no-author-reply.zip',
+                f'{self.input_directory}/multiple-revision-rounds.zip',
+                f'{self.input_directory}/single-revision-round.zip',
+            ],
         )
-
-        actual_output = self.do_batch_deposit()
-        self.assert_results_equal(expected_output, actual_output)
-
-        self.assert_input_dir_is_empty()
-
-        expected_deposition_files = [
+        self.expected_deposition_files = [
+            ('no-author-reply', '10.1101/no-author-reply.123.456.7890/deposition.xml'),
             ('multiple-revision-rounds', '10.1101/multiple-revision-rounds.123.456.7890/deposition.xml'),
             ('single-revision-round', '10.1101/single-revision-round.123.456.7890/deposition.xml'),
         ]
-        self.assert_deposition_files_in_output_dir(expected_deposition_files)
-
-        expected_export_files = [
+        self.expected_export_files = [
+            'no-author-reply',
             'multiple-revision-rounds',
             'single-revision-round',
         ]
-        self.assert_export_files_in_output_dir(expected_export_files)
+
+        self.expected_response = '<html><head><title>SUCCESS</title></head><body><h2>SUCCESS</h2></body></html>'
+        responses.add(responses.POST, CROSSREF_DEPOSITION_URL, body=self.expected_response, status=200)
+        return super().setUp()
 
     @responses.activate
-    def test_batch_deposit_same_file(self, datetime_mock: Mock, get_free_doi_mock: Mock) -> None:
-        input_files = [
-            'multiple-revision-rounds',
-        ]
-        expected_output_first_run = BatchDepositRun(
-            results=[
-                MecaDeposition(
-                    meca_parsing=MecaParsingResult(
-                        input=f'{self.input_directory}/multiple-revision-rounds.zip',
-                        error=None,
-                        has_reviews=True,
-                        has_preprint_doi=True,
-                        doi_already_processed=False,
-                    ),
-                    deposition_file_generation=DepositionResult(
-                        output=f'{self.output_directory}/10.1101/multiple-revision-rounds.123.456.7890/deposition.xml',
-                        error=None,
-                    ),
-                    crossref_deposition=DepositionResult(
-                        output=self.expected_response,
-                        error=None,
-                    ),
-                ),
-            ],
-            timestamp=datetime.now(),
-        )
+    def test_batch_generate(self, datetime_mock: Mock, get_free_doi_mock: Mock) -> None:
+        actual_output = self.do_batch_generate()
+
+        self.assert_results_equal(self.expected_output, actual_output)
+        self.assert_deposition_files_in_output_dir(self.expected_deposition_files)
+        self.assert_export_files_in_output_dir(self.expected_export_files)
+
+    @responses.activate
+    def test_batch_generate_same_file(self, datetime_mock: Mock, get_free_doi_mock: Mock) -> None:
         expected_output_second_run = BatchDepositRun(
-            results=[
-                MecaDeposition(
-                    meca_parsing=MecaParsingResult(
-                        input=f'{self.input_directory}/multiple-revision-rounds.zip',
-                        error=None,
-                        has_reviews=True,
-                        has_preprint_doi=True,
-                        doi_already_processed=True,
-                    ),
-                ),
-            ],
-            timestamp=datetime.now(),
+            timestamp=PUBLICATION_DATE,
+            invalid=self.expected_output.invalid,
+            incomplete=self.expected_output.incomplete,
+            duplicate=self.expected_output.processed,
+            processed=[],
         )
 
-        self.setup_input_directory(input_files)
-
-        result_first_run = self.do_batch_deposit()
-        self.assert_results_equal(expected_output_first_run, result_first_run)
-
-        expected_deposition_files = [
-            ('multiple-revision-rounds', '10.1101/multiple-revision-rounds.123.456.7890/deposition.xml'),
-        ]
-        self.assert_deposition_files_in_output_dir(expected_deposition_files)
-
-        expected_export_files = ['multiple-revision-rounds']
-        self.assert_export_files_in_output_dir(expected_export_files)
+        # do the first batch run
+        self.do_batch_generate()
 
         # Setup the input directory again since the input MECAs are deleted after each run
-        self.setup_input_directory(input_files)
-        result_second_run = self.do_batch_deposit()
+        self.setup_input_directory(self.input_files)
+        result_second_run = self.do_batch_generate()
 
         self.assert_results_equal(expected_output_second_run, result_second_run)
-        self.assert_deposition_files_in_output_dir(expected_deposition_files)
-        self.assert_export_files_in_output_dir(expected_export_files)
+        self.assert_deposition_files_in_output_dir(self.expected_deposition_files)
+        self.assert_export_files_in_output_dir(self.expected_export_files)
 
     def assert_results_equal(self, expected: BatchDepositRun, actual: BatchDepositRun) -> None:
-        def sorted_results(items: List[MecaDeposition]) -> List[MecaDeposition]:
-            return sorted(items, key=lambda i: i.meca_parsing.input)
-        self.assertEqual(sorted_results(expected.results), sorted_results(actual.results))
+        self.assertEqual(expected, actual)
 
     def setup_input_directory(self, files: List[str]) -> None:
         try:
@@ -199,18 +107,14 @@ class TestBatchDeposit(MecaArchiveTestCase, DepositionFileTestCase):
         except FileNotFoundError:
             pass
         mkdir(self.input_directory)
-        self.assert_input_dir_is_empty()
 
         for file in [self.get_meca_archive_path(filename) for filename in files]:
             copy(file, self.input_directory)
 
         self.assert_num_files_in_dir(self.input_directory, len(files))
 
-    def do_batch_deposit(self) -> BatchDepositRun:
-        return batch_deposit(self.input_directory, self.output_directory, verbose=False, dry_run=False)
-
-    def assert_input_dir_is_empty(self) -> None:
-        self.assert_num_files_in_dir(self.input_directory, 0)
+    def do_batch_generate(self) -> BatchDepositRun:
+        return batch_deposit(self.input_directory, self.output_directory)
 
     def assert_num_files_in_dir(self, dir: str, expected_num_files_in_dir: int) -> None:
         actual_num_files_in_dir = len(listdir(dir))
