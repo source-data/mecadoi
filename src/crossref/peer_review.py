@@ -253,5 +253,5 @@ def generate_contributors(contributors: List[Author]) -> Any:
 def template_xml(template: Template, **kwargs: Union[str, int]) -> Any:
     return etree.fromstring(
         template.substitute(**kwargs),
-        parser=etree.XMLParser(remove_blank_text=True),
+        parser=etree.XMLParser(remove_blank_text=True, recover=True),
     )
