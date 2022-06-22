@@ -94,9 +94,8 @@
     become: yes
     become_user: '{{ sync_user }}'
     ansible.builtin.cron:
-      name: Sync MECA archives every day at 03:00
+      name: Sync MECA archives hourly
       minute: 0
-      hour: 3
       job: '{{ scripts_dir }}/sync-storage-box.sh "{{ sync_dir }}" "{{ s3_bucket_name }}" | tee -a "{{ logs_dir }}/sync-storage-box.log"'
 
   - name: Set up cron job for notification about new files
