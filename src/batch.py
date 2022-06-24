@@ -1,92 +1,94 @@
 """
 Process multiple MECA archives: parse them, generate deposition files, and send them to the Crossref API.
+
+Main entrypoint is parse(files, db) which parses all given files and stores the results in the given BatchDatabase.
 """
 
 __all__ = [
-    'batch_deposit',
-    'BatchDepositRun',
+    'parse',
+    'ParsedFiles',
 ]
 
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from datetime import datetime
-from os import makedirs
 from pathlib import Path
-from typing import List
-from yaml import dump
-from src.article import Article, from_meca_manuscript
-from src.crossref.api import deposit as deposit_xml
-from src.crossref.peer_review import generate_peer_review_deposition
-from src.dois import get_free_doi
+from typing import List, Tuple
+from src.db import BatchDatabase, ParsedFile
 from src.meca import parse_meca_archive
 
 
 @dataclass
-class BatchDepositRun:
-    timestamp: datetime
+class ParsedFiles:
+    """The files that were parsed in one batch-parsing run."""
 
     invalid: List[str] = field(default_factory=list)
-    incomplete: List[str] = field(default_factory=list)
-    duplicate: List[str] = field(default_factory=list)
+    """These files are either not .zip files or invalid MECA archives."""
 
-    processed: List[str] = field(default_factory=list)
+    no_reviews: List[str] = field(default_factory=list)
+    """These MECA archives contain no reviews."""
+
+    no_preprint_doi: List[str] = field(default_factory=list)
+    """These MECA archives don't have a DOI for the preprint that their manuscript is based on."""
+
+    ready_for_deposition: List[str] = field(default_factory=list)
+    """These MECA archives have all the necessary information to proceed with review DOI deposition."""
 
 
-def batch_deposit(input_dir: str, output_dir: str, verbose: int = 0, dry_run: bool = True) -> BatchDepositRun:
+def parse(files: List[str], db: BatchDatabase) -> ParsedFiles:
     """
-    Generate deposition files and send them to the Crossref API for all peer reviews in the MECA archives found in the
-    given input directory.
+    Parse all given files as MECA archives and store the results in `db`.
     """
-    # find all .zips in the given input directory: these are the potential MECA archives
-    potential_meca_archives = [str(file) for file in Path(input_dir).glob('*.zip')]
+    # Parse each file and register it in the batch database
+    parsed_meca_archives = [
+        parse_potential_meca_archive(potential_meca_archive)
+        for potential_meca_archive in files
+    ]
+    db.add_parsed_files(parsed_meca_archives)
 
-    timestamp = datetime.now()
-    result = BatchDepositRun(timestamp=timestamp)
-    processed_articles = []
+    # Group the parsed files by their status
+    invalid, no_reviews, no_preprint_doi, ready_for_deposition = partition_meca_archives(parsed_meca_archives)
+    return ParsedFiles(
+        invalid=invalid,
+        no_reviews=no_reviews,
+        no_preprint_doi=no_preprint_doi,
+        ready_for_deposition=ready_for_deposition,
+    )
 
-    # Process each .zip and if it's a MECA with a preprint DOI and reviews, then generate deposition files for them
-    for potential_meca_archive in potential_meca_archives:
-        try:
-            manuscript = parse_meca_archive(potential_meca_archive)
-        except ValueError:
-            result.invalid.append(potential_meca_archive)
-            continue
 
-        try:
-            article = from_meca_manuscript(manuscript, timestamp, get_free_doi)
-        except ValueError:
-            result.incomplete.append(potential_meca_archive)
-            continue
+def partition_meca_archives(meca_archives: List[ParsedFile]) -> Tuple[List[str], List[str], List[str], List[str]]:
+    invalid: List[str] = []
+    no_reviews: List[str] = []
+    no_preprint_doi: List[str] = []
+    ready_for_deposition: List[str] = []
 
-        deposition_xml = generate_peer_review_deposition(article)
-        deposition_file_output_dir = f'{output_dir}/{article.doi}'
-        try:
-            makedirs(deposition_file_output_dir)
-        except FileExistsError:
-            result.duplicate.append(potential_meca_archive)
-            continue
+    for meca_archive in meca_archives:
+        resulting_list = None
+        if meca_archive.manuscript is None:
+            resulting_list = invalid
+        elif not meca_archive.manuscript.review_process:
+            resulting_list = no_reviews
+        elif not meca_archive.manuscript.preprint_doi:
+            resulting_list = no_preprint_doi
+        else:
+            resulting_list = ready_for_deposition
+        resulting_list.append(meca_archive.path)
 
-        deposition_file = f'{output_dir}/{article.doi}/deposition.xml'
-        with open(deposition_file, 'w') as f:
-            f.write(deposition_xml)
+    return (invalid, no_reviews, no_preprint_doi, ready_for_deposition)
 
-        if not dry_run:
-            deposit_xml(deposition_xml, verbose=verbose)
 
-        result.processed.append(potential_meca_archive)
-        processed_articles.append(article)
+def parse_potential_meca_archive(potential_meca_archive: str) -> ParsedFile:
+    received_at = get_modification_time(potential_meca_archive)
+    result = ParsedFile(path=potential_meca_archive, received_at=received_at)
 
-    # Record the articles for which deposition files have been generated
-    if processed_articles:
-        processed_articles_output_dir = f'{output_dir}/processed-articles'
-        try:
-            makedirs(processed_articles_output_dir)
-        except FileExistsError:
-            pass
-        export_processed_articles(f'{processed_articles_output_dir}/{timestamp}.yml', processed_articles)
+    try:
+        result.manuscript = parse_meca_archive(potential_meca_archive)
+    except ValueError:
+        return result
 
     return result
 
 
-def export_processed_articles(output_file: str, processed_articles: List[Article]) -> None:
-    with open(f'{output_file}', 'w') as f:
-        dump([asdict(processed_article) for processed_article in processed_articles], f)
+def get_modification_time(file_path: str) -> datetime:
+    file = Path(file_path)
+    mod_timestamp = file.stat().st_mtime
+    return datetime.fromtimestamp(mod_timestamp)

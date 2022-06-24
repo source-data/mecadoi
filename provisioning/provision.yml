@@ -9,7 +9,7 @@
     sync_dir: '{{ sync_user_home_dir }}/storage-box-local'
     scripts_dir: '{{ sync_user_home_dir }}/bin'
     code_dir: '{{ sync_user_home_dir }}/mecadoi'
-    depositions_dir: '{{ sync_user_home_dir }}/depositions'
+    batch_dir: '{{ sync_user_home_dir }}/batch'
     logs_dir: '{{ sync_user_home_dir }}/logs'
     s3_bucket_name: mecadoi-archives
 
@@ -72,7 +72,7 @@
 
   - name: Create the local directories needed for sync
     ansible.builtin.file:
-      path: '{{ sync_user_home_dir }}/{{ item }}'
+      path: '{{ item }}'
       state: directory
       owner: '{{ sync_user }}'
       group: '{{ sync_user }}'
@@ -80,7 +80,7 @@
       - '{{ scripts_dir }}'
       - '{{ sync_dir }}'
       - '{{ logs_dir }}'
-      - '{{ depositions_dir }}'
+      - '{{ batch_dir }}'
 
   - name: Copy the scripts to the server
     ansible.builtin.copy:
@@ -94,16 +94,16 @@
     become: yes
     become_user: '{{ sync_user }}'
     ansible.builtin.cron:
-      name: Sync MECA archives hourly
-      minute: 0
+      name: Sync MECA archives from the storage box to a local directory and an S3 bucket
+      minute: 3
       job: '{{ scripts_dir }}/sync-storage-box.sh "{{ sync_dir }}" "{{ s3_bucket_name }}" | tee -a "{{ logs_dir }}/sync-storage-box.log"'
 
   - name: Set up cron job for notification about new files
     become: yes
     become_user: '{{ sync_user }}'
     ansible.builtin.cron:
-      name: Notify about new MECA archives every day at 04:00
-      minute: 0
+      name: Notify about new MECA archives
+      minute: 25
       hour: 4
       job: '{{ scripts_dir }}/notify-about-new-files.sh "{{ sync_dir }}"'
 
@@ -138,11 +138,11 @@
       virtualenv: '{{ code_dir }}/.venv'
       virtualenv_command: /usr/bin/python3.9 -m venv
 
-  - name: Set up cron job for generating deposition files
+  - name: Set up cron job for parsing new MECA archives
     become: yes
     become_user: '{{ sync_user }}'
     ansible.builtin.cron:
-      name: Generate Crossref deposition files from MECA archives every day at 05:00
-      minute: 0
+      name: Parse new MECA archives
+      minute: 46
       hour: 5
-      job: '{{ scripts_dir }}/generate-deposition-files.sh "{{ code_dir }}" "{{ sync_dir }}" "{{ depositions_dir }}" "{{ s3_bucket_name }}" "{{ logs_dir }}" | tee -a "{{ logs_dir }}/generate-deposition-files.log"'
+      job: '{{ scripts_dir }}/batch-parse.sh "{{ code_dir }}" "{{ sync_dir }}" "{{ batch_dir }}" | tee -a "{{ logs_dir }}/batch.log"'

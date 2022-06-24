@@ -4,6 +4,7 @@ __all__ = ['MecaArchiveTestCase']
 
 from os import listdir, mkdir
 from os.path import isdir, isfile, join
+from typing import List
 import lxml.etree
 from shutil import rmtree
 from unittest import TestCase
@@ -60,6 +61,9 @@ class MecaArchiveTestCase(TestCase):
 
     def get_meca_archive_path(self, meca_name: str) -> str:
         return f'{self.MECA_TARGET_DIR}/{meca_name}.zip'
+
+    def get_meca_archive_paths(self, meca_names: List[str]) -> List[str]:
+        return [self.get_meca_archive_path(meca_name) for meca_name in meca_names]
 
 
 class DepositionFileTestCase(TestCase):

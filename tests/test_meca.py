@@ -72,8 +72,8 @@ MANUSCRIPTS = {
                                    is_corresponding_author=False),
                         ],
                         text={
-                            'Significance (Required)': 'Lorem ipsum dolor sit amet.',
                             'Estimated time to Complete Revisions (Required)': 'Cannot tell / Not applicable',
+                            'Significance (Required)': 'Lorem ipsum dolor sit amet.',
                         },
                         running_number='1',
                     ),
@@ -83,9 +83,9 @@ MANUSCRIPTS = {
                                    is_corresponding_author=False),
                         ],
                         text={
+                            'Estimated time to Complete Revisions (Required)': 'Between 3 and 6 months',
                             'Evidence, reproducibility and clarity (Required)': 'Summary: this is a test',
                             'Significance (Required)': 'Signification: also a test',
-                            'Estimated time to Complete Revisions (Required)': 'Between 3 and 6 months',
                         },
                         running_number='2'
                     )
@@ -124,8 +124,8 @@ MANUSCRIPTS = {
                                    is_corresponding_author=False),
                         ],
                         text={
+                            'Estimated time to Complete Revisions (Required)': 'Cannot tell / Not applicable',
                             'Significance (Required)': 'Consectetur adipiscing elit.',
-                            'Estimated time to Complete Revisions (Required)': 'Cannot tell / Not applicable'
                         },
                         running_number='1',
                     ),
@@ -135,8 +135,8 @@ MANUSCRIPTS = {
                                    is_corresponding_author=False),
                         ],
                         text={
+                            'Estimated time to Complete Revisions (Required)': 'Cannot tell / Not applicable',
                             'Significance (Required)': 'Sed do eiusmod tempor incididunt ut labore et dolore.',
-                            'Estimated time to Complete Revisions (Required)': 'Cannot tell / Not applicable'
                         },
                         running_number='2',
                     ),
@@ -146,8 +146,8 @@ MANUSCRIPTS = {
                                    is_corresponding_author=False),
                         ],
                         text={
-                            'Significance (Required)': 'Cras adipiscing enim eu turpis egestas pretium aenean.',
                             'Estimated time to Complete Revisions (Required)': 'Cannot tell / Not applicable',
+                            'Significance (Required)': 'Cras adipiscing enim eu turpis egestas pretium aenean.',
                         },
                         running_number='3',
                     )
@@ -163,9 +163,9 @@ MANUSCRIPTS = {
                                    is_corresponding_author=False),
                         ],
                         text={
+                            'Estimated time to Complete Revisions (Required)': 'Cannot tell / Not applicable',
                             'Evidence, reproducibility and clarity (Required)': 'This is sample of evidence answer',
                             'Significance (Required)': 'This is a sample of significance',
-                            'Estimated time to Complete Revisions (Required)': 'Cannot tell / Not applicable',
                         },
                         running_number='1',
                     )
@@ -196,8 +196,8 @@ MANUSCRIPTS = {
                                    is_corresponding_author=False),
                         ],
                         text={
-                            'Significance (Required)': 'Lorem ipsum dolor sit amet.',
                             'Estimated time to Complete Revisions (Required)': 'Cannot tell / Not applicable',
+                            'Significance (Required)': 'Lorem ipsum dolor sit amet.',
                         },
                         running_number='1'
                     ),
@@ -207,8 +207,8 @@ MANUSCRIPTS = {
                                    is_corresponding_author=False),
                         ],
                         text={
-                            'Significance (Required)': 'Consectetur adipiscing elit.',
                             'Estimated time to Complete Revisions (Required)': 'Cannot tell / Not applicable',
+                            'Significance (Required)': 'Consectetur adipiscing elit.',
                         },
                         running_number='2'
                     ),
@@ -218,8 +218,8 @@ MANUSCRIPTS = {
                                    is_corresponding_author=False),
                         ],
                         text={
-                            'Significance (Required)': 'Sed do eiusmod tempor incididunt ut labore.',
                             'Estimated time to Complete Revisions (Required)': 'Cannot tell / Not applicable',
+                            'Significance (Required)': 'Sed do eiusmod tempor incididunt ut labore.',
                         },
                         running_number='3',
                     ),
@@ -242,9 +242,9 @@ MANUSCRIPTS = {
                             Author(given_name='redacted', surname='redacted', orcid=None, affiliation=None,
                                    is_corresponding_author=False)],
                         text={
+                            'Estimated time to Complete Revisions (Required)': 'Cannot tell / Not applicable',
                             'Evidence, reproducibility and clarity (Required)': 'This is sample of evidence answer',
                             'Significance (Required)': 'This is a sample of significance',
-                            'Estimated time to Complete Revisions (Required)': 'Cannot tell / Not applicable'
                         },
                         running_number='1',
                     )
@@ -281,8 +281,8 @@ MANUSCRIPTS = {
                                    is_corresponding_author=False),
                         ],
                         text={
-                            'Significance (Required)': 'Lorem ipsum dolor sit amet.',
                             'Estimated time to Complete Revisions (Required)': 'Cannot tell / Not applicable',
+                            'Significance (Required)': 'Lorem ipsum dolor sit amet.',
                         },
                         running_number='1',
                     ),
@@ -292,9 +292,9 @@ MANUSCRIPTS = {
                                    is_corresponding_author=False),
                         ],
                         text={
+                            'Estimated time to Complete Revisions (Required)': 'Between 3 and 6 months',
                             'Evidence, reproducibility and clarity (Required)': 'Summary: this is a test',
                             'Significance (Required)': 'Signification: also a test',
-                            'Estimated time to Complete Revisions (Required)': 'Between 3 and 6 months',
                         },
                         running_number='2',
                     ),

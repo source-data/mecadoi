@@ -1,7 +1,13 @@
+from dataclasses import asdict
+from os import mkdir, walk
+from os.path import join
+from shutil import move
+from typing import Any, Dict
+from uuid import uuid4
 import click
 from yaml import dump
-from src.cli.crossref.options import verbose_output
-from src.batch import batch_deposit, BatchDepositRun
+from src.batch import parse as batch_parse
+from src.db import BatchDatabase
 
 
 @click.command()
@@ -14,28 +20,31 @@ from src.batch import batch_deposit, BatchDepositRun
     required=True,
     type=click.Path(exists=True, file_okay=False, dir_okay=True, writable=True),
 )
-@verbose_output
-@click.option(
-    '--dry-run/--no-dry-run',
-    default=True,
-)
-def deposit(
-    input_directory: str,
-    output_directory: str,
-    verbose: int,
-    dry_run: bool,
-) -> None:
+def parse(input_directory: str, output_directory: str) -> None:
     """
-    Generate deposition files for all peer reviews in the MECA archives found in the given directory.
+    Parse all files in the given directory, register them in the database, and move them to the given output directory.
     """
-    result = batch_deposit(
-        input_directory,
-        output_directory,
-        verbose=verbose,
-        dry_run=dry_run,
-    )
-    click.echo(output(result), nl=False)
+    # find all files in the given input directory: these are the potential MECA archives. Usually they're .zip files,
+    # but let's just find everything in case they're not.
+    input_files = [
+        join(dirpath, filename)
+        for dirpath, _, filenames in walk(input_directory)
+        for filename in filenames
+    ]
+
+    # parse and register the input files
+    result = batch_parse(input_files, BatchDatabase(f'{output_directory}/batch.sqlite3'))
+
+    # move the input files to the output directory
+    id_batch_run = str(uuid4())
+    output_directory = f'{output_directory}/{id_batch_run}/'
+    move(input_directory, output_directory)
+    mkdir(input_directory)
+
+    result_as_dict = asdict(result)
+    result_as_dict['id'] = id_batch_run
+    click.echo(output(result_as_dict), nl=False)
 
 
-def output(batch_deposit_run: BatchDepositRun) -> str:
-    return str(dump(batch_deposit_run, canonical=False))
+def output(result: Dict[str, Any]) -> str:
+    return str(dump(result, canonical=False))

@@ -49,8 +49,8 @@ class ArticleTestCase(TestCase):
                         Review(
                             authors=[],
                             text={
-                                'Significance (Required)': 'Lorem ipsum dolor sit amet.',
                                 'Estimated time to Complete Revisions (Required)': 'Cannot tell / Not applicable',
+                                'Significance (Required)': 'Lorem ipsum dolor sit amet.',
                             },
                             doi=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES,
                             publication_date=PUBLICATION_DATE,
@@ -58,9 +58,9 @@ class ArticleTestCase(TestCase):
                         Review(
                             authors=[],
                             text={
+                                'Estimated time to Complete Revisions (Required)': 'Between 3 and 6 months',
                                 'Evidence, reproducibility and clarity (Required)': 'Summary: this is a test',
                                 'Significance (Required)': 'Signification: also a test',
-                                'Estimated time to Complete Revisions (Required)': 'Between 3 and 6 months',
                             },
                             doi=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES,
                             publication_date=PUBLICATION_DATE,
@@ -102,26 +102,26 @@ ARTICLES = {
                     Review(
                         authors=[],
                         text={
-                            'Significance (Required)': 'Consectetur adipiscing elit.',
-                            'Estimated time to Complete Revisions (Required)': 'Cannot tell / Not applicable'
-                        },
-                        doi=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES,
-                        publication_date=PUBLICATION_DATE,
-                    ),
-                    Review(
-                        authors=[],
-                        text={
-                            'Significance (Required)': 'Sed do eiusmod tempor incididunt ut labore et dolore.',
-                            'Estimated time to Complete Revisions (Required)': 'Cannot tell / Not applicable'
-                        },
-                        doi=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES,
-                        publication_date=PUBLICATION_DATE,
-                    ),
-                    Review(
-                        authors=[],
-                        text={
-                            'Significance (Required)': 'Cras adipiscing enim eu turpis egestas pretium aenean.',
                             'Estimated time to Complete Revisions (Required)': 'Cannot tell / Not applicable',
+                            'Significance (Required)': 'Consectetur adipiscing elit.',
+                        },
+                        doi=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES,
+                        publication_date=PUBLICATION_DATE,
+                    ),
+                    Review(
+                        authors=[],
+                        text={
+                            'Estimated time to Complete Revisions (Required)': 'Cannot tell / Not applicable',
+                            'Significance (Required)': 'Sed do eiusmod tempor incididunt ut labore et dolore.',
+                        },
+                        doi=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES,
+                        publication_date=PUBLICATION_DATE,
+                    ),
+                    Review(
+                        authors=[],
+                        text={
+                            'Estimated time to Complete Revisions (Required)': 'Cannot tell / Not applicable',
+                            'Significance (Required)': 'Cras adipiscing enim eu turpis egestas pretium aenean.',
                         },
                         doi=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES,
                         publication_date=PUBLICATION_DATE,
@@ -134,9 +134,9 @@ ARTICLES = {
                     Review(
                         authors=[],
                         text={
+                            'Estimated time to Complete Revisions (Required)': 'Cannot tell / Not applicable',
                             'Evidence, reproducibility and clarity (Required)': 'This is sample of evidence answer',
                             'Significance (Required)': 'This is a sample of significance',
-                            'Estimated time to Complete Revisions (Required)': 'Cannot tell / Not applicable',
                         },
                         doi=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES,
                         publication_date=PUBLICATION_DATE,
@@ -155,8 +155,8 @@ ARTICLES = {
                     Review(
                         authors=[],
                         text={
+                            'Estimated time to Complete Revisions (Required)': 'Cannot tell / Not applicable',
                             'Significance (Required)': 'Lorem ipsum dolor sit amet.',
-                            'Estimated time to Complete Revisions (Required)': 'Cannot tell / Not applicable',
                         },
                         doi=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES,
                         publication_date=PUBLICATION_DATE,
@@ -164,8 +164,8 @@ ARTICLES = {
                     Review(
                         authors=[],
                         text={
+                            'Estimated time to Complete Revisions (Required)': 'Cannot tell / Not applicable',
                             'Significance (Required)': 'Consectetur adipiscing elit.',
-                            'Estimated time to Complete Revisions (Required)': 'Cannot tell / Not applicable',
                         },
                         doi=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES,
                         publication_date=PUBLICATION_DATE,
@@ -173,8 +173,8 @@ ARTICLES = {
                     Review(
                         authors=[],
                         text={
-                            'Significance (Required)': 'Sed do eiusmod tempor incididunt ut labore.',
                             'Estimated time to Complete Revisions (Required)': 'Cannot tell / Not applicable',
+                            'Significance (Required)': 'Sed do eiusmod tempor incididunt ut labore.',
                         },
                         doi=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES,
                         publication_date=PUBLICATION_DATE,
@@ -197,9 +197,9 @@ ARTICLES = {
                     Review(
                         authors=[],
                         text={
+                            'Estimated time to Complete Revisions (Required)': 'Cannot tell / Not applicable',
                             'Evidence, reproducibility and clarity (Required)': 'This is sample of evidence answer',
                             'Significance (Required)': 'This is a sample of significance',
-                            'Estimated time to Complete Revisions (Required)': 'Cannot tell / Not applicable'
                         },
                         doi=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES,
                         publication_date=PUBLICATION_DATE,
@@ -218,8 +218,8 @@ ARTICLES = {
                     Review(
                         authors=[],
                         text={
-                            'Significance (Required)': 'Lorem ipsum dolor sit amet.',
                             'Estimated time to Complete Revisions (Required)': 'Cannot tell / Not applicable',
+                            'Significance (Required)': 'Lorem ipsum dolor sit amet.',
                         },
                         doi=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES,
                         publication_date=PUBLICATION_DATE,
@@ -227,9 +227,9 @@ ARTICLES = {
                     Review(
                         authors=[],
                         text={
+                            'Estimated time to Complete Revisions (Required)': 'Between 3 and 6 months',
                             'Evidence, reproducibility and clarity (Required)': 'Summary: this is a test',
                             'Significance (Required)': 'Signification: also a test',
-                            'Estimated time to Complete Revisions (Required)': 'Between 3 and 6 months',
                         },
                         doi=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES,
                         publication_date=PUBLICATION_DATE,
