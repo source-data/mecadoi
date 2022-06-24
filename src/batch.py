@@ -11,10 +11,13 @@ __all__ = [
 
 from dataclasses import dataclass, field
 from datetime import datetime
+from logging import getLogger
 from pathlib import Path
 from typing import List, Tuple
 from src.db import BatchDatabase, ParsedFile
 from src.meca import parse_meca_archive
+
+LOGGER = getLogger(__name__)
 
 
 @dataclass
@@ -82,7 +85,8 @@ def parse_potential_meca_archive(potential_meca_archive: str) -> ParsedFile:
 
     try:
         result.manuscript = parse_meca_archive(potential_meca_archive)
-    except ValueError:
+    except ValueError as e:
+        LOGGER.info('Invalid MECA archive "%s": %s', potential_meca_archive, str(e))
         return result
 
     return result

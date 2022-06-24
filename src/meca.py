@@ -317,7 +317,7 @@ class MECArchive:
         try:
             return ZipFile(self.path_to_archive, 'r')
         except BadZipFile as e:
-            raise ValueError('Bad zip file:' + str(e))
+            raise ValueError('Bad zip file: ' + str(e))
 
     def _open_file_in_archive(self, file: Union[str, FileInMeca]) -> IO[bytes]:
         with self._open_archive() as archive:
