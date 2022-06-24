@@ -23,7 +23,7 @@ from html import unescape
 from lxml.etree import parse, tostring
 from pathlib import Path
 from typing import Any, IO, List, Optional, Set, Union
-from zipfile import ZipFile
+from zipfile import BadZipFile, ZipFile
 
 from src.model import Author, DigitalObject, Orcid, Work
 
@@ -314,7 +314,10 @@ class MECArchive:
             )
 
     def _open_archive(self) -> ZipFile:
-        return ZipFile(self.path_to_archive, 'r')
+        try:
+            return ZipFile(self.path_to_archive, 'r')
+        except BadZipFile as e:
+            raise ValueError('Bad zip file:' + str(e))
 
     def _open_file_in_archive(self, file: Union[str, FileInMeca]) -> IO[bytes]:
         with self._open_archive() as archive:

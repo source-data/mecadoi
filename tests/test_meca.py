@@ -8,11 +8,15 @@ class ParseMecaArchiveTestCase(MecaArchiveTestCase):
 
     def test_parsing_invalid_archives(self) -> None:
         """When parsing invalid MECA archives a ValueError should be raised."""
-        for meca_archive_name in INVALID_MECA_ARCHIVES:
-            with self.subTest(meca_archive=meca_archive_name):
-                meca_archive_path = self.get_meca_archive_path(meca_archive_name)
+        invalid_meca_archives = [
+            self.get_meca_archive_path(meca_archive_name)
+            for meca_archive_name in ['no-manifest', 'no-article']
+        ]
+        invalid_zip_files = ['tests/resources/expected/multiple-revision-rounds.xml']
+        for file in invalid_meca_archives + invalid_zip_files:
+            with self.subTest(file=file):
                 with self.assertRaises(ValueError):
-                    parse_meca_archive(meca_archive_path)
+                    parse_meca_archive(file)
 
     def test_parsing_valid_archives(self) -> None:
         """When parsing valid MECA archives an Article object with all the right info should be returned."""
