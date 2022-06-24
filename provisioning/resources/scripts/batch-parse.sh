@@ -10,5 +10,5 @@ cd "${code_folder}"
 source .venv/bin/activate
 output_batch_parse="$(python3 -m src.cli.main batch parse -o "${output_folder}" "${input_folder}")"
 
-echo "${output_batch_parse}" | mutt -s "[MECADOI] batch deposit run" -- "${recipient_email}"
+echo "${output_batch_parse}" | mutt -s "[MECADOI] batch parsing" -- "${recipient_email}"
 echo "${output_batch_parse}"
