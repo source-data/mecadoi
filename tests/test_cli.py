@@ -15,6 +15,7 @@ class CliTestCase(MecaArchiveTestCase):
 
     def setUp(self) -> None:
         self.runner = CliRunner()
+        self.maxDiff = None
         return super().setUp()
 
     def run_mecadoi_command(self, command: List[str]) -> Result:
