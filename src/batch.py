@@ -44,7 +44,7 @@ def parse(files: List[str], db: BatchDatabase) -> ParsedFiles:
     # Parse each file and register it in the batch database
     parsed_meca_archives = [
         parse_potential_meca_archive(potential_meca_archive)
-        for potential_meca_archive in files
+        for potential_meca_archive in sorted(files)
     ]
     db.add_parsed_files(parsed_meca_archives)
 

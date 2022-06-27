@@ -24,8 +24,8 @@ class BatchTestCase(MecaArchiveTestCase, BatchDbTestCase):
             ParsedFileStatus.NO_REVIEWS: ['no-reviews'],
             ParsedFileStatus.NO_PREPRINT_DOI: ['no-preprint-doi'],
             ParsedFileStatus.READY_FOR_DEPOSITION: [
-                'no-author-reply',
                 'multiple-revision-rounds',
+                'no-author-reply',
                 'single-revision-round',
             ],
         }
