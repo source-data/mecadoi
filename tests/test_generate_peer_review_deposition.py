@@ -1,5 +1,4 @@
 from datetime import datetime
-from src.article import Article
 from src.crossref.peer_review import generate_peer_review_deposition
 from tests.common import DepositionFileTestCase, MecaArchiveTestCase
 from tests.test_article import ARTICLES
@@ -24,13 +23,6 @@ class TestGeneratePeerReviewDeposition(MecaArchiveTestCase, DepositionFileTestCa
                 expected_xml = f'tests/resources/expected/{article_name}.xml'
 
                 article = ARTICLES[article_name]
-                actual_xml = self.generate_xml(article, article_name)
+                actual_xml = generate_peer_review_deposition(article)
 
                 self.assertDepositionFileEquals(expected_xml, actual_xml)
-
-    def generate_xml(self, article: Article, article_name: str) -> str:
-        output_filename = f'tests/tmp/{article_name}.xml'
-        deposition_xml = generate_peer_review_deposition(article)
-        with open(output_filename, 'w') as f:
-            f.write(deposition_xml)
-        return output_filename

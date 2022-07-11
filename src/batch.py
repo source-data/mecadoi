@@ -1,10 +1,15 @@
 """
 Process multiple MECA archives: parse them, generate deposition files, and send them to the Crossref API.
 
-Main entrypoint is parse(files, db) which parses all given files and stores the results in the given BatchDatabase.
+Main entrypoints are `parse(files, db)` which parses all given files to prepare for deposition and
+`deposit(parsed_files, db)` which tries to deposit all given parsed files.
+Both functions store detailed results in the given BatchDatabase and return an overview of the actions taken for each
+given file.
 """
 
 __all__ = [
+    'deposit',
+    'DepositedMECAs',
     'parse',
     'ParsedFiles',
 ]
@@ -13,8 +18,13 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from logging import getLogger
 from pathlib import Path
-from typing import List, Tuple
-from src.db import BatchDatabase, ParsedFile
+from typing import List, Optional, Tuple
+
+from src.article import Article, from_meca_manuscript
+from src.crossref.api import deposit as deposit_file
+from src.crossref.peer_review import generate_peer_review_deposition
+from src.db import BatchDatabase, DepositionAttempt, ParsedFile
+from src.dois import get_free_doi
 from src.meca import parse_meca_archive
 
 LOGGER = getLogger(__name__)
@@ -49,34 +59,25 @@ def parse(files: List[str], db: BatchDatabase) -> ParsedFiles:
     db.add_parsed_files(parsed_meca_archives)
 
     # Group the parsed files by their status
-    invalid, no_reviews, no_preprint_doi, ready_for_deposition = partition_meca_archives(parsed_meca_archives)
-    return ParsedFiles(
-        invalid=invalid,
-        no_reviews=no_reviews,
-        no_preprint_doi=no_preprint_doi,
-        ready_for_deposition=ready_for_deposition,
-    )
+    return group_files_by_status(parsed_meca_archives)
 
 
-def partition_meca_archives(meca_archives: List[ParsedFile]) -> Tuple[List[str], List[str], List[str], List[str]]:
-    invalid: List[str] = []
-    no_reviews: List[str] = []
-    no_preprint_doi: List[str] = []
-    ready_for_deposition: List[str] = []
+def group_files_by_status(meca_archives: List[ParsedFile]) -> ParsedFiles:
+    result = ParsedFiles()
 
     for meca_archive in meca_archives:
         resulting_list = None
         if meca_archive.manuscript is None:
-            resulting_list = invalid
+            resulting_list = result.invalid
         elif not meca_archive.manuscript.review_process:
-            resulting_list = no_reviews
+            resulting_list = result.no_reviews
         elif not meca_archive.manuscript.preprint_doi:
-            resulting_list = no_preprint_doi
+            resulting_list = result.no_preprint_doi
         else:
-            resulting_list = ready_for_deposition
+            resulting_list = result.ready_for_deposition
         resulting_list.append(meca_archive.path)
 
-    return (invalid, no_reviews, no_preprint_doi, ready_for_deposition)
+    return result
 
 
 def parse_potential_meca_archive(potential_meca_archive: str) -> ParsedFile:
@@ -96,3 +97,96 @@ def get_modification_time(file_path: str) -> datetime:
     file = Path(file_path)
     mod_timestamp = file.stat().st_mtime
     return datetime.fromtimestamp(mod_timestamp)
+
+
+@dataclass
+class DepositedMECAs:
+    """The MECA archives that were attempted to be deposited in one batch-deposition run."""
+
+    deposition_generation_failed: List[str] = field(default_factory=list)
+    """No deposition file could be generated from these MECAs."""
+
+    deposition_failed: List[str] = field(default_factory=list)
+    """The DOI deposition failed for these MECAs."""
+
+    deposition_succeeded: List[str] = field(default_factory=list)
+    """The DOI deposition succeeded for these MECAs."""
+
+
+def deposit(mecas: List[ParsedFile], db: BatchDatabase, dry_run: bool = True) -> Tuple[DepositedMECAs, List[Article]]:
+    """
+    Generate deposition files from the given MECAs, try to send the files to the Crossref API, and store the results in
+    `db`.
+
+    Raises a ValueError if not all given MECAs are already stored in the database and have reviews as well as a
+    preprint DOI.
+    """
+    if not all([m.id and m.manuscript and m.manuscript.review_process and m.manuscript.preprint_doi for m in mecas]):
+        raise ValueError(f'Not all required information present for all MECAs: {mecas}')
+
+    deposition_attempts = []
+    articles = []
+    for meca in mecas:
+        deposition_attempt, article = generate_deposition_file(meca)
+        deposition_attempts.append(deposition_attempt)
+        articles.append(article)
+
+    if dry_run:
+        return group_deposition_attempts_by_status(deposition_attempts, dry_run), []
+
+    for deposition_attempt in deposition_attempts:
+        if deposition_attempt.deposition is None:
+            continue
+
+        deposition_attempt.attempted_at = datetime.now()
+        try:
+            deposit_file(deposition_attempt.deposition)
+            deposition_attempt.succeeded = True
+        except Exception as e:
+            LOGGER.warning('Failed to deposit peer reviews from "%s": %s', deposition_attempt.meca.path, str(e))
+            deposition_attempt.succeeded = False
+
+    db.add_deposition_attempts(deposition_attempts)
+
+    successfully_deposited_articles = [
+        articles[i]
+        for i, deposition_attempt in enumerate(deposition_attempts)
+        if deposition_attempt.succeeded
+    ]
+
+    return (
+        group_deposition_attempts_by_status(deposition_attempts, dry_run),
+        successfully_deposited_articles,
+    )
+
+
+def generate_deposition_file(meca: ParsedFile) -> Tuple[DepositionAttempt, Optional[Article]]:
+    result = DepositionAttempt(meca=meca)
+    try:
+        article = from_meca_manuscript(
+            meca.manuscript,  # type: ignore[arg-type] # meca.manuscript is checked to be not None above
+            meca.received_at,
+            get_free_doi
+        )
+        result.deposition = generate_peer_review_deposition(article)
+    except Exception as e:
+        LOGGER.warning('Failed to generate deposition file from "%s": %s', meca.path, str(e))
+        article = None
+
+    return result, article
+
+
+def group_deposition_attempts_by_status(deposition_attempts: List[DepositionAttempt], dry_run: bool) -> DepositedMECAs:
+    result = DepositedMECAs()
+
+    for deposition_attempt in deposition_attempts:
+        resulting_list = None
+        if deposition_attempt.deposition is None:
+            resulting_list = result.deposition_generation_failed
+        elif dry_run or deposition_attempt.succeeded:
+            resulting_list = result.deposition_succeeded
+        else:
+            resulting_list = result.deposition_failed
+        resulting_list.append(deposition_attempt.meca.path)
+
+    return result

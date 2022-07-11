@@ -75,15 +75,27 @@ The Crossref API almost always returns a message indicating success even with ob
 
 ### `batch`
 
-The `generate` subcommand finds all `.zip` files in the given input directory and tries to parse them as MECA archives. For every successfully parsed MECA archive that has reviews, a deposition file is generated in the given output directory. Then, all input files are removed. Inside the output directory, the deposition files are placed within subfolders corresponding to the DOI of the preprint the article belongs to. No deposition file is generated for any invalid MECA archive, any archive without a preprint DOI, and any archive for whose preprint a deposition file is already present.
+All actions taken during these commands is recorded in an sqlite database, the batch database. It's stored in the output directory parameter that has to passed to each command.
+
+The `generate` subcommand finds all files in the given input directory, tries to parse them as MECA archives, and registers them in the batch database. Then, all input files are archived in the output directory.
 
 ```bash
 python3 -m src.cli.main batch deposit -o output/ input-dir/
 ```
 
+The `deposit` subcommand finds every successfully parsed MECA archive in the batch database that has reviews & a preprint DOI and for which no DOIs have been successfully deposited. Then, for each file a deposition attempt is made and stored in the batch database.
+
+
 ## Workflow Pipeline
 
-The MECA processing workflow of fetching files from the input FTP directory, archiving them to S3, generating deposition files out of the MECA archives, sending these deposition files to the Crossref API, and finally exporting the created DOIs is currently defined as a series of cron jobs. These are set up through the Ansible playbook in [provisioning](provisioning).
+The MECA processing workflow is currently defined as a series of cron jobs that are set up through the Ansible playbook in [provisioning](provisioning).
+The workflow consists of these steps:
+
+1. Move files from the input FTP directory to a local directory.
+2. Archive the files to an S3 bucket.
+3. Try parsing the files as MECA archives, register them in a database, and archive the processed files.
+4. Find all files in that database that are ready to be deposited and deposit them.
+5. Export information about the created DOIs.
 
 ## Development
 

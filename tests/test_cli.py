@@ -3,11 +3,14 @@ from os import mkdir, walk
 from pathlib import Path
 from shutil import rmtree
 from typing import Any, Dict, List
+from unittest.mock import Mock, patch
 from click.testing import CliRunner, Result
-from yaml import Loader, load
+from yaml import Loader, load, safe_load
+from src.article import Article
 from src.cli.main import main as mecadoi
 from tests.common import MecaArchiveTestCase
-from tests.test_batch import BatchTestCase
+from tests.test_article import DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES
+from tests.test_batch import BaseDepositTestCase, BaseParseTestCase
 from tests.test_db import BatchDbTestCase
 
 
@@ -37,7 +40,7 @@ class MecaTestCase(CliTestCase):
         self.assertIn(publisher, result.output)
 
 
-class BatchParseTestCase(CliTestCase, BatchTestCase, BatchDbTestCase):
+class BaseBatchTestCase(CliTestCase, BatchDbTestCase):
 
     def setUp(self) -> None:
         self.output_directory = 'tests/tmp/batch'
@@ -50,6 +53,25 @@ class BatchParseTestCase(CliTestCase, BatchTestCase, BatchDbTestCase):
         self.db_file = f'{self.output_directory}/batch.sqlite3'
         super().setUp()
 
+    def assert_cli_output_equal(
+        self,
+        expected: Dict[str, Any],
+        result: Result,
+        attrs_to_ignore: List[str],
+    ) -> Dict[str, Any]:
+        actual_output = load(result.output, Loader=Loader)
+        for attr_to_ignore in attrs_to_ignore:
+            self.assertIsNotNone(actual_output[attr_to_ignore])
+            expected[attr_to_ignore] = actual_output[attr_to_ignore]
+        self.assertEqual(expected, actual_output)
+        return actual_output
+
+
+class ParseTestCase(BaseBatchTestCase, BaseParseTestCase):
+
+    def setUp(self) -> None:
+        super().setUp()
+
         self.input_directory = self.MECA_TARGET_DIR
         self.input_directory_structure = list(walk(self.input_directory))
 
@@ -60,20 +82,54 @@ class BatchParseTestCase(CliTestCase, BatchTestCase, BatchDbTestCase):
         """
         result = self.run_mecadoi_command(['batch', 'parse', '-o', self.output_directory, self.input_directory])
         self.assertEqual(0, result.exit_code)
-
-        actual_output = load(result.output, Loader=Loader)
-        expected_output = asdict(self.expected_output)
-        self.assert_cli_output_equal(expected_output, actual_output)
+        actual_output = self.assert_cli_output_equal(asdict(self.expected_output), result, ['id'])
 
         self.assert_meca_archives_in_db(self.expected_db_contents)
         self.assert_input_files_are_in_output_dir(actual_output)
-
-    def assert_cli_output_equal(self, expected: Dict[str, Any], actual: Dict[str, Any]) -> None:
-        self.assertIsNotNone(actual['id'])
-        expected['id'] = actual['id']
-        self.assertEqual(expected, actual)
 
     def assert_input_files_are_in_output_dir(self, actual: Dict[str, Any]) -> None:
         expected_output_dir = f'{self.output_directory}/{actual["id"]}'
         files_in_output_dir = [path for path in Path(expected_output_dir).glob('**/*') if path.is_file()]
         self.assertEqual(len(self.input_files), len(files_in_output_dir))
+
+
+@patch('src.batch.deposit_file')
+@patch('src.batch.get_free_doi', return_value=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES)
+class DepositTestCase(BaseBatchTestCase, BaseDepositTestCase):
+
+    def test_batch_deposit_dry_run(self, _: Mock, deposit_file_mock: Mock) -> None:
+        result = self.run_mecadoi_command(['batch', 'deposit', '-o', self.output_directory, '--dry-run'])
+        self.assertEqual(0, result.exit_code)
+
+        expected_output = asdict(self.expected_output)
+        expected_output['dry_run'] = True
+        actual_output = self.assert_cli_output_equal(expected_output, result, ['id'])
+
+        self.assert_deposition_attempts_in_db([])
+        self.assert_articles_in_output_dir(actual_output['id'], [])
+        deposit_file_mock.assert_not_called()
+
+    def test_batch_deposit(self, _: Mock, deposit_file_mock: Mock) -> None:
+        result = self.run_mecadoi_command(['batch', 'deposit', '-o', self.output_directory, '--no-dry-run'])
+        self.assertEqual(0, result.exit_code)
+
+        expected_output = asdict(self.expected_output)
+        expected_output['dry_run'] = False
+        actual_output = self.assert_cli_output_equal(expected_output, result, ['id'])
+
+        self.assert_deposition_attempts_in_db(self.expected_deposition_attempts())
+        self.assert_articles_in_output_dir(actual_output['id'], self.expected_articles)
+        self.assertEqual(3, len(deposit_file_mock.mock_calls))
+
+    def assert_articles_in_output_dir(self, id_batch_run: str, expected_articles: List[Article]) -> None:
+        output_file = f'{self.output_directory}/{id_batch_run}.yml'
+        if not expected_articles:
+            self.assertFalse(Path(output_file).exists())
+            return
+
+        expected_content = [asdict(article) for article in expected_articles]
+
+        with open(output_file, 'r') as f:
+            actual_content = safe_load(f)
+
+        self.assertEqual(expected_content, actual_content)

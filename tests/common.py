@@ -78,8 +78,11 @@ class DepositionFileTestCase(TestCase):
         ]
 
         def canonicalize(xml_file: str) -> str:
-            tree = lxml.etree.parse(xml_file)
-            root = tree.getroot()
+            try:
+                tree = lxml.etree.parse(xml_file)
+                root = tree.getroot()
+            except:
+                root = lxml.etree.fromstring(xml_file)
             for ignore_xpath in ignore_xpaths:
                 for element_to_ignore in root.findall(ignore_xpath, namespaces=ignore_namespaces):
                     parent = element_to_ignore.getparent()

@@ -1,5 +1,5 @@
 import click
-from .commands import parse
+from .commands import deposit, parse
 
 
 @click.group()
@@ -8,4 +8,5 @@ def batch() -> None:
     pass
 
 
+batch.add_command(deposit)
 batch.add_command(parse)
