@@ -8,6 +8,7 @@ The configuration file can also be specified by setting the environment variable
 """
 
 from dotenv import load_dotenv
+from logging import basicConfig
 from os import getenv
 
 # Use the ENV_FILE parameter to load the configuration file. If the parameter isn't set, the dotenv library searches
@@ -40,7 +41,10 @@ CROSSREF_USERNAME = getenv_or_raise('CROSSREF_USERNAME')
 CROSSREF_PASSWORD = getenv_or_raise('CROSSREF_PASSWORD')
 
 LOG_FILE = getenv('LOG_FILE')
-LOG_LEVEL = getenv('LOG_LEVEL')
+LOG_LEVEL = getenv('LOG_LEVEL', default='INFO')
+
+if LOG_FILE:
+    basicConfig(filename=LOG_FILE, level=LOG_LEVEL, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 __all__ = [
     'DEPOSITOR_NAME',
