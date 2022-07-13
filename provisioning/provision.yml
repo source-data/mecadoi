@@ -82,30 +82,13 @@
       - '{{ logs_dir }}'
       - '{{ batch_dir }}'
 
-  - name: Copy the scripts to the server
-    ansible.builtin.copy:
-      src: 'resources/scripts/'
-      dest: '{{ scripts_dir }}/'
+  - name: Copy the templated wrapper script to the server
+    template: 
+      src: 'resources/scripts/mecadoi.sh'
+      dest: '{{ scripts_dir }}/mecadoi.sh'
       owner: '{{ sync_user }}'
       group: '{{ sync_user }}'
-      mode: u=rwx,g=r,o=r
-
-  - name: Set up cron job for syncing the storage box
-    become: yes
-    become_user: '{{ sync_user }}'
-    ansible.builtin.cron:
-      name: Sync MECA archives from the storage box to a local directory and an S3 bucket
-      minute: 3
-      job: '{{ scripts_dir }}/sync-storage-box.sh "{{ sync_dir }}" "{{ s3_bucket_name }}" | tee -a "{{ logs_dir }}/sync-storage-box.log"'
-
-  - name: Set up cron job for notification about new files
-    become: yes
-    become_user: '{{ sync_user }}'
-    ansible.builtin.cron:
-      name: Notify about new MECA archives
-      minute: 25
-      hour: 4
-      job: '{{ scripts_dir }}/notify-about-new-files.sh "{{ sync_dir }}"'
+      mode: u=rx,g=rx,o=r
 
   - name: Copy the Python files to the server
     ansible.posix.synchronize:
@@ -138,11 +121,21 @@
       virtualenv: '{{ code_dir }}/.venv'
       virtualenv_command: /usr/bin/python3.9 -m venv
 
+  - name: Set up cron job for syncing the storage box
+    become: yes
+    become_user: '{{ sync_user }}'
+    ansible.builtin.cron:
+      name: Sync MECA archives from the storage box to a local directory and an S3 bucket
+      minute: 3
+      job: '{{ scripts_dir }}/mecadoi.sh sync | tee -a "{{ logs_dir }}/sync-storage-box.log"'
+
   - name: Set up cron job for parsing new MECA archives
     become: yes
     become_user: '{{ sync_user }}'
     ansible.builtin.cron:
       name: Parse new MECA archives
+      # weekly on Sunday morning
       minute: 46
       hour: 5
-      job: '{{ scripts_dir }}/batch-parse.sh "{{ code_dir }}" "{{ sync_dir }}" "{{ batch_dir }}" | tee -a "{{ logs_dir }}/batch.log"'
+      weekday: 1
+      job: '{{ scripts_dir }}/mecadoi.sh parse | tee -a "{{ logs_dir }}/batch.log"'
