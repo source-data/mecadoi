@@ -24,7 +24,7 @@ class BaseBatchTestCase(BatchDbTestCase):
     def assert_timestamps_within_interval(self, expected: datetime, actual: datetime, interval: timedelta) -> None:
         self.assertIsNotNone(expected)
         self.assertIsNotNone(actual)
-        delta = actual - expected  # type: ignore[operator] # checked to not be None above
+        delta = actual - expected
         self.assertGreaterEqual(interval, delta)
 
 
