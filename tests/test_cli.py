@@ -58,7 +58,7 @@ class BaseBatchTestCase(CliTestCase, BatchDbTestCase):
         expected: Dict[str, Any],
         result: Result,
         attrs_to_ignore: List[str],
-    ) -> Dict[str, Any]:
+    ) -> Any:
         actual_output = load(result.output, Loader=Loader)
         for attr_to_ignore in attrs_to_ignore:
             self.assertIsNotNone(actual_output[attr_to_ignore])

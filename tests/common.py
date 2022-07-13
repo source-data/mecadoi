@@ -81,7 +81,7 @@ class DepositionFileTestCase(TestCase):
             try:
                 tree = lxml.etree.parse(xml_file)
                 root = tree.getroot()
-            except:
+            except Exception:
                 root = lxml.etree.fromstring(xml_file)
             for ignore_xpath in ignore_xpaths:
                 for element_to_ignore in root.findall(ignore_xpath, namespaces=ignore_namespaces):

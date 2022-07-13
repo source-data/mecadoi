@@ -172,7 +172,10 @@ class BatchDatabase:
             for statement in self.CREATE_TABLE_STATEMENTS:
                 conn.execute(statement)
 
-    def _deserialize_parsed_files(self, result: List[Row]) -> List[ParsedFile]:
+    def _deserialize_parsed_files(
+        self,
+        result: List[Row]  # type: ignore[type-arg]
+    ) -> List[ParsedFile]:
         return [
             ParsedFile(
                 path=row['path'],
@@ -183,7 +186,10 @@ class BatchDatabase:
             for row in result
         ]
 
-    def _deserialize_deposition_attempts(self, result: List[Row]) -> List[DepositionAttempt]:
+    def _deserialize_deposition_attempts(
+        self,
+        result: List[Row]  # type: ignore[type-arg]
+    ) -> List[DepositionAttempt]:
         return [
             DepositionAttempt(
                 deposition=row['deposition'],

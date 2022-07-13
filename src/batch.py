@@ -18,7 +18,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from logging import getLogger
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 from src.article import Article, from_meca_manuscript
 from src.crossref.api import deposit as deposit_file
@@ -125,20 +125,30 @@ def deposit(mecas: List[ParsedFile], db: BatchDatabase, dry_run: bool = True) ->
         raise ValueError(f'Not all required information present for all MECAs: {mecas}')
 
     deposition_attempts = []
-    articles = []
+    successfully_deposited_articles = []
     for meca in mecas:
-        deposition_attempt, article = generate_deposition_file(meca)
+        deposition_attempt = DepositionAttempt(meca=meca)
         deposition_attempts.append(deposition_attempt)
-        articles.append(article)
 
-    if dry_run:
-        return group_deposition_attempts_by_status(deposition_attempts, dry_run), []
+        try:
+            article = from_meca_manuscript(
+                meca.manuscript,  # type: ignore[arg-type] # meca.manuscript is checked to be not None above
+                meca.received_at,
+                get_free_doi,
+            )
+            deposition_attempt.deposition = generate_peer_review_deposition(article)
+        except Exception as e:
+            LOGGER.warning('Failed to generate deposition file from "%s": %s', meca.path, str(e))
+            continue
 
-    for deposition_attempt in deposition_attempts:
+        if dry_run:
+            continue
+
         if deposition_attempt.deposition is None:
             continue
 
         deposition_attempt.attempted_at = datetime.now()
+
         try:
             deposit_file(deposition_attempt.deposition)
             deposition_attempt.succeeded = True
@@ -146,34 +156,16 @@ def deposit(mecas: List[ParsedFile], db: BatchDatabase, dry_run: bool = True) ->
             LOGGER.warning('Failed to deposit peer reviews from "%s": %s', deposition_attempt.meca.path, str(e))
             deposition_attempt.succeeded = False
 
-    db.add_deposition_attempts(deposition_attempts)
+        if deposition_attempt.succeeded:
+            successfully_deposited_articles.append(article)
 
-    successfully_deposited_articles = [
-        articles[i]
-        for i, deposition_attempt in enumerate(deposition_attempts)
-        if deposition_attempt.succeeded
-    ]
+    if not dry_run:
+        db.add_deposition_attempts(deposition_attempts)
 
     return (
         group_deposition_attempts_by_status(deposition_attempts, dry_run),
         successfully_deposited_articles,
     )
-
-
-def generate_deposition_file(meca: ParsedFile) -> Tuple[DepositionAttempt, Optional[Article]]:
-    result = DepositionAttempt(meca=meca)
-    try:
-        article = from_meca_manuscript(
-            meca.manuscript,  # type: ignore[arg-type] # meca.manuscript is checked to be not None above
-            meca.received_at,
-            get_free_doi
-        )
-        result.deposition = generate_peer_review_deposition(article)
-    except Exception as e:
-        LOGGER.warning('Failed to generate deposition file from "%s": %s', meca.path, str(e))
-        article = None
-
-    return result, article
 
 
 def group_deposition_attempts_by_status(deposition_attempts: List[DepositionAttempt], dry_run: bool) -> DepositedMECAs:
