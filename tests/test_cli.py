@@ -88,7 +88,7 @@ class ParseTestCase(BaseBatchTestCase, BaseParseTestCase):
         self.assert_input_files_are_in_output_dir(actual_output)
 
     def assert_input_files_are_in_output_dir(self, actual: Dict[str, Any]) -> None:
-        expected_output_dir = f'{self.output_directory}/{actual["id"]}'
+        expected_output_dir = f'{self.output_directory}/parsed/{actual["id"]}'
         files_in_output_dir = [path for path in Path(expected_output_dir).glob('**/*') if path.is_file()]
         self.assertEqual(len(self.input_files), len(files_in_output_dir))
 
@@ -122,7 +122,7 @@ class DepositTestCase(BaseBatchTestCase, BaseDepositTestCase):
         self.assertEqual(3, len(deposit_file_mock.mock_calls))
 
     def assert_articles_in_output_dir(self, id_batch_run: str, expected_articles: List[Article]) -> None:
-        output_file = f'{self.output_directory}/{id_batch_run}.yml'
+        output_file = f'{self.output_directory}/deposited/{id_batch_run}.yml'
         if not expected_articles:
             self.assertFalse(Path(output_file).exists())
             return

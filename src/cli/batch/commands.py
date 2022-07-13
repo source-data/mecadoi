@@ -45,7 +45,7 @@ def parse(input_directory: str, output_directory: str) -> None:
 
     # move the input files to the output directory
     id_batch_run = str(uuid4())
-    output_directory = f'{output_directory}/{id_batch_run}/'
+    output_directory = f'{output_directory}/parsed/{id_batch_run}/'
 
     move(input_directory, output_directory)
     mkdir(input_directory)
@@ -81,7 +81,9 @@ def deposit(output_directory: str, dry_run: bool = True) -> None:
     result_as_dict['dry_run'] = dry_run
 
     if successfully_deposited_articles:
-        with open(f'{output_directory}/{id_batch_run}.yml', 'w') as f:
+        deposition_output_directory = f'{output_directory}/deposited'
+        mkdir(deposition_output_directory)
+        with open(f'{deposition_output_directory}/{id_batch_run}.yml', 'w') as f:
             dump([asdict(article) for article in successfully_deposited_articles], f)
 
     click.echo(output(result_as_dict), nl=False)
