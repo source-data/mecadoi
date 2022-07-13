@@ -41,10 +41,11 @@ CROSSREF_USERNAME = getenv_or_raise('CROSSREF_USERNAME')
 CROSSREF_PASSWORD = getenv_or_raise('CROSSREF_PASSWORD')
 
 LOG_FILE = getenv('LOG_FILE')
-LOG_LEVEL = getenv('LOG_LEVEL', default='INFO')
+LOG_LEVEL = getenv('LOG_LEVEL')
 
 if LOG_FILE:
-    basicConfig(filename=LOG_FILE, level=LOG_LEVEL, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    level = LOG_LEVEL or 'INFO'
+    basicConfig(filename=LOG_FILE, level=level, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 __all__ = [
     'DEPOSITOR_NAME',
