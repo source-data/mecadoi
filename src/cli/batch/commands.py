@@ -91,7 +91,10 @@ def deposit(output_directory: str, dry_run: bool = True, after: Optional[str] = 
 
     if successfully_deposited_articles:
         deposition_output_directory = f'{output_directory}/deposited'
-        mkdir(deposition_output_directory)
+        try:
+            mkdir(deposition_output_directory)
+        except FileExistsError:
+            pass
         with open(f'{deposition_output_directory}/{id_batch_run}.yml', 'w') as f:
             dump([asdict(article) for article in successfully_deposited_articles], f)
 
