@@ -70,7 +70,12 @@ def parse(input_directory: str, output_directory: str) -> None:
 )
 @click.option('-a', '--after')
 @click.option('-b', '--before')
-def deposit(output_directory: str, dry_run: bool = True, after: Optional[str] = None, before: Optional[str] = None) -> None:
+def deposit(
+    output_directory: str,
+    dry_run: bool = True,
+    after: Optional[str] = None,
+    before: Optional[str] = None
+) -> None:
     """
     Find all files in the batch database that are not yet deposited, and try to deposit them.
     """

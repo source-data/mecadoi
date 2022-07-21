@@ -8,6 +8,5 @@ packaging==21.3
 pi==0.1.2
 pycparser==2.21
 pyparsing==3.0.7
-python-dateutil==2.8.2
 PyYAML==6.0
 resolvelib==0.5.4
