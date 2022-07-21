@@ -82,23 +82,23 @@ class BatchDatabase:
         'INSERT INTO parsed_file (path, received_at, manuscript) '
         'VALUES (:path, :received_at, :manuscript)'
     )
-    QUERY_SELECT_PARSED_FILES = 'SELECT path, received_at, manuscript, id FROM parsed_file'
+    QUERY_SELECT_PARSED_FILES = (
+        'SELECT p.path, p.received_at, p.manuscript, p.id '
+        'FROM parsed_file AS p '
+        'WHERE p.received_at > :after AND p.received_at < :before'
+    )
+    QUERY_SELECT_PARSED_FILES_WITH_MANUSCRIPT_AND_WITHOUT_ATTEMPTS = (
+        'SELECT p.path, p.received_at, p.manuscript, p.id '
+        'FROM parsed_file AS p '
+        'WHERE p.manuscript IS NOT NULL AND p.id NOT IN (SELECT id_parsed_file from deposition_attempt) '
+        'AND p.received_at > :after AND p.received_at < :before'
+    )
     QUERY_SELECT_PARSED_FILES_WITH_ONLY_FAILED_ATTEMPTS = (
         'SELECT p.path, p.received_at, p.manuscript, p.id '
         'FROM parsed_file AS p '
         '  LEFT JOIN deposition_attempt AS d ON p.id = d.id_parsed_file '
         'WHERE p.manuscript IS NOT NULL '
         'GROUP BY p.id HAVING SUM(d.succeeded) = 0'
-    )
-    QUERY_SELECT_PARSED_FILES_WITH_MANUSCRIPT_AND_WITHOUT_ATTEMPTS = (
-        'SELECT p.path, p.received_at, p.manuscript, p.id '
-        'FROM parsed_file AS p '
-        'WHERE p.manuscript IS NOT NULL AND p.id NOT IN (SELECT id_parsed_file from deposition_attempt) '
-    )
-    QUERY_SELECT_PARSED_FILES_READY_FOR_DEPOSITION = (
-        QUERY_SELECT_PARSED_FILES_WITH_ONLY_FAILED_ATTEMPTS
-        + ' UNION '
-        + QUERY_SELECT_PARSED_FILES_WITH_MANUSCRIPT_AND_WITHOUT_ATTEMPTS
     )
     QUERY_INSERT_DEPOSITION_ATTEMPTS = (
         'INSERT INTO deposition_attempt (deposition, attempted_at, succeeded, id_parsed_file) '
@@ -131,11 +131,27 @@ class BatchDatabase:
             ]
             conn.executemany(self.QUERY_INSERT_PARSED_FILES, params)
 
-    def get_all_parsed_files(self) -> List[ParsedFile]:
-        """Fetch all parsed files in the database."""
+    def with_date_filter(
+        self,
+        query: str,
+        after: Optional[datetime] = None,
+        before: Optional[datetime] = None,
+    ) -> List[ParsedFile]:
+        params = {
+            "after": datetime(1, 1, 1) if after is None else after,
+            "before": datetime.now() if before is None else before,
+        }
         with self.conn() as conn:
-            result = conn.execute(self.QUERY_SELECT_PARSED_FILES)
+            result = conn.execute(query, params)
             return self._deserialize_parsed_files(result.fetchall())
+
+    def get_all_parsed_files(
+        self,
+        after: Optional[datetime] = None,
+        before: Optional[datetime] = None,
+    ) -> List[ParsedFile]:
+        """Fetch all parsed files in the database."""
+        return self.with_date_filter(self.QUERY_SELECT_PARSED_FILES, after=after, before=before)
 
     def add_deposition_attempts(self, deposition_attempts: List[DepositionAttempt]) -> None:
         """Add the given deposition attempts to the database."""
@@ -157,14 +173,17 @@ class BatchDatabase:
             result = conn.execute(self.QUERY_SELECT_DEPOSITION_ATTEMPTS)
             return self._deserialize_deposition_attempts(result.fetchall())
 
-    def get_files_ready_for_deposition(self) -> List[ParsedFile]:
-        with self.conn() as conn:
-            result = conn.execute(self.QUERY_SELECT_PARSED_FILES_READY_FOR_DEPOSITION)
-            parsed_files = self._deserialize_parsed_files(result.fetchall())
-            return [
-                p for p in parsed_files
-                if p.manuscript and p.manuscript.preprint_doi and p.manuscript.review_process
-            ]
+    def get_files_ready_for_deposition(
+        self,
+        after: Optional[datetime] = None,
+        before: Optional[datetime] = None
+    ) -> List[ParsedFile]:
+        parsed_files = self.with_date_filter(
+            self.QUERY_SELECT_PARSED_FILES_WITH_MANUSCRIPT_AND_WITHOUT_ATTEMPTS, after=after, before=before)
+        return [
+            p for p in parsed_files
+            if p.manuscript and p.manuscript.preprint_doi and p.manuscript.review_process
+        ]
 
     def initialize(self) -> None:
         """Create all necessary tables. Does nothing if they already exist."""

@@ -132,6 +132,6 @@ class DbTestCase(BatchDbTestCase):
         self.db.add_deposition_attempts(failed_attempts + successful_attempts)
 
         files_ready_for_deposition = self.db.get_files_ready_for_deposition()
-        expected_files_ready_for_deposition = [file_with_failed_attempts, file_without_attempts]
+        expected_files_ready_for_deposition = [file_without_attempts]
 
         self.assertEqual(expected_files_ready_for_deposition, files_ready_for_deposition)
