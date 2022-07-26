@@ -56,7 +56,7 @@ def parse(files: List[str], db: BatchDatabase) -> ParsedFiles:
         parse_potential_meca_archive(potential_meca_archive)
         for potential_meca_archive in sorted(files)
     ]
-    db.add_parsed_files(parsed_meca_archives)
+    db.insert_all(parsed_meca_archives)
 
     # Group the parsed files by their status
     return group_files_by_status(parsed_meca_archives)
@@ -160,7 +160,7 @@ def deposit(mecas: List[ParsedFile], db: BatchDatabase, dry_run: bool = True) ->
             successfully_deposited_articles.append(article)
 
     if not dry_run:
-        db.add_deposition_attempts(deposition_attempts)
+        db.insert_all(deposition_attempts)
 
     return (
         group_deposition_attempts_by_status(deposition_attempts, dry_run),

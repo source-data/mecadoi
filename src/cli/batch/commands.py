@@ -1,3 +1,4 @@
+from datetime import datetime
 from dateutil import parser
 from dataclasses import asdict
 from logging import getLogger
@@ -80,8 +81,8 @@ def deposit(
     Find all files in the batch database that are not yet deposited, and try to deposit them.
     """
     batch_db = BatchDatabase(f'{output_directory}/batch.sqlite3')
-    after_as_datetime = parser.parse(after) if after is not None else None
-    before_as_datetime = parser.parse(before) if before is not None else None
+    after_as_datetime = parser.parse(after) if after is not None else datetime(1, 1, 1)
+    before_as_datetime = parser.parse(before) if before is not None else datetime.now()
     undeposited_files = batch_db.get_files_ready_for_deposition(after=after_as_datetime, before=before_as_datetime)
     deposition_results, successfully_deposited_articles = batch_deposit(undeposited_files, batch_db, dry_run=dry_run)
 
@@ -89,10 +90,6 @@ def deposit(
     id_batch_run = str(uuid4())
     result_as_dict['id'] = id_batch_run
     result_as_dict['dry_run'] = dry_run
-    if after_as_datetime:
-        result_as_dict["after"] = str(after_as_datetime)
-    if before_as_datetime:
-        result_as_dict["before"] = str(before_as_datetime)
 
     if successfully_deposited_articles:
         deposition_output_directory = f'{output_directory}/deposited'
@@ -119,14 +116,10 @@ def ls(output_directory: str, after: Optional[str] = None, before: Optional[str]
     List files in the batch database.
     """
     batch_db = BatchDatabase(f'{output_directory}/batch.sqlite3')
-    after_as_datetime = parser.parse(after) if after is not None else None
-    before_as_datetime = parser.parse(before) if before is not None else None
-    parsed_files = batch_db.get_all_parsed_files(after=after_as_datetime, before=before_as_datetime)
+    after_as_datetime = parser.parse(after) if after is not None else datetime(1, 1, 1)
+    before_as_datetime = parser.parse(before) if before is not None else datetime.now()
+    parsed_files = batch_db.fetch_parsed_files_between(after_as_datetime, before_as_datetime)
     result_as_dict = asdict(group_files_by_status(parsed_files))
-    if after_as_datetime:
-        result_as_dict["after"] = str(after_as_datetime)
-    if before_as_datetime:
-        result_as_dict["before"] = str(before_as_datetime)
 
     click.echo(output(result_as_dict), nl=False)
 

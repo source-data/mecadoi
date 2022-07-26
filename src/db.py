@@ -1,14 +1,21 @@
 """
-
 """
+
+__all__ = ["BatchDatabase", "DepositionAttempt", "ParsedFile"]
+
+from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime
-from sqlite3 import Connection, Row, connect
-from typing import Any, List, Optional, cast
-
+from sqlalchemy import Boolean, Column, create_engine, DateTime, ForeignKey, Integer, MetaData, Table, Text, select
+from sqlalchemy.orm import registry, relationship, Session  # type: ignore[attr-defined] # it does have this attribute
+from sqlalchemy.types import TypeDecorator
+from typing import Any, List, Optional
 from yaml import dump, load, Loader
 
 from src.meca import Manuscript
+
+
+mapper_registry = registry()
 
 
 @dataclass
@@ -34,197 +41,122 @@ class ParsedFile:
 
 @dataclass
 class DepositionAttempt:
+    """An attempt for depositing DOIs for reviews in a MECA."""
 
     meca: ParsedFile
+    """The MECA archive used in the attempt."""
 
     deposition: Optional[str] = None
+    """The deposition XML generated for this attempt. Is None if this generation failed."""
 
     attempted_at: Optional[datetime] = None
+    """The time when the deposition file was sent to the server."""
 
     succeeded: Optional[bool] = None
+    """Whether sending the deposition file succeeded. The deposition could still fail after processing!"""
 
     id: Optional[int] = None
+    """A unique identifier for this attempt."""
+
+
+class Yaml(TypeDecorator):  # type: ignore[type-arg]
+    """An SQLAlchemy type for storing objects as YAML."""
+
+    cache_ok = False
+    impl = Text
+
+    def process_bind_param(self, obj: Any, _: Any) -> Any:
+        return dump(obj)
+
+    def process_result_value(self, value: Any, _: Any) -> Any:
+        if value:
+            return load(value, Loader=Loader)
+        else:
+            return None
+
+
+metadata = MetaData()
+
+tbl_parsed_file = Table(
+    "parsed_file",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("path", Text, nullable=False),
+    Column("received_at", DateTime, nullable=False),
+    Column("manuscript", Yaml, nullable=True),
+)
+mapper_registry.map_imperatively(ParsedFile, tbl_parsed_file)
+
+tbl_deposition_attempt = Table(
+    "deposition_attempt",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("id_parsed_file", ForeignKey("parsed_file.id")),
+    Column("deposition", Text),
+    Column("attempted_at", DateTime),
+    Column("succeeded", Boolean),
+)
+mapper_registry.map_imperatively(
+    DepositionAttempt,
+    tbl_deposition_attempt,
+    properties={"meca": relationship(ParsedFile, lazy="joined")},
+)
 
 
 class BatchDatabase:
-    """
-    Stores information about parsed MECA archives.
-
-    Uses an sqlite3 file-based database whose path should be passed into the constructor. If no database exists at that
-    path the constructor automatically initializes it.
-
-    Complex objects like `Manuscript` are serialized before storage and deserialized after retrieval with yaml as the
-    storage format.
-    """
-
-    CREATE_TABLE_STATEMENTS = [
-        (
-            'CREATE TABLE IF NOT EXISTS parsed_file ('
-            '  path TEXT NOT NULL,'
-            '  received_at TIMESTAMP NOT NULL,'
-            '  manuscript TEXT,'
-            '  id INTEGER PRIMARY KEY'
-            ')'
-        ),
-        (
-            'CREATE TABLE IF NOT EXISTS deposition_attempt ('
-            '  id_parsed_file INTEGER NOT NULL,'
-            '  deposition TEXT,'
-            '  attempted_at TIMESTAMP,'
-            '  succeeded BOOLEAN,'
-            '  id INTEGER PRIMARY KEY,'
-            '  FOREIGN KEY(id_parsed_file) REFERENCES parsed_file(id)'
-            ')'
-        ),
-    ]
-
-    QUERY_INSERT_PARSED_FILES = (
-        'INSERT INTO parsed_file (path, received_at, manuscript) '
-        'VALUES (:path, :received_at, :manuscript)'
-    )
-    QUERY_SELECT_PARSED_FILES = (
-        'SELECT p.path, p.received_at, p.manuscript, p.id '
-        'FROM parsed_file AS p '
-        'WHERE p.received_at > :after AND p.received_at < :before'
-    )
-    QUERY_SELECT_PARSED_FILES_WITH_MANUSCRIPT_AND_WITHOUT_ATTEMPTS = (
-        'SELECT p.path, p.received_at, p.manuscript, p.id '
-        'FROM parsed_file AS p '
-        'WHERE p.manuscript IS NOT NULL AND p.id NOT IN (SELECT id_parsed_file from deposition_attempt) '
-        'AND p.received_at > :after AND p.received_at < :before'
-    )
-    QUERY_SELECT_PARSED_FILES_WITH_ONLY_FAILED_ATTEMPTS = (
-        'SELECT p.path, p.received_at, p.manuscript, p.id '
-        'FROM parsed_file AS p '
-        '  LEFT JOIN deposition_attempt AS d ON p.id = d.id_parsed_file '
-        'WHERE p.manuscript IS NOT NULL '
-        'GROUP BY p.id HAVING SUM(d.succeeded) = 0'
-    )
-    QUERY_INSERT_DEPOSITION_ATTEMPTS = (
-        'INSERT INTO deposition_attempt (deposition, attempted_at, succeeded, id_parsed_file) '
-        'VALUES (:deposition, :attempted_at, :succeeded, :id_parsed_file)'
-    )
-    QUERY_SELECT_DEPOSITION_ATTEMPTS = (
-        'SELECT d.id, d.deposition, d.attempted_at, d.succeeded, d.id_parsed_file, p.path, p.received_at, p.manuscript '
-        'FROM deposition_attempt AS d LEFT JOIN parsed_file AS p ON d.id_parsed_file = p.id'
-    )
+    """An interface for the batch database storing information about processed MECAs and deposition attempts."""
 
     def __init__(self, db_file: str) -> None:
         self.db_file = db_file
+        self.engine = create_engine(f"sqlite:///{self.db_file}")
         self.initialize()
 
-    def conn(self) -> Connection:
-        connection = connect(self.db_file)
-        connection.row_factory = Row
-        return connection
+    def initialize(self) -> None:
+        """Create all necessary tables. Does nothing if they already exist."""
+        metadata.create_all(self.engine)
 
-    def add_parsed_files(self, parsed_files: List[ParsedFile]) -> None:
-        """Add the given files to the database."""
-        with self.conn() as conn:
-            params = [
-                {
-                    'path': parsed_file.path,
-                    'received_at': parsed_file.received_at,
-                    'manuscript': self._dump(parsed_file.manuscript),
-                }
-                for parsed_file in parsed_files
-            ]
-            conn.executemany(self.QUERY_INSERT_PARSED_FILES, params)
+    def session(self) -> Session:
+        return Session(self.engine)
 
-    def with_date_filter(
-        self,
-        query: str,
-        after: Optional[datetime] = None,
-        before: Optional[datetime] = None,
-    ) -> List[ParsedFile]:
-        params = {
-            "after": datetime(1, 1, 1) if after is None else after,
-            "before": datetime.now() if before is None else before,
-        }
-        with self.conn() as conn:
-            result = conn.execute(query, params)
-            return self._deserialize_parsed_files(result.fetchall())
+    def insert_all(self, objects: Any) -> None:
+        """Insert all given objects into the database."""
+        with self.session() as session:  # type: ignore[attr-defined] # it does have this attribute
+            with session.begin():
+                # Deep-copying keeps the original objects transient, i.e. not associated with the database. Otherwise
+                # SQLAlchemy's ORM kicks in and might raise errors if modifying the passed-in objects.
+                session.add_all(deepcopy(objects))
 
-    def get_all_parsed_files(
-        self,
-        after: Optional[datetime] = None,
-        before: Optional[datetime] = None,
-    ) -> List[ParsedFile]:
-        """Fetch all parsed files in the database."""
-        return self.with_date_filter(self.QUERY_SELECT_PARSED_FILES, after=after, before=before)
+    def _fetch_rows(self, statement: Any) -> Any:
+        with self.session() as session:  # type: ignore[attr-defined] # it does have this attribute
+            rows = session.execute(statement).all()
+            return rows
 
-    def add_deposition_attempts(self, deposition_attempts: List[DepositionAttempt]) -> None:
-        """Add the given deposition attempts to the database."""
-        with self.conn() as conn:
-            params = [
-                {
-                    'deposition': deposition_attempt.deposition,
-                    'attempted_at': deposition_attempt.attempted_at,
-                    'succeeded': deposition_attempt.succeeded,
-                    'id_parsed_file': deposition_attempt.meca.id,
-                }
-                for deposition_attempt in deposition_attempts
-            ]
-            conn.executemany(self.QUERY_INSERT_DEPOSITION_ATTEMPTS, params)
+    def fetch_all(self, clazz: Any) -> List[Any]:
+        """Fetch all objects of the given type from the database."""
+        statement = select(clazz).order_by(clazz.id)
+        rows = self._fetch_rows(statement)
+        return [row[0] for row in rows]
 
-    def get_all_deposition_attempts(self) -> List[DepositionAttempt]:
-        """Fetch all deposition attempts in the database."""
-        with self.conn() as conn:
-            result = conn.execute(self.QUERY_SELECT_DEPOSITION_ATTEMPTS)
-            return self._deserialize_deposition_attempts(result.fetchall())
+    def fetch_parsed_files_between(self, after: datetime, before: datetime) -> List[ParsedFile]:
+        """Fetch all parsed files in the database between the given dates."""
+        statement = select(ParsedFile).filter(  # type: ignore
+            ParsedFile.received_at > after,
+            ParsedFile.received_at < before,
+        ).order_by(ParsedFile.id)
+        rows = self._fetch_rows(statement)
+        return [row["ParsedFile"] for row in rows]
 
-    def get_files_ready_for_deposition(
-        self,
-        after: Optional[datetime] = None,
-        before: Optional[datetime] = None
-    ) -> List[ParsedFile]:
-        parsed_files = self.with_date_filter(
-            self.QUERY_SELECT_PARSED_FILES_WITH_MANUSCRIPT_AND_WITHOUT_ATTEMPTS, after=after, before=before)
+    def get_files_ready_for_deposition(self, after: datetime, before: datetime) -> List[ParsedFile]:
+        """Fetch all parsed files in the database that are ready to be deposited."""
+        ids_parsed_files_with_deposition_attempt = select(DepositionAttempt.id_parsed_file)  # type: ignore
+        statement = select(ParsedFile).filter(  # type: ignore
+            ParsedFile.received_at > after,
+            ParsedFile.received_at < before,
+            ParsedFile.id.not_in(ids_parsed_files_with_deposition_attempt),  # type: ignore
+            ParsedFile.manuscript.is_not(None),  # type: ignore
+        ).order_by(ParsedFile.id)
+        parsed_files = [row["ParsedFile"] for row in self._fetch_rows(statement)]
         return [
             p for p in parsed_files
             if p.manuscript and p.manuscript.preprint_doi and p.manuscript.review_process
         ]
-
-    def initialize(self) -> None:
-        """Create all necessary tables. Does nothing if they already exist."""
-        with self.conn() as conn:
-            for statement in self.CREATE_TABLE_STATEMENTS:
-                conn.execute(statement)
-
-    def _deserialize_parsed_files(self, result: List[Row]) -> List[ParsedFile]:
-        return [
-            ParsedFile(
-                path=row['path'],
-                received_at=datetime.fromisoformat(row['received_at']),
-                manuscript=self._load(row['manuscript']),
-                id=row['id'],
-            )
-            for row in result
-        ]
-
-    def _deserialize_deposition_attempts(self, result: List[Row]) -> List[DepositionAttempt]:
-        return [
-            DepositionAttempt(
-                deposition=row['deposition'],
-                attempted_at=datetime.fromisoformat(row['attempted_at']) if row['attempted_at'] else None,
-                succeeded=None if row['succeeded'] is None else bool(row['succeeded']),
-                meca=ParsedFile(
-                    path=row['path'],
-                    received_at=datetime.fromisoformat(row['received_at']),
-                    manuscript=self._load(row['manuscript']),
-                    id=row['id_parsed_file'],
-                ),
-                id=row['id'],
-            )
-            for row in result
-        ]
-
-    def _dump(self, obj: Any) -> Optional[str]:
-        if obj is None:
-            return None
-        return cast(str, dump(obj))
-
-    def _load(self, obj_str: Optional[str]) -> Any:
-        if obj_str is None:
-            return None
-        return load(obj_str, Loader=Loader)

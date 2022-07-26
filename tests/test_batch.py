@@ -68,7 +68,7 @@ class BaseParseTestCase(MecaArchiveTestCase, BaseBatchTestCase):
         return super().setUp()
 
     def assert_meca_archives_in_db(self, expected_meca_archives: List[ParsedFile]) -> None:
-        meca_archives_in_db = self.db.get_all_parsed_files()
+        meca_archives_in_db = self.db.fetch_all(ParsedFile)
 
         self.assertEqual(len(expected_meca_archives), len(meca_archives_in_db))
         for meca_archive in expected_meca_archives:
@@ -110,8 +110,8 @@ class BaseDepositTestCase(DepositionFileTestCase, BaseBatchTestCase):
             ParsedFile(path=f'{meca_name}.zip', received_at=PUBLICATION_DATE, manuscript=MANUSCRIPTS[meca_name])
             for meca_name in input_files
         ]
-        self.db.add_parsed_files(parsed_files)
-        self.parsed_files = self.db.get_all_parsed_files()
+        self.db.insert_all(parsed_files)
+        self.parsed_files = self.db.fetch_all(ParsedFile)
 
         self.expected_output = DepositedMECAs(
             deposition_generation_failed=[],
@@ -140,7 +140,7 @@ class BaseDepositTestCase(DepositionFileTestCase, BaseBatchTestCase):
         self.expected_deposition_attempts = expected_deposition_attempts
 
     def assert_deposition_attempts_in_db(self, expected_deposition_attempts: Iterable[DepositionAttempt]) -> None:
-        actual_deposition_attempts = self.db.get_all_deposition_attempts()
+        actual_deposition_attempts = self.db.fetch_all(DepositionAttempt)
         expected_deposition_attempts = [i for i in expected_deposition_attempts]
         self.assertEqual(len(expected_deposition_attempts), len(actual_deposition_attempts))
 
