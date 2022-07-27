@@ -129,7 +129,7 @@ class DbTestCase(BatchDbTestCase):
 
         self.assertEqual(expected_files_ready_for_deposition, files_ready_for_deposition)
 
-    def test_get_parsed_files_ready_for_deposition(self) -> None:
+    def test_get_parsed_files_ready_for_deposition_between(self) -> None:
         self.db.insert_all(self.parsed_files)
         inserted_parsed_files = self.db.fetch_all(ParsedFile)
 
