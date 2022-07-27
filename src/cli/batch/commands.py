@@ -105,14 +105,9 @@ def deposit(
 
 
 @click.command()
-@click.option(
-    '-o', '--output-directory',
-    required=True,
-    type=click.Path(exists=True, file_okay=False, dir_okay=True, writable=True),
-)
 @click.option('-a', '--after')
 @click.option('-b', '--before')
-def ls(output_directory: str, after: Optional[str] = None, before: Optional[str] = None) -> None:
+def ls(after: Optional[str] = None, before: Optional[str] = None) -> None:
     """
     List files in the batch database.
     """
