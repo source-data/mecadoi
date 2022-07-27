@@ -5,6 +5,7 @@ from typing import Iterable, List
 from unittest.mock import Mock, patch
 
 from src.batch import DepositedMECAs, deposit, parse, ParsedFiles
+from src.crossref.verify import VerificationResult
 from src.db import DepositionAttempt, ParsedFile
 from tests.common import DepositionFileTestCase, MecaArchiveTestCase
 from tests.test_article import ARTICLES, DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES, PUBLICATION_DATE
@@ -166,10 +167,18 @@ class BaseDepositTestCase(DepositionFileTestCase, BaseBatchTestCase):
 
 
 @patch('src.batch.deposit_file')
+@patch('src.batch.verify', return_value=[
+    VerificationResult(preprint_doi="preprint_doi", all_reviews_present=True, author_reply_matches=True)
+])
 @patch('src.batch.get_free_doi', return_value=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES)
 class DepositTestCase(BaseDepositTestCase):
 
-    def test_depositing_parsed_files(self, _: Mock, deposit_file_mock: Mock) -> None:
+    def test_depositing_parsed_files(
+        self,
+        _verify: Mock,
+        _get_free_doi: Mock,
+        deposit_file_mock: Mock,
+    ) -> None:
         actual_output, actual_articles = deposit(self.parsed_files, self.db, dry_run=False)
 
         self.assertEqual(self.expected_output, actual_output)
@@ -177,7 +186,12 @@ class DepositTestCase(BaseDepositTestCase):
         self.assertEqual(3, len(deposit_file_mock.mock_calls))
         self.assert_deposition_attempts_in_db(self.expected_deposition_attempts())
 
-    def test_deposition_fails(self, _: Mock, deposit_file_mock: Mock) -> None:
+    def test_deposition_fails(
+        self,
+        _verify: Mock,
+        _get_free_doi: Mock,
+        deposit_file_mock: Mock,
+    ) -> None:
         deposit_file_mock.side_effect = Exception('Boom!')
         expected_output = DepositedMECAs(deposition_failed=self.expected_output.deposition_succeeded)
 
@@ -189,7 +203,13 @@ class DepositTestCase(BaseDepositTestCase):
         self.assertEqual(3, len(deposit_file_mock.mock_calls))
 
     @patch('src.batch.generate_peer_review_deposition', side_effect=Exception('Boom!'))
-    def test_deposition_file_generation_fails(self, _: Mock, get_free_doi_mock: Mock, deposit_file_mock: Mock) -> None:
+    def test_deposition_file_generation_fails(
+        self,
+        _generate_peer_review_deposition: Mock,
+        _verify: Mock,
+        _get_free_doi: Mock,
+        deposit_file_mock: Mock,
+    ) -> None:
         expected_output = DepositedMECAs(deposition_generation_failed=self.expected_output.deposition_succeeded)
 
         actual_output, actual_articles = deposit(self.parsed_files, self.db, dry_run=False)
@@ -200,14 +220,24 @@ class DepositTestCase(BaseDepositTestCase):
         # get_free_doi_mock.assert_not_called()
         deposit_file_mock.assert_not_called()
 
-    def test_dry_run_depositing_parsed_files(self, _: Mock, deposit_file_mock: Mock) -> None:
+    def test_dry_run_depositing_parsed_files(
+        self,
+        _verify: Mock,
+        _get_free_doi: Mock,
+        deposit_file_mock: Mock,
+    ) -> None:
         actual_output, actual_articles = deposit(self.parsed_files, self.db, dry_run=True)
         self.assertEqual(self.expected_output, actual_output)
         self.assertEqual([], actual_articles)
         self.assert_deposition_attempts_in_db([])
         deposit_file_mock.assert_not_called()
 
-    def test_depositing_invalid_parsed_files(self, _: Mock, deposit_file_mock: Mock) -> None:
+    def test_depositing_invalid_parsed_files(
+        self,
+        _verify: Mock,
+        _get_free_doi: Mock,
+        deposit_file_mock: Mock,
+    ) -> None:
         fixtures = [
             ParsedFile(path='path', received_at=datetime.now(), manuscript=manuscript, id=db_id)
             for manuscript, db_id in [

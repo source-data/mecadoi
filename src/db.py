@@ -49,6 +49,9 @@ class DepositionAttempt:
     deposition: Optional[str] = None
     """The deposition XML generated for this attempt. Is None if this generation failed."""
 
+    verification_failed: Optional[bool] = None
+    """Whether verifying the deposition file succeeded."""
+
     attempted_at: Optional[datetime] = None
     """The time when the deposition file was sent to the server."""
 
@@ -93,6 +96,7 @@ tbl_deposition_attempt = Table(
     Column("id", Integer, primary_key=True),
     Column("id_parsed_file", ForeignKey("parsed_file.id")),
     Column("deposition", Text),
+    Column("verification_failed", Boolean),
     Column("attempted_at", DateTime),
     Column("succeeded", Boolean),
 )

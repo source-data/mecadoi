@@ -23,6 +23,7 @@ from typing import List, Tuple
 from src.article import Article, from_meca_manuscript
 from src.crossref.api import deposit as deposit_file
 from src.crossref.peer_review import generate_peer_review_deposition
+from src.crossref.verify import verify
 from src.db import BatchDatabase, DepositionAttempt, ParsedFile
 from src.dois import get_free_doi
 from src.meca import parse_meca_archive
@@ -106,6 +107,9 @@ class DepositedMECAs:
     deposition_generation_failed: List[str] = field(default_factory=list)
     """No deposition file could be generated from these MECAs."""
 
+    deposition_verification_failed: List[str] = field(default_factory=list)
+    """No deposition file could be generated from these MECAs."""
+
     deposition_failed: List[str] = field(default_factory=list)
     """The DOI deposition failed for these MECAs."""
 
@@ -141,10 +145,16 @@ def deposit(mecas: List[ParsedFile], db: BatchDatabase, dry_run: bool = True) ->
             LOGGER.warning('Failed to generate deposition file from "%s": %s', meca.path, str(e))
             continue
 
-        if dry_run:
+        if deposition_attempt.deposition is None:
             continue
 
-        if deposition_attempt.deposition is None:
+        verification_result = verify(deposition_attempt.deposition)[0]
+        if not (verification_result.all_reviews_present and verification_result.author_reply_matches):
+            LOGGER.warning('Failed to verify deposition file from "%s": %s',
+                           deposition_attempt.meca.path, verification_result.error)
+            continue
+
+        if dry_run:
             continue
 
         deposition_attempt.attempted_at = datetime.now()
@@ -175,6 +185,8 @@ def group_deposition_attempts_by_status(deposition_attempts: List[DepositionAtte
         resulting_list = None
         if deposition_attempt.deposition is None:
             resulting_list = result.deposition_generation_failed
+        elif deposition_attempt.verification_failed:
+            resulting_list = result.deposition_verification_failed
         elif dry_run or deposition_attempt.succeeded:
             resulting_list = result.deposition_succeeded
         else:

@@ -8,6 +8,7 @@ from click.testing import CliRunner, Result
 from yaml import Loader, load, safe_load
 from src.article import Article
 from src.cli.main import main as mecadoi
+from src.crossref.verify import VerificationResult
 from tests.common import MecaArchiveTestCase
 from tests.test_article import DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES
 from tests.test_batch import BaseDepositTestCase, BaseParseTestCase
@@ -94,10 +95,18 @@ class ParseTestCase(BaseBatchTestCase, BaseParseTestCase):
 
 
 @patch('src.batch.deposit_file')
+@patch('src.batch.verify', return_value=[
+    VerificationResult(preprint_doi="preprint_doi", all_reviews_present=True, author_reply_matches=True)
+])
 @patch('src.batch.get_free_doi', return_value=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES)
 class DepositTestCase(BaseBatchTestCase, BaseDepositTestCase):
 
-    def test_batch_deposit_dry_run(self, _: Mock, deposit_file_mock: Mock) -> None:
+    def test_batch_deposit_dry_run(
+        self,
+        _verify: Mock,
+        _get_free_doi: Mock,
+        deposit_file_mock: Mock,
+    ) -> None:
         result = self.run_mecadoi_command(['batch', 'deposit', '-o', self.output_directory, '--dry-run'])
         self.assertEqual(0, result.exit_code)
 
@@ -109,7 +118,12 @@ class DepositTestCase(BaseBatchTestCase, BaseDepositTestCase):
         self.assert_articles_in_output_dir(actual_output['id'], [])
         deposit_file_mock.assert_not_called()
 
-    def test_batch_deposit(self, _: Mock, deposit_file_mock: Mock) -> None:
+    def test_batch_deposit(
+        self,
+        _verify: Mock,
+        _get_free_doi: Mock,
+        deposit_file_mock: Mock,
+    ) -> None:
         result = self.run_mecadoi_command(['batch', 'deposit', '-o', self.output_directory, '--no-dry-run'])
         self.assertEqual(0, result.exit_code)
 
