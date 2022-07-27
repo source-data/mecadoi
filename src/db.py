@@ -106,9 +106,8 @@ mapper_registry.map_imperatively(
 class BatchDatabase:
     """An interface for the batch database storing information about processed MECAs and deposition attempts."""
 
-    def __init__(self, db_file: str) -> None:
-        self.db_file = db_file
-        self.engine = create_engine(f"sqlite:///{self.db_file}")
+    def __init__(self, db_url: str) -> None:
+        self.engine = create_engine(db_url)
         self.initialize()
 
     def initialize(self) -> None:

@@ -18,7 +18,7 @@ class BatchDbTestCase(TestCase):
         except FileNotFoundError:
             pass
 
-        self.db = BatchDatabase(self.db_file)
+        self.db = BatchDatabase(f"sqlite:///{self.db_file}")
 
 
 class DbTestCase(BatchDbTestCase):

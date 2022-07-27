@@ -10,6 +10,7 @@ from uuid import uuid4
 import click
 from yaml import dump
 from src.batch import deposit as batch_deposit, group_files_by_status, parse as batch_parse
+from src.config import DB_URL
 from src.db import BatchDatabase
 
 LOGGER = getLogger(__name__)
@@ -42,7 +43,7 @@ def parse(input_directory: str, output_directory: str) -> None:
     LOGGER.debug('input_files=%s', input_files)
 
     # parse and register the input files
-    result = batch_parse(input_files, BatchDatabase(f'{output_directory}/batch.sqlite3'))
+    result = batch_parse(input_files, BatchDatabase(DB_URL))
     LOGGER.debug('result=%s', result)
 
     # move the input files to the output directory
@@ -80,7 +81,7 @@ def deposit(
     """
     Find all files in the batch database that are not yet deposited, and try to deposit them.
     """
-    batch_db = BatchDatabase(f'{output_directory}/batch.sqlite3')
+    batch_db = BatchDatabase(DB_URL)
     after_as_datetime = parser.parse(after) if after is not None else datetime(1, 1, 1)
     before_as_datetime = parser.parse(before) if before is not None else datetime.now()
     undeposited_files = batch_db.get_files_ready_for_deposition(after=after_as_datetime, before=before_as_datetime)
@@ -115,7 +116,7 @@ def ls(output_directory: str, after: Optional[str] = None, before: Optional[str]
     """
     List files in the batch database.
     """
-    batch_db = BatchDatabase(f'{output_directory}/batch.sqlite3')
+    batch_db = BatchDatabase(DB_URL)
     after_as_datetime = parser.parse(after) if after is not None else datetime(1, 1, 1)
     before_as_datetime = parser.parse(before) if before is not None else datetime.now()
     parsed_files = batch_db.fetch_parsed_files_between(after_as_datetime, before_as_datetime)
