@@ -20,7 +20,8 @@ class TestGeneratePeerReviewDeposition(MecaArchiveTestCase, DepositionFileTestCa
     def test_generate_peer_review_deposition(self) -> None:
         for article_name in self.fixtures:
             with self.subTest(article=article_name):
-                expected_xml = f'tests/resources/expected/{article_name}.xml'
+                with open(f'tests/resources/expected/{article_name}.xml', 'r') as f:
+                    expected_xml = f.read()
 
                 article = ARTICLES[article_name]
                 actual_xml = generate_peer_review_deposition(article)

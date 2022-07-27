@@ -4,11 +4,13 @@ __all__ = ['MecaArchiveTestCase']
 
 from os import listdir, mkdir
 from os.path import isdir, isfile, join
-from typing import List
-import lxml.etree
+from typing import List, Tuple
 from shutil import rmtree
 from unittest import TestCase
+from xsdata.formats.dataclass.parsers import XmlParser
 from zipfile import ZipFile, ZIP_DEFLATED
+
+from src.crossref.xml import DoiBatch
 
 
 def _add_to_zip(zf: ZipFile, path: str, zip_path: str) -> None:
@@ -69,30 +71,20 @@ class MecaArchiveTestCase(TestCase):
 class DepositionFileTestCase(TestCase):
 
     def assertDepositionFileEquals(self, expected_deposition_file: str, actual_deposition_file: str) -> None:
-        ignore_namespaces = {
-            'cr': 'http://www.crossref.org/schema/5.3.1',
-        }
-        ignore_xpaths = [
-            './cr:head/cr:doi_batch_id',
-            './cr:head/cr:timestamp',
-        ]
+        def parse(xml_file: str) -> Tuple[DoiBatch, str, int]:
+            parser = XmlParser()
+            doi_batch = parser.from_string(xml_file, DoiBatch)
+            doi_batch_id = doi_batch.head.doi_batch_id
+            timestamp = doi_batch.head.timestamp
 
-        def canonicalize(xml_file: str) -> str:
-            try:
-                tree = lxml.etree.parse(xml_file)
-                root = tree.getroot()
-            except Exception:
-                root = lxml.etree.fromstring(xml_file)
-            for ignore_xpath in ignore_xpaths:
-                for element_to_ignore in root.findall(ignore_xpath, namespaces=ignore_namespaces):
-                    parent = element_to_ignore.getparent()
-                    parent.remove(element_to_ignore)
+            doi_batch.head.doi_batch_id = "doi_batch_id"
+            doi_batch.head.timestamp = 1234
 
-            return lxml.etree.canonicalize(  # type: ignore[no-any-return]  # lxml docs say this does return a string
-                xml_data=lxml.etree.tostring(root, encoding='unicode')
-            )
+            return doi_batch, doi_batch_id, timestamp
 
-        expected = canonicalize(expected_deposition_file)
-        actual = canonicalize(actual_deposition_file)
+        expected_doi_batch, _, _ = parse(expected_deposition_file)
+        actual_doi_batch, actual_id, actual_timestamp = parse(actual_deposition_file)
 
-        self.assertEqual(expected, actual)
+        self.assertEqual(expected_doi_batch, actual_doi_batch)
+        self.assertIsNotNone(actual_id)
+        self.assertIsNotNone(actual_timestamp)
