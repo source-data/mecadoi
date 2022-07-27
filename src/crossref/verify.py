@@ -21,7 +21,7 @@ def verify(deposition_file: str) -> List[VerificationResult]:
     """
     parser = XmlParser()
 
-    doi_batch = parser.parse(deposition_file, clazz=DoiBatch)
+    doi_batch = parser.from_string(deposition_file, clazz=DoiBatch)
 
     reviews_by_preprint_doi: Dict[str, Tuple[List[PeerReview], Optional[PeerReview]]] = {}
     for review in doi_batch.body.peer_review:

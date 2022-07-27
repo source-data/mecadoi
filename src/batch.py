@@ -23,7 +23,7 @@ from typing import List, Tuple
 from src.article import Article, from_meca_manuscript
 from src.crossref.api import deposit as deposit_file
 from src.crossref.peer_review import generate_peer_review_deposition
-from src.crossref.verify import verify
+from src.crossref.verify import VerificationResult, verify
 from src.db import BatchDatabase, DepositionAttempt, ParsedFile
 from src.dois import get_free_doi
 from src.meca import parse_meca_archive
@@ -148,11 +148,23 @@ def deposit(mecas: List[ParsedFile], db: BatchDatabase, dry_run: bool = True) ->
         if deposition_attempt.deposition is None:
             continue
 
-        verification_result = verify(deposition_attempt.deposition)[0]
-        if not (verification_result.all_reviews_present and verification_result.author_reply_matches):
+        try:
+            verification_result = verify(deposition_attempt.deposition)[0]
+        except Exception as e:
+            LOGGER.exception(e)
+            LOGGER.error(deposition_attempt.deposition)
+            verification_result = VerificationResult(
+                preprint_doi=deposition_attempt.meca.path,
+                error=str(e),
+            )
+
+        if verification_result.error:
             LOGGER.warning('Failed to verify deposition file from "%s": %s',
                            deposition_attempt.meca.path, verification_result.error)
+            deposition_attempt.verification_failed = True
             continue
+        else:
+            deposition_attempt.verification_failed = False
 
         if dry_run:
             continue

@@ -44,7 +44,8 @@ class TestVerifyDepositionFile(TestCase):
         )
 
     def setUp(self) -> None:
-        self.deposition_file = 'tests/resources/expected/multiple-revision-rounds.xml'
+        with open('tests/resources/expected/multiple-revision-rounds.xml', 'r') as f:
+            self.deposition_file = f.read()
         self.preprint_doi = '10.1101/multiple-revision-rounds.123.456.7890'
         self.eeb_api_response: List[Article] = [
             {

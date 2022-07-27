@@ -178,7 +178,7 @@ class Head:
         name = "head"
         namespace = "http://www.crossref.org/schema/5.3.1"
 
-    doi_batch_id: XmlPeriod = field(
+    doi_batch_id: str = field(
         metadata={
             "type": "Element",
         }
