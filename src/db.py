@@ -62,6 +62,13 @@ class DepositionAttempt:
     """A unique identifier for this attempt."""
 
 
+@dataclass
+class UsedDoi:
+    doi: str
+    resource: str
+    claimed_at: datetime
+
+
 class Yaml(TypeDecorator):  # type: ignore[type-arg]
     """An SQLAlchemy type for storing objects as YAML."""
 
@@ -106,13 +113,21 @@ mapper_registry.map_imperatively(
     properties={"meca": relationship(ParsedFile, lazy="joined")},
 )
 
+tbl_used_dois = Table(
+    "used_dois",
+    metadata,
+    Column("doi", Text, primary_key=True),
+    Column("resource", Text, nullable=False),
+    Column("claimed_at", DateTime, nullable=False),
+)
+mapper_registry.map_imperatively(UsedDoi, tbl_used_dois)
+
 
 class BatchDatabase:
     """An interface for the batch database storing information about processed MECAs and deposition attempts."""
 
     def __init__(self, db_url: str) -> None:
         self.engine = create_engine(db_url)
-        self.initialize()
 
     def initialize(self) -> None:
         """Create all necessary tables. Does nothing if they already exist."""
@@ -163,3 +178,9 @@ class BatchDatabase:
             p for p in parsed_files
             if p.manuscript and p.manuscript.preprint_doi and p.manuscript.review_process
         ]
+
+    def mark_doi_as_used(self, doi: str, resource: str) -> None:
+        used_doi = UsedDoi(doi=doi, resource=resource, claimed_at=datetime.now())
+        with self.session() as session:
+            with session.begin():
+                session.add(deepcopy(used_doi))

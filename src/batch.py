@@ -128,6 +128,11 @@ def deposit(mecas: List[ParsedFile], db: BatchDatabase, dry_run: bool = True) ->
     if not all([m.id and m.manuscript and m.manuscript.review_process and m.manuscript.preprint_doi for m in mecas]):
         raise ValueError(f'Not all required information present for all MECAs: {mecas}')
 
+    def doi_generator(resource: str) -> str:
+        if dry_run:
+            return get_random_doi()
+        return get_free_doi(db, resource)
+
     deposition_attempts = []
     successfully_deposited_articles = []
     for meca in mecas:
@@ -138,7 +143,7 @@ def deposit(mecas: List[ParsedFile], db: BatchDatabase, dry_run: bool = True) ->
             article = from_meca_manuscript(
                 meca.manuscript,  # type: ignore[arg-type] # meca.manuscript is checked to be not None above
                 meca.received_at,
-                get_random_doi if dry_run else get_free_doi,
+                doi_generator,
             )
             deposition_attempt.deposition = generate_peer_review_deposition(article)
         except Exception as e:

@@ -4,12 +4,14 @@ __all__ = ['get_random_doi', 'get_free_doi']
 
 from datetime import datetime
 from secrets import choice
+from sqlalchemy.exc import IntegrityError
 from string import digits, Template
-from sqlite3 import connect, Connection, IntegrityError
-from src.config import DOI_DB_FILE, DOI_TEMPLATE
+
+from src.config import DOI_TEMPLATE
+from src.db import BatchDatabase
 
 
-def get_free_doi(resource: str) -> str:
+def get_free_doi(doi_db: BatchDatabase, resource: str) -> str:
     """
     Get an unused DOI for the given resource.
 
@@ -28,15 +30,12 @@ def get_free_doi(resource: str) -> str:
     The function will try multiple times to create a random, unused DOI. If it still fails to create an unused DOI
     after these attempt, an Exception is raised.
     """
-    doi_db = DoiDatabase(DOI_DB_FILE)
-    doi_db.initialize()
-
     doi = None
     max_num_tries = 10
     num_tries = 0
     while doi is None and num_tries < max_num_tries:
         num_tries += 1
-        doi = _create_random_doi()
+        doi = get_random_doi()
         try:
             doi_db.mark_doi_as_used(doi, resource)
         except IntegrityError:
@@ -48,54 +47,10 @@ def get_free_doi(resource: str) -> str:
     return doi
 
 
-def get_random_doi(_: str) -> str:
-    return _create_random_doi()
-
-
-def _create_random_doi() -> str:
+def get_random_doi() -> str:
     # create the random part of the DOI: a string of 6 random digits
     population = digits
     k = 6
     random_part = ''.join([choice(population) for i in range(k)])
     year = str(datetime.now().year)
     return Template(DOI_TEMPLATE).substitute(year=year, random=random_part)
-
-
-class DoiDatabase:
-    """Interface for accessing a DOI database."""
-
-    CREATE_TABLE_STATEMENT = """
-CREATE TABLE IF NOT EXISTS dois
-    (
-        doi TEXT,
-        resource TEXT,
-        claimed_at TIMESTAMP,
-        PRIMARY KEY (doi)
-    )
-"""
-    QUERY_INSERT_DOI = 'INSERT INTO dois (doi, resource, claimed_at) VALUES (:doi, :resource, :timestamp)'
-    QUERY_NUM_TOTAL_DOIS = 'SELECT COUNT(*) FROM dois'
-
-    def __init__(self, db_file: str = DOI_DB_FILE) -> None:
-        self.db_file = db_file
-
-    def conn(self) -> Connection:
-        return connect(self.db_file)
-
-    def mark_doi_as_used(self, doi: str, resource: str) -> None:
-        with self.conn() as conn:
-            params = {
-                'doi': doi,
-                'resource': resource,
-                'timestamp': datetime.now(),
-            }
-            conn.cursor().execute(self.QUERY_INSERT_DOI, params)
-
-    def get_num_total_dois(self) -> int:
-        with self.conn() as conn:
-            result = conn.cursor().execute(self.QUERY_NUM_TOTAL_DOIS).fetchone()
-        return int(result[0])
-
-    def initialize(self) -> None:
-        with self.conn() as conn:
-            conn.cursor().execute(self.CREATE_TABLE_STATEMENT)

@@ -19,6 +19,7 @@ class BatchDbTestCase(TestCase):
             pass
 
         self.db = BatchDatabase(f"sqlite:///{self.db_file}")
+        self.db.initialize()
 
 
 class DbTestCase(BatchDbTestCase):
