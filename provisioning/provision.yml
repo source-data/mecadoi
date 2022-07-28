@@ -99,6 +99,14 @@
       rsync_opts:
         - "--exclude={'__pycache__','.DS_Store'}"
 
+  - name: Copy the alembic files to the server
+    ansible.builtin.copy:
+      src: ../alembic.ini
+      dest: '{{ code_dir }}/'
+      owner: '{{ sync_user }}'
+      group: '{{ sync_user }}'
+      mode: u=rw,g=r,o=r
+
   - name: Recursively change ownership of the Python files
     ansible.builtin.file:
       path: '{{ code_dir }}/'
@@ -144,7 +152,7 @@
     become: yes
     become_user: '{{ sync_user }}'
     ansible.builtin.cron:
-      name: Deposit DOI from parsed MECA archives
+      name: Deposit DOIs from parsed MECA archives
       # weekly on Monday morning
       minute: 23
       hour: 2
