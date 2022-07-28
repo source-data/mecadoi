@@ -219,18 +219,7 @@ class PersonName:
         name = "person_name"
         namespace = "http://www.crossref.org/schema/5.3.1"
 
-    surname: str = field(
-        metadata={
-            "type": "Element",
-        }
-    )
     sequence: str = field(
-        metadata={
-            "type": "Attribute",
-        }
-    )
-    contributor_role: Optional[str] = field(
-        default=None,
         metadata={
             "type": "Attribute",
         }
@@ -239,6 +228,18 @@ class PersonName:
         default=None,
         metadata={
             "type": "Element",
+        }
+    )
+    surname: Optional[str] = field(
+        default="Surname",
+        metadata={
+            "type": "Element",
+        }
+    )
+    contributor_role: Optional[str] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
         }
     )
     affiliations: Optional[Affiliations] = field(
