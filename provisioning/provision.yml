@@ -136,6 +136,17 @@
       name: Parse new MECA archives
       # weekly on Sunday morning
       minute: 46
-      hour: 5
-      weekday: 1
+      hour: 3
+      weekday: 0
       job: '{{ scripts_dir }}/mecadoi.sh parse | tee -a "{{ logs_dir }}/batch.log"'
+
+  - name: Set up cron job for depositing DOIs from parsed MECA archives
+    become: yes
+    become_user: '{{ sync_user }}'
+    ansible.builtin.cron:
+      name: Deposit DOI from parsed MECA archives
+      # weekly on Monday morning
+      minute: 23
+      hour: 2
+      weekday: 1
+      job: '{{ scripts_dir }}/mecadoi.sh deposit | tee -a "{{ logs_dir }}/batch.log"'

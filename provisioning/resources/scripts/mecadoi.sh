@@ -45,12 +45,13 @@ _execute_batch_command() {
     source .venv/bin/activate
     output_batch_command="$(python3 -m src.cli.main batch ${command})"
     cd -
-    echo "${output_batch_command}" | mutt -s "[MECADOI] batch ${command_name}" -- "${recipient_email}"
+    echo "python3 -m src.cli.main batch ${command}
+
+${output_batch_command}" | mutt -s "[MECADOI] batch ${command_name}" -- "${recipient_email}"
     echo "${output_batch_command}"
 
     echo "$(date) Syncing MECADOI batch dir"
     aws s3 sync "${batch_dir}" "s3://${s3_bucket_name}/batch"
-
 }
 
 cmd_parse() {
@@ -60,7 +61,7 @@ cmd_parse() {
 
 cmd_deposit() {
     echo "$(date) Batch deposit"
-    _execute_batch_command deposit -o "${batch_dir}"
+    _execute_batch_command deposit -o "${batch_dir}" --after "$(date --date='last week' "+%F")" --dry-run
 }
 
 with_lock() {
