@@ -181,6 +181,6 @@ class BatchDatabase:
 
     def mark_doi_as_used(self, doi: str, resource: str) -> None:
         used_doi = UsedDoi(doi=doi, resource=resource, claimed_at=datetime.now())
-        with self.session() as session:
+        with self.session() as session:  # type: ignore[attr-defined] # it does have this attribute
             with session.begin():
                 session.add(deepcopy(used_doi))

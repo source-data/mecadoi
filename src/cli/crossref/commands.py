@@ -23,7 +23,12 @@ def generate(meca_archive: str, output: TextIO, preprint_doi: Optional[str] = No
     """Generate a CrossRef deposition file for any reviews within the given MECA archive."""
     try:
         manuscript = parse_meca_archive(meca_archive)
-        article = from_meca_manuscript(manuscript, datetime.now(), get_random_doi, preprint_doi=preprint_doi)
+        article = from_meca_manuscript(
+            manuscript,
+            datetime.now(),
+            lambda _: get_random_doi(),
+            preprint_doi=preprint_doi
+        )
         deposition_xml = generate_peer_review_deposition(article)
     except ValueError as e:
         raise click.ClickException(str(e))
