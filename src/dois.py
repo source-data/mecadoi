@@ -1,6 +1,6 @@
 """Handles the creation of random DOIs and tries to ensure they are not reused."""
 
-__all__ = ['get_free_doi']
+__all__ = ['get_random_doi', 'get_free_doi']
 
 from datetime import datetime
 from secrets import choice
@@ -46,6 +46,10 @@ def get_free_doi(resource: str) -> str:
         raise Exception(f'failed to generate unused DOI in {max_num_tries} tries')
 
     return doi
+
+
+def get_random_doi(_: str) -> str:
+    return _create_random_doi()
 
 
 def _create_random_doi() -> str:

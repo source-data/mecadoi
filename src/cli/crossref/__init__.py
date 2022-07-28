@@ -1,5 +1,5 @@
 import click
-from .commands import deposit, generate, verify
+from .commands import generate, verify
 
 
 @click.group()
@@ -8,6 +8,5 @@ def crossref() -> None:
     pass
 
 
-crossref.add_command(deposit)
 crossref.add_command(generate)
 crossref.add_command(verify)

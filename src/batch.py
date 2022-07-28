@@ -25,7 +25,7 @@ from src.crossref.api import deposit as deposit_file
 from src.crossref.peer_review import generate_peer_review_deposition
 from src.crossref.verify import VerificationResult, verify
 from src.db import BatchDatabase, DepositionAttempt, ParsedFile
-from src.dois import get_free_doi
+from src.dois import get_random_doi, get_free_doi
 from src.meca import parse_meca_archive
 
 LOGGER = getLogger(__name__)
@@ -138,7 +138,7 @@ def deposit(mecas: List[ParsedFile], db: BatchDatabase, dry_run: bool = True) ->
             article = from_meca_manuscript(
                 meca.manuscript,  # type: ignore[arg-type] # meca.manuscript is checked to be not None above
                 meca.received_at,
-                get_free_doi,
+                get_random_doi if dry_run else get_free_doi,
             )
             deposition_attempt.deposition = generate_peer_review_deposition(article)
         except Exception as e:

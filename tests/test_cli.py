@@ -98,12 +98,14 @@ class ParseTestCase(BaseBatchTestCase, BaseParseTestCase):
 @patch('src.batch.verify', return_value=[
     VerificationResult(preprint_doi="preprint_doi", all_reviews_present=True, author_reply_matches=True)
 ])
+@patch('src.batch.get_random_doi', return_value=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES)
 @patch('src.batch.get_free_doi', return_value=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES)
 class DepositTestCase(BaseBatchTestCase, BaseDepositTestCase):
 
     def test_batch_deposit_dry_run(
         self,
         _verify: Mock,
+        _get_random_doi: Mock,
         _get_free_doi: Mock,
         deposit_file_mock: Mock,
     ) -> None:
@@ -121,6 +123,7 @@ class DepositTestCase(BaseBatchTestCase, BaseDepositTestCase):
     def test_batch_deposit(
         self,
         _verify: Mock,
+        _get_random_doi: Mock,
         _get_free_doi: Mock,
         deposit_file_mock: Mock,
     ) -> None:

@@ -217,11 +217,12 @@ class DepositTestCase(BaseDepositTestCase):
         self.assertEqual(expected_output, actual_output)
         self.assertEqual([], actual_articles)
         self.assert_deposition_attempts_in_db(self.expected_deposition_attempts(generation_failed=True))
-        # get_free_doi_mock.assert_not_called()
         deposit_file_mock.assert_not_called()
 
+    @patch('src.batch.get_random_doi', return_value=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES)
     def test_dry_run_depositing_parsed_files(
         self,
+        _get_random_doi: Mock,
         _verify: Mock,
         _get_free_doi: Mock,
         deposit_file_mock: Mock,
