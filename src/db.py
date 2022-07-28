@@ -151,7 +151,7 @@ class BatchDatabase:
 
     def fetch_all(self, clazz: Any) -> List[Any]:
         """Fetch all objects of the given type from the database."""
-        statement = select(clazz).order_by(clazz.id)
+        statement = select(clazz)
         rows = self._fetch_rows(statement)
         return [row[0] for row in rows]
 
