@@ -1,7 +1,7 @@
 """create parsed_file and deposition_attempt tables
 
 Revision ID: 04416d171bbc
-Revises: 
+Revises:
 Create Date: 2022-07-28 09:04:44.944476
 
 """
