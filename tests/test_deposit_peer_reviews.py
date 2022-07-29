@@ -7,17 +7,18 @@ from src.crossref.api import deposit
 
 
 class TestDepositPeerReviews(TestCase):
-
     @responses.activate
     def test_deposit_peer_reviews(self) -> None:
         """
         Test whether the correct request is sent to the Crossref API when depositing peer reviews.
         """
         # Set up responses, which mocks out the requests library we use
-        expected_response = '<html><head><title>SUCCESS</title></head><body><h2>SUCCESS</h2></body></html>'
-        responses.add(responses.POST, CROSSREF_DEPOSITION_URL, body=expected_response, status=200)
+        expected_response = "<html><head><title>SUCCESS</title></head><body><h2>SUCCESS</h2></body></html>"
+        responses.add(
+            responses.POST, CROSSREF_DEPOSITION_URL, body=expected_response, status=200
+        )
 
-        deposition_xml = '<doi_batch><head></head><body></body></doi_batch>'
+        deposition_xml = "<doi_batch><head></head><body></body></doi_batch>"
         actual_response = deposit(deposition_xml)
         self.assertEqual(expected_response, actual_response)
 
@@ -25,10 +26,10 @@ class TestDepositPeerReviews(TestCase):
         actual_request = responses.calls[0].request
         self.assertEqual(CROSSREF_DEPOSITION_URL, actual_request.url)
 
-        self.assertIn('Content-Type', actual_request.headers)
-        content_type = actual_request.headers['Content-Type']
+        self.assertIn("Content-Type", actual_request.headers)
+        content_type = actual_request.headers["Content-Type"]
 
-        re_content_type = re.compile('^multipart/form-data; boundary=(.+)$')
+        re_content_type = re.compile("^multipart/form-data; boundary=(.+)$")
         self.assertRegex(content_type, re_content_type)
 
         match = re_content_type.match(content_type)
@@ -56,6 +57,6 @@ Content-Disposition: form-data; name="fname"; filename="deposition.xml"
             except AttributeError:
                 pass
             actual_body = cast(str, actual_body)
-            actual_body = actual_body.replace('\r', '')
+            actual_body = actual_body.replace("\r", "")
         self.maxDiff = None
         self.assertEqual(expected_body, actual_body)

@@ -20,9 +20,7 @@ class InterWorkRelation:
             "type": "Attribute",
         }
     )
-    value: str = field(
-        default=""
-    )
+    value: str = field(default="")
 
 
 @dataclass
@@ -35,11 +33,9 @@ class Orcid:
         default=None,
         metadata={
             "type": "Attribute",
-        }
+        },
     )
-    value: str = field(
-        default=""
-    )
+    value: str = field(default="")
 
 
 @dataclass
@@ -209,7 +205,7 @@ class Program:
         default_factory=list,
         metadata={
             "type": "Element",
-        }
+        },
     )
 
 
@@ -228,32 +224,32 @@ class PersonName:
         default=None,
         metadata={
             "type": "Element",
-        }
+        },
     )
     surname: Optional[str] = field(
         default="Surname",
         metadata={
             "type": "Element",
-        }
+        },
     )
     contributor_role: Optional[str] = field(
         default=None,
         metadata={
             "type": "Attribute",
-        }
+        },
     )
     affiliations: Optional[Affiliations] = field(
         default=None,
         metadata={
             "type": "Element",
-        }
+        },
     )
     orcid: Optional[Orcid] = field(
         default=None,
         metadata={
             "name": "ORCID",
             "type": "Element",
-        }
+        },
     )
 
 
@@ -267,13 +263,13 @@ class Contributors:
         default=None,
         metadata={
             "type": "Element",
-        }
+        },
     )
     person_name: List[PersonName] = field(
         default_factory=list,
         metadata={
             "type": "Element",
-        }
+        },
     )
 
 
@@ -342,7 +338,7 @@ class Body:
         default_factory=list,
         metadata={
             "type": "Element",
-        }
+        },
     )
 
 

@@ -5,10 +5,10 @@ The main entrypoint is the `Article` class.
 """
 
 __all__ = [
-    'Author',
-    'DigitalObject',
-    'Orcid',
-    'Work',
+    "Author",
+    "DigitalObject",
+    "Orcid",
+    "Work",
 ]
 
 from dataclasses import dataclass

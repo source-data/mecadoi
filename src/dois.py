@@ -1,6 +1,6 @@
 """Handles the creation of random DOIs and tries to ensure they are not reused."""
 
-__all__ = ['get_random_doi', 'get_free_doi']
+__all__ = ["get_random_doi", "get_free_doi"]
 
 from datetime import datetime
 from secrets import choice
@@ -42,7 +42,7 @@ def get_free_doi(doi_db: BatchDatabase, resource: str) -> str:
             # this means the DOI has already been used
             doi = None
     if doi is None:
-        raise Exception(f'failed to generate unused DOI in {max_num_tries} tries')
+        raise Exception(f"failed to generate unused DOI in {max_num_tries} tries")
 
     return doi
 
@@ -51,6 +51,6 @@ def get_random_doi() -> str:
     # create the random part of the DOI: a string of 6 random digits
     population = digits
     k = 6
-    random_part = ''.join([choice(population) for i in range(k)])
+    random_part = "".join([choice(population) for i in range(k)])
     year = str(datetime.now().year)
     return Template(DOI_TEMPLATE).substitute(year=year, random=random_part)

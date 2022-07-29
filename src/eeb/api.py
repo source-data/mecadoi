@@ -62,4 +62,6 @@ class Article(TypedDict):
 
 
 def get_articles(doi: str) -> List[Article]:
-    return cast(List[Article], requests.get(f'https://eeb.embo.org/api/v1/doi/{doi}').json())
+    return cast(
+        List[Article], requests.get(f"https://eeb.embo.org/api/v1/doi/{doi}").json()
+    )

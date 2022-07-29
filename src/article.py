@@ -3,11 +3,11 @@
 """
 
 __all__ = [
-    'from_meca_manuscript',
-    'Article',
-    'AuthorReply',
-    'Review',
-    'RevisionRound',
+    "from_meca_manuscript",
+    "Article",
+    "AuthorReply",
+    "Review",
+    "RevisionRound",
 ]
 
 from dataclasses import dataclass
@@ -72,10 +72,10 @@ def from_meca_manuscript(
     elif manuscript.preprint_doi is not None:
         article_doi = manuscript.preprint_doi
     else:
-        raise ValueError('no preprint DOI found in the given manuscript')
+        raise ValueError("no preprint DOI found in the given manuscript")
 
     if not manuscript.review_process:
-        raise ValueError('no reviews found in the given manuscript')
+        raise ValueError("no reviews found in the given manuscript")
 
     return Article(
         doi=article_doi,
@@ -86,16 +86,23 @@ def from_meca_manuscript(
                     Review(
                         authors=[],
                         text=review.text,
-                        doi=doi_generator(f'{article_doi} - {revision_round.revision_id} - {review.running_number}'),
+                        doi=doi_generator(
+                            f"{article_doi} - {revision_round.revision_id} - {review.running_number}"
+                        ),
                         publication_date=review__process_publication_date,
-                    ) for review in revision_round.reviews
+                    )
+                    for review in revision_round.reviews
                 ],
                 author_reply=AuthorReply(
                     authors=revision_round.author_reply.authors,
                     text=revision_round.author_reply.text,
-                    doi=doi_generator(f'{article_doi} - {revision_round.revision_id} - author reply'),
+                    doi=doi_generator(
+                        f"{article_doi} - {revision_round.revision_id} - author reply"
+                    ),
                     publication_date=review__process_publication_date,
-                ) if revision_round.author_reply else None,
+                )
+                if revision_round.author_reply
+                else None,
             )
             for revision_round in manuscript.review_process
         ],

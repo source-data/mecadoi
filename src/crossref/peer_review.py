@@ -1,6 +1,6 @@
 """"""
 
-__all__ = ['generate_peer_review_deposition']
+__all__ = ["generate_peer_review_deposition"]
 
 from string import Template
 from time import time_ns
@@ -46,8 +46,15 @@ def generate_peer_review_deposition(article: Article) -> str:
     If the article does not contain any peer reviews, a ValueError is thrown.
     """
     num_reviews = (
-        len([r for revision_round in article.review_process for r in revision_round.reviews])
-        if article.review_process else 0
+        len(
+            [
+                r
+                for revision_round in article.review_process
+                for r in revision_round.reviews
+            ]
+        )
+        if article.review_process
+        else 0
     )
     if num_reviews == 0:
         raise ValueError("Article does not contain any reviews!")
@@ -70,7 +77,9 @@ def generate_peer_review_deposition(article: Article) -> str:
         ),
     )
 
-    serializer = XmlSerializer(config=SerializerConfig(pretty_print=True, xml_declaration=False))
+    serializer = XmlSerializer(
+        config=SerializerConfig(pretty_print=True, xml_declaration=False)
+    )
     namespaces = {
         "": "http://www.crossref.org/schema/5.3.1",
         "rel": "http://www.crossref.org/relations.xsd",
@@ -88,7 +97,9 @@ def generate_reviews(article: Article) -> Generator[PeerReview, None, None]:
     )
     for revision, revision_round in enumerate(article.review_process):
         for running_number, review in enumerate(revision_round.reviews, start=1):
-            title = Template(REVIEW_TITLE_TEMPLATE).substitute(article_title=article.title)
+            title = Template(REVIEW_TITLE_TEMPLATE).substitute(
+                article_title=article.title
+            )
             resource_url = Template(REVIEW_RESOURCE_URL_TEMPLATE).substitute(
                 article_doi=article.doi,
                 revision=revision,
@@ -97,7 +108,9 @@ def generate_reviews(article: Article) -> Generator[PeerReview, None, None]:
             yield PeerReview(
                 revision_round=revision,
                 type="referee-report",
-                contributors=Contributors(anonymous=Anonymous(sequence="first", contributor_role="author")),
+                contributors=Contributors(
+                    anonymous=Anonymous(sequence="first", contributor_role="author")
+                ),
                 titles=Titles(title=title),
                 review_date=ReviewDate(
                     year=review.publication_date.year,
@@ -115,7 +128,9 @@ def generate_reviews(article: Article) -> Generator[PeerReview, None, None]:
 
         author_reply = revision_round.author_reply
         if author_reply:
-            title = Template(AUTHOR_REPLY_TITLE_TEMPLATE).substitute(article_title=article.title)
+            title = Template(AUTHOR_REPLY_TITLE_TEMPLATE).substitute(
+                article_title=article.title
+            )
             resource_url = Template(AUTHOR_REPLY_RESOURCE_URL_TEMPLATE).substitute(
                 article_doi=article.doi,
                 revision=revision,
@@ -132,16 +147,19 @@ def generate_reviews(article: Article) -> Generator[PeerReview, None, None]:
                 ),
                 institution=Institution(institution_name=INSTITUTION_NAME),
                 running_number="Author Reply",
-                program=Program(related_item=[is_review_of_relation] + [
-                    RelatedItem(
-                        inter_work_relation=InterWorkRelation(
-                            relationship_type="isReplyTo",
-                            identifier_type="doi",
-                            value=review.doi,
+                program=Program(
+                    related_item=[is_review_of_relation]
+                    + [
+                        RelatedItem(
+                            inter_work_relation=InterWorkRelation(
+                                relationship_type="isReplyTo",
+                                identifier_type="doi",
+                                value=review.doi,
+                            )
                         )
-                    )
-                    for review in revision_round.reviews
-                ]),
+                        for review in revision_round.reviews
+                    ]
+                ),
                 doi_data=DoiData(
                     doi=author_reply.doi,
                     resource=resource_url,
@@ -150,23 +168,32 @@ def generate_reviews(article: Article) -> Generator[PeerReview, None, None]:
 
 
 def create_contributors(authors: List[Author]) -> Contributors:
-    contributors = Contributors(person_name=[
-        PersonName(
-            surname=author.surname,
-            sequence="additional",
-            contributor_role="author",
-            given_name=author.given_name,
-            affiliations=(
-                Affiliations(institution=Institution(institution_name=author.affiliation))
-                if author.affiliation else None
-            ),
-            orcid=(
-                Orcid(authenticated=author.orcid.is_authenticated, value=author.orcid.id)
-                if author.orcid else None
-            ),
-        )
-        for author in authors
-    ])
+    contributors = Contributors(
+        person_name=[
+            PersonName(
+                surname=author.surname,
+                sequence="additional",
+                contributor_role="author",
+                given_name=author.given_name,
+                affiliations=(
+                    Affiliations(
+                        institution=Institution(institution_name=author.affiliation)
+                    )
+                    if author.affiliation
+                    else None
+                ),
+                orcid=(
+                    Orcid(
+                        authenticated=author.orcid.is_authenticated,
+                        value=author.orcid.id,
+                    )
+                    if author.orcid
+                    else None
+                ),
+            )
+            for author in authors
+        ]
+    )
 
     # the contributor at the beginning of the contributors list gets to be first author
     if len(contributors.person_name) > 0:

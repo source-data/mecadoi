@@ -24,23 +24,30 @@ def verify(deposition_file: str) -> List[VerificationResult]:
 
     doi_batch = parser.from_string(deposition_file, clazz=DoiBatch)
 
-    reviews_by_preprint_doi: Dict[str, Tuple[List[PeerReview], Optional[PeerReview]]] = {}
+    reviews_by_preprint_doi: Dict[
+        str, Tuple[List[PeerReview], Optional[PeerReview]]
+    ] = {}
     for review in doi_batch.body.peer_review:
         reviewed_article_relationships = [
-            rel for rel in review.program.related_item
-            if rel.inter_work_relation.relationship_type == 'isReviewOf'
+            rel
+            for rel in review.program.related_item
+            if rel.inter_work_relation.relationship_type == "isReviewOf"
         ]
         if len(reviewed_article_relationships) != 1:
-            raise ValueError(f'Multiple isReviewOf relationships in deposition xml: {doi_batch}')
+            raise ValueError(
+                f"Multiple isReviewOf relationships in deposition xml: {doi_batch}"
+            )
         preprint_doi = reviewed_article_relationships[0].inter_work_relation.value
         reviews_by_preprint_doi.setdefault(preprint_doi, ([], None))
         (reviews, author_reply) = reviews_by_preprint_doi[preprint_doi]
 
-        if review.type == 'referee-report':
+        if review.type == "referee-report":
             reviews.append(review)
-        elif review.type == 'author-comment':
+        elif review.type == "author-comment":
             if author_reply:
-                raise ValueError(f'Multiple author replies in deposition xml: {doi_batch}')
+                raise ValueError(
+                    f"Multiple author replies in deposition xml: {doi_batch}"
+                )
             author_reply = review
 
         reviews_by_preprint_doi[preprint_doi] = (reviews, author_reply)
@@ -60,12 +67,12 @@ def verify_reviews_match(
     if articles is None or len(articles) != 1:
         return VerificationResult(
             preprint_doi=preprint_doi,
-            error=f'received no or multiple results from EEB for preprint DOI {preprint_doi}',
+            error=f"received no or multiple results from EEB for preprint DOI {preprint_doi}",
         )
 
-    review_process = articles[0]['review_process']
-    eeb_reviews = review_process['reviews']
-    eeb_response = review_process['response']
+    review_process = articles[0]["review_process"]
+    eeb_reviews = review_process["reviews"]
+    eeb_response = review_process["response"]
 
     num_reviews = len(reviews)
     num_eeb_reviews = len(eeb_reviews)
@@ -75,9 +82,9 @@ def verify_reviews_match(
     deposition_has_author_reply = author_reply is not None
     author_reply_matches = eeb_has_author_reply == deposition_has_author_reply
 
-    eeb_dois = [r.get('doi', None) for r in eeb_reviews]
+    eeb_dois = [r.get("doi", None) for r in eeb_reviews]
     if eeb_response:
-        eeb_dois += [eeb_response.get('doi', None)]
+        eeb_dois += [eeb_response.get("doi", None)]
     no_dois_assigned = not any([bool(doi) for doi in eeb_dois])
 
     return VerificationResult(
@@ -86,11 +93,12 @@ def verify_reviews_match(
         author_reply_matches=author_reply_matches,
         no_dois_assigned=no_dois_assigned,
         error=(
-            None if all_reviews_present and author_reply_matches and no_dois_assigned
+            None
+            if all_reviews_present and author_reply_matches and no_dois_assigned
             else (
-                f'deposition file wants to create DOIs for {num_reviews} reviews'
+                f"deposition file wants to create DOIs for {num_reviews} reviews"
                 + f'{" and an author reply" if deposition_has_author_reply else ""}'
-                + f' but EEB has {num_eeb_reviews} reviews'
+                + f" but EEB has {num_eeb_reviews} reviews"
                 + f'{" and an author reply" if eeb_has_author_reply else " and no author reply"}'
                 + f'{"" if no_dois_assigned else " with DOIs already assigned"}'
             )

@@ -10,11 +10,11 @@ defined in this module.
 """
 
 __all__ = [
-    'parse_meca_archive',
-    'AuthorReply',
-    'Manuscript',
-    'Review',
-    'RevisionRound',
+    "parse_meca_archive",
+    "AuthorReply",
+    "Manuscript",
+    "Review",
+    "RevisionRound",
 ]
 
 from dataclasses import dataclass
@@ -44,6 +44,7 @@ class Review(Work):
 @dataclass
 class AuthorReply(Work):
     """The reply by the article authors to its reviews, as it appears in a MECA archive."""
+
     pass
 
 
@@ -93,7 +94,9 @@ class Manuscript(DigitalObject, Work):
     """
 
 
-def parse_meca_archive(path_to_archive: Union[str, Path], use_preprint_doi: bool = True) -> Manuscript:
+def parse_meca_archive(
+    path_to_archive: Union[str, Path], use_preprint_doi: bool = True
+) -> Manuscript:
     """
     Read the MECA archive at the given path and construct an Article from it.
 
@@ -105,8 +108,7 @@ def parse_meca_archive(path_to_archive: Union[str, Path], use_preprint_doi: bool
     article_xml = meca.get_xml(MECArchive.ARTICLE)
 
     article_authors = _get_authors(
-        article_xml.find('front/article-meta/contrib-group'),
-        contrib_type='author'
+        article_xml.find("front/article-meta/contrib-group"), contrib_type="author"
     )
 
     try:
@@ -116,43 +118,50 @@ def parse_meca_archive(path_to_archive: Union[str, Path], use_preprint_doi: bool
 
     if review_xml is not None:
         author_replies = meca._get_files_of_type(MECArchive.AUTHOR_REPLY)
-        review_process = _get_review_process(review_xml, article_authors, author_replies)
+        review_process = _get_review_process(
+            review_xml, article_authors, author_replies
+        )
     else:
         review_process = None
 
-    abstract_node = article_xml.find('front/article-meta/abstract')
+    abstract_node = article_xml.find("front/article-meta/abstract")
     return Manuscript(
         authors=article_authors,
-        doi=_text(article_xml.find('front/article-meta/article-id[@pub-id-type="doi"]')),
+        doi=_text(
+            article_xml.find('front/article-meta/article-id[@pub-id-type="doi"]')
+        ),
         preprint_doi=_get_preprint_doi(article_xml),
-        journal=_text_or_default(article_xml.find('front/journal-meta/journal-title-group/journal-title')),
+        journal=_text_or_default(
+            article_xml.find("front/journal-meta/journal-title-group/journal-title")
+        ),
         review_process=review_process,
         text={
-            'abstract': _text(abstract_node),
-        } if abstract_node is not None else {},
-        title=_text(article_xml.find('front/article-meta/title-group/article-title')),
+            "abstract": _text(abstract_node),
+        }
+        if abstract_node is not None
+        else {},
+        title=_text(article_xml.find("front/article-meta/title-group/article-title")),
     )
 
 
 def _assigned_date(review_xml: Any) -> datetime:
     date_assigned_xml = review_xml.find('history/date[@date-type="assigned"]')
     return datetime(
-        _int(date_assigned_xml.find('year')),
-        _int(date_assigned_xml.find('month')),
-        _int(date_assigned_xml.find('day')),
+        _int(date_assigned_xml.find("year")),
+        _int(date_assigned_xml.find("month")),
+        _int(date_assigned_xml.find("day")),
     )
 
 
 def _get_review_process(
-    review_xml: Any,
-    article_authors: List[Author],
-    author_replies: List['FileInMeca']
+    review_xml: Any, article_authors: List[Author], author_replies: List["FileInMeca"]
 ) -> Optional[List[RevisionRound]]:
     review_process = []
-    for revision_round_xml in review_xml.findall('version'):
-        revision_id = revision_round_xml.get('revision')
+    for revision_round_xml in review_xml.findall("version"):
+        revision_id = revision_round_xml.get("revision")
         author_reply_present = (
-            True if len(list(filter(lambda f: f.version == revision_id, author_replies))) > 0
+            True
+            if len(list(filter(lambda f: f.version == revision_id, author_replies))) > 0
             else False
         )
 
@@ -160,32 +169,41 @@ def _get_review_process(
             revision_id=revision_id,
             reviews=[
                 Review(
-                    authors=_get_authors(review_xml.find('contrib-group'), contrib_type='reviewer'),
+                    authors=_get_authors(
+                        review_xml.find("contrib-group"), contrib_type="reviewer"
+                    ),
                     running_number=str(running_number),
                     text={
-                        _text(review_item_xml.find('review-item-question/alt-title')): _text(review_item_xml.find(
-                            'review-item-response/text'))
-                        for review_item_xml in review_xml.findall('review-item-group/review-item')
+                        _text(
+                            review_item_xml.find("review-item-question/alt-title")
+                        ): _text(review_item_xml.find("review-item-response/text"))
+                        for review_item_xml in review_xml.findall(
+                            "review-item-group/review-item"
+                        )
                     },
                 )
                 for running_number, review_xml in enumerate(
-                    sorted(revision_round_xml.findall('review'), key=_assigned_date),
-                    start=1
+                    sorted(revision_round_xml.findall("review"), key=_assigned_date),
+                    start=1,
                 )
             ],
             author_reply=AuthorReply(
                 authors=article_authors,
                 text={},
-            ) if author_reply_present else None,
+            )
+            if author_reply_present
+            else None,
         )
         review_process.append(revision_round)
     return review_process
 
 
 def _get_preprint_doi(article_xml: Any) -> Optional[str]:
-    for custom_meta in article_xml.findall('front/article-meta/custom-meta-group/custom-meta'):
-        if 'Pre-existing BioRxiv Preprint DOI' == _text(custom_meta.find('meta-name')):
-            return _text(custom_meta.find('meta-value'))
+    for custom_meta in article_xml.findall(
+        "front/article-meta/custom-meta-group/custom-meta"
+    ):
+        if "Pre-existing BioRxiv Preprint DOI" == _text(custom_meta.find("meta-name")):
+            return _text(custom_meta.find("meta-value"))
     return None
 
 
@@ -197,14 +215,16 @@ def _get_authors(contrib_group_xml: Any, contrib_type: str) -> List[Author]:
         orcid_xml = author_xml.find('contrib-id[@contrib-id-type="orcid"]')
         authors.append(
             Author(
-                given_name=_text(author_xml.find('name/given-names')),
-                surname=_text(author_xml.find('name/surname')),
+                given_name=_text(author_xml.find("name/given-names")),
+                surname=_text(author_xml.find("name/surname")),
                 orcid=Orcid(
                     id=_text(orcid_xml),
-                    is_authenticated=orcid_xml.get('specific-use') == 'authenticated',
-                ) if orcid_xml is not None else None,
+                    is_authenticated=orcid_xml.get("specific-use") == "authenticated",
+                )
+                if orcid_xml is not None
+                else None,
                 affiliation=_get_affiliation(contrib_group_xml, author_xml),
-                is_corresponding_author=author_xml.get('corresp') == 'yes',
+                is_corresponding_author=author_xml.get("corresp") == "yes",
             )
         )
     return authors
@@ -213,7 +233,7 @@ def _get_authors(contrib_group_xml: Any, contrib_type: str) -> List[Author]:
 def _get_affiliation(contrib_group_xml: Any, author_xml: Any) -> Optional[str]:
     aff_xref = author_xml.find('xref[@ref-type="aff"]')
     if aff_xref is not None:
-        aff_id = aff_xref.get('rid')
+        aff_id = aff_xref.get("rid")
         if aff_id is not None:
             institution = contrib_group_xml.find(f'aff[@id="{aff_id}"]/institution')
             if institution is not None:
@@ -226,7 +246,7 @@ def _text(node: Any) -> str:
         str(
             tostring(
                 node,
-                method='text',  # return only text content, no <tag>s
+                method="text",  # return only text content, no <tag>s
                 encoding=str,  # return an unencoded unicode string
             ).strip()  # remove trailing whitespace
         )
@@ -250,6 +270,7 @@ class FileInMeca:
 
     Modelled after a MECA manifest's <item>s.
     """
+
     id: str
     file_name: str
     media_type: str
@@ -277,9 +298,9 @@ class MECArchive:
 
     # The file types of entries in the manifest file that are of interest to us. AUTHOR_REPLY is likely specific to
     # MECA archives exported from eJP.
-    ARTICLE = 'article-metadata'
-    REVIEWS = 'review-metadata'
-    AUTHOR_REPLY = 'Response to Reviewers'
+    ARTICLE = "article-metadata"
+    REVIEWS = "review-metadata"
+    AUTHOR_REPLY = "Response to Reviewers"
 
     def __init__(self, path_to_archive: Union[str, Path]) -> None:
         self.path_to_archive = path_to_archive
@@ -287,21 +308,21 @@ class MECArchive:
         with self._open_archive() as archive:
             self.files_in_archive = archive.namelist()
 
-        filename_manifest = 'manifest.xml'
+        filename_manifest = "manifest.xml"
         if filename_manifest not in self.files_in_archive:
-            raise ValueError('Invalid MECA archive: missing manifest file')
+            raise ValueError("Invalid MECA archive: missing manifest file")
 
         manifest = self._parse_xml(filename_manifest)
 
         self.files_in_manifest: Set[FileInMeca] = set()
-        for item in manifest.findall('item'):
-            file_id = item.get('id')
-            file_type = item.get('type')
-            file_version = item.get('version')
+        for item in manifest.findall("item"):
+            file_id = item.get("id")
+            file_type = item.get("type")
+            file_version = item.get("version")
 
-            instance = item.find('instance')
-            file_name = instance.get('href')
-            media_type = instance.get('media-type')
+            instance = item.find("instance")
+            file_name = instance.get("href")
+            media_type = instance.get("media-type")
 
             self.files_in_manifest.add(
                 FileInMeca(
@@ -315,9 +336,9 @@ class MECArchive:
 
     def _open_archive(self) -> ZipFile:
         try:
-            return ZipFile(self.path_to_archive, 'r')
+            return ZipFile(self.path_to_archive, "r")
         except BadZipFile as e:
-            raise ValueError('Bad zip file: ' + str(e))
+            raise ValueError("Bad zip file: " + str(e))
 
     def _open_file_in_archive(self, file: Union[str, FileInMeca]) -> IO[bytes]:
         with self._open_archive() as archive:
@@ -333,8 +354,11 @@ class MECArchive:
             tree = parse(xml_file)
             return tree.getroot()
 
-    def _get_files_of_type(self, file_type: str, version: Optional[str] = None) -> List[FileInMeca]:
+    def _get_files_of_type(
+        self, file_type: str, version: Optional[str] = None
+    ) -> List[FileInMeca]:
         """Finds all files of the given type and optionally the given version."""
+
         def predicate(file: FileInMeca) -> bool:
             if file.type != file_type:
                 return False
@@ -344,7 +368,9 @@ class MECArchive:
 
         return list(filter(predicate, self.files_in_manifest))
 
-    def _get_file_of_type(self, file_type: str, version: Optional[str] = None) -> FileInMeca:
+    def _get_file_of_type(
+        self, file_type: str, version: Optional[str] = None
+    ) -> FileInMeca:
         """
         Finds the file of the given type and optionally the given version.
 
@@ -353,9 +379,13 @@ class MECArchive:
         files_of_type = self._get_files_of_type(file_type, version=version)
         num_files_found = len(files_of_type)
         if num_files_found < 1:
-            raise ValueError(f'Found no file of type "{file_type}" and version "{version}"')
+            raise ValueError(
+                f'Found no file of type "{file_type}" and version "{version}"'
+            )
         if num_files_found > 1:
-            raise ValueError(f'Found multiple files of type "{file_type}" and version "{version}"')
+            raise ValueError(
+                f'Found multiple files of type "{file_type}" and version "{version}"'
+            )
         return files_of_type[0]
 
     def get_xml(self, file_type: str, version: Optional[str] = None) -> Any:

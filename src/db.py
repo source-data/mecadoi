@@ -6,7 +6,18 @@ __all__ = ["BatchDatabase", "DepositionAttempt", "ParsedFile"]
 from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime
-from sqlalchemy import Boolean, Column, create_engine, DateTime, ForeignKey, Integer, MetaData, Table, Text, select
+from sqlalchemy import (
+    Boolean,
+    Column,
+    create_engine,
+    DateTime,
+    ForeignKey,
+    Integer,
+    MetaData,
+    Table,
+    Text,
+    select,
+)
 from sqlalchemy.orm import registry, relationship, Session  # type: ignore[attr-defined] # it does have this attribute
 from sqlalchemy.types import TypeDecorator
 from typing import Any, List, Optional
@@ -155,28 +166,43 @@ class BatchDatabase:
         rows = self._fetch_rows(statement)
         return [row[0] for row in rows]
 
-    def fetch_parsed_files_between(self, after: datetime, before: datetime) -> List[ParsedFile]:
+    def fetch_parsed_files_between(
+        self, after: datetime, before: datetime
+    ) -> List[ParsedFile]:
         """Fetch all parsed files in the database between the given dates."""
-        statement = select(ParsedFile).filter(  # type: ignore
-            ParsedFile.received_at > after,
-            ParsedFile.received_at < before,
-        ).order_by(ParsedFile.id)
+        statement = (
+            select(ParsedFile)
+            .filter(  # type: ignore
+                ParsedFile.received_at > after,
+                ParsedFile.received_at < before,
+            )
+            .order_by(ParsedFile.id)
+        )
         rows = self._fetch_rows(statement)
         return [row["ParsedFile"] for row in rows]
 
-    def get_files_ready_for_deposition(self, after: datetime, before: datetime) -> List[ParsedFile]:
+    def get_files_ready_for_deposition(
+        self, after: datetime, before: datetime
+    ) -> List[ParsedFile]:
         """Fetch all parsed files in the database that are ready to be deposited."""
         ids_parsed_files_with_deposition_attempt = select(DepositionAttempt.id_parsed_file)  # type: ignore
-        statement = select(ParsedFile).filter(  # type: ignore
-            ParsedFile.received_at > after,
-            ParsedFile.received_at < before,
-            ParsedFile.id.not_in(ids_parsed_files_with_deposition_attempt),  # type: ignore
-            ParsedFile.manuscript.is_not(None),  # type: ignore
-        ).order_by(ParsedFile.id)
+        statement = (
+            select(ParsedFile)
+            .filter(  # type: ignore
+                ParsedFile.received_at > after,
+                ParsedFile.received_at < before,
+                ParsedFile.id.not_in(ids_parsed_files_with_deposition_attempt),  # type: ignore
+                ParsedFile.manuscript.is_not(None),  # type: ignore
+            )
+            .order_by(ParsedFile.id)
+        )
         parsed_files = [row["ParsedFile"] for row in self._fetch_rows(statement)]
         return [
-            p for p in parsed_files
-            if p.manuscript and p.manuscript.preprint_doi and p.manuscript.review_process
+            p
+            for p in parsed_files
+            if p.manuscript
+            and p.manuscript.preprint_doi
+            and p.manuscript.review_process
         ]
 
     def mark_doi_as_used(self, doi: str, resource: str) -> None:

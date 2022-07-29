@@ -5,7 +5,7 @@ from src.config import CROSSREF_DEPOSITION_URL, CROSSREF_USERNAME, CROSSREF_PASS
 def pretty_print_request(req: PreparedRequest) -> None:
     print(req.method, req.url)
     for k, v in req.headers.items():
-        print(f'{k}: {v}')
+        print(f"{k}: {v}")
 
     body = req.body
     try:
@@ -16,24 +16,26 @@ def pretty_print_request(req: PreparedRequest) -> None:
     print(output)
 
 
-def prep_request(deposition_file: str, crossref_username: str, crossref_password: str) -> PreparedRequest:
-    files = {'fname': ('deposition.xml', deposition_file)}
+def prep_request(
+    deposition_file: str, crossref_username: str, crossref_password: str
+) -> PreparedRequest:
+    files = {"fname": ("deposition.xml", deposition_file)}
     data = {
-        'login_id': crossref_username,
-        'login_passwd': crossref_password,
+        "login_id": crossref_username,
+        "login_passwd": crossref_password,
     }
     url = CROSSREF_DEPOSITION_URL
-    req = Request('POST', url, files=files, data=data)
+    req = Request("POST", url, files=files, data=data)
     return req.prepare()
 
 
 def deposit(deposition_file: str, verbose: int = 0) -> str:
     """Send a deposition file to the Crossref API."""
     if not (CROSSREF_USERNAME and CROSSREF_PASSWORD):
-        raise ValueError('No CrossRef username or password given!')
+        raise ValueError("No CrossRef username or password given!")
 
     if verbose:
-        pretty_print_request(prep_request(deposition_file, '***', '***'))
+        pretty_print_request(prep_request(deposition_file, "***", "***"))
 
     req = prep_request(deposition_file, CROSSREF_USERNAME, CROSSREF_PASSWORD)
     resp = Session().send(req)

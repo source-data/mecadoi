@@ -8,10 +8,10 @@ given file.
 """
 
 __all__ = [
-    'deposit',
-    'DepositedMECAs',
-    'parse',
-    'ParsedFiles',
+    "deposit",
+    "DepositedMECAs",
+    "parse",
+    "ParsedFiles",
 ]
 
 from dataclasses import dataclass, field
@@ -117,7 +117,9 @@ class DepositedMECAs:
     """The DOI deposition succeeded for these MECAs."""
 
 
-def deposit(mecas: List[ParsedFile], db: BatchDatabase, dry_run: bool = True) -> Tuple[DepositedMECAs, List[Article]]:
+def deposit(
+    mecas: List[ParsedFile], db: BatchDatabase, dry_run: bool = True
+) -> Tuple[DepositedMECAs, List[Article]]:
     """
     Generate deposition files from the given MECAs, try to send the files to the Crossref API, and store the results in
     `db`.
@@ -125,8 +127,16 @@ def deposit(mecas: List[ParsedFile], db: BatchDatabase, dry_run: bool = True) ->
     Raises a ValueError if not all given MECAs are already stored in the database and have reviews as well as a
     preprint DOI.
     """
-    if not all([m.id and m.manuscript and m.manuscript.review_process and m.manuscript.preprint_doi for m in mecas]):
-        raise ValueError(f'Not all required information present for all MECAs: {mecas}')
+    if not all(
+        [
+            m.id
+            and m.manuscript
+            and m.manuscript.review_process
+            and m.manuscript.preprint_doi
+            for m in mecas
+        ]
+    ):
+        raise ValueError(f"Not all required information present for all MECAs: {mecas}")
 
     def doi_generator(resource: str) -> str:
         if dry_run:
@@ -147,7 +157,9 @@ def deposit(mecas: List[ParsedFile], db: BatchDatabase, dry_run: bool = True) ->
             )
             deposition_attempt.deposition = generate_peer_review_deposition(article)
         except Exception as e:
-            LOGGER.warning('Failed to generate deposition file from "%s": %s', meca.path, str(e))
+            LOGGER.warning(
+                'Failed to generate deposition file from "%s": %s', meca.path, str(e)
+            )
             continue
 
         if deposition_attempt.deposition is None:
@@ -164,8 +176,11 @@ def deposit(mecas: List[ParsedFile], db: BatchDatabase, dry_run: bool = True) ->
             )
 
         if verification_result.error:
-            LOGGER.warning('Failed to verify deposition file from "%s": %s',
-                           deposition_attempt.meca.path, verification_result.error)
+            LOGGER.warning(
+                'Failed to verify deposition file from "%s": %s',
+                deposition_attempt.meca.path,
+                verification_result.error,
+            )
             deposition_attempt.verification_failed = True
             continue
         else:
@@ -180,7 +195,11 @@ def deposit(mecas: List[ParsedFile], db: BatchDatabase, dry_run: bool = True) ->
             deposit_file(deposition_attempt.deposition)
             deposition_attempt.succeeded = True
         except Exception as e:
-            LOGGER.warning('Failed to deposit peer reviews from "%s": %s', deposition_attempt.meca.path, str(e))
+            LOGGER.warning(
+                'Failed to deposit peer reviews from "%s": %s',
+                deposition_attempt.meca.path,
+                str(e),
+            )
             deposition_attempt.succeeded = False
 
         if deposition_attempt.succeeded:
@@ -195,7 +214,9 @@ def deposit(mecas: List[ParsedFile], db: BatchDatabase, dry_run: bool = True) ->
     )
 
 
-def group_deposition_attempts_by_status(deposition_attempts: List[DepositionAttempt], dry_run: bool) -> DepositedMECAs:
+def group_deposition_attempts_by_status(
+    deposition_attempts: List[DepositionAttempt], dry_run: bool
+) -> DepositedMECAs:
     result = DepositedMECAs()
 
     for deposition_attempt in deposition_attempts:

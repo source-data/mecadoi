@@ -1,6 +1,6 @@
 """Common functionality for the test cases."""
 
-__all__ = ['MecaArchiveTestCase']
+__all__ = ["MecaArchiveTestCase"]
 
 from os import listdir, mkdir
 from os.path import isdir, isfile, join
@@ -28,8 +28,8 @@ def _add_to_zip(zf: ZipFile, path: str, zip_path: str) -> None:
 
 def create_zip(zip_name: str, dir: str) -> None:
     """Create a zip file at the path `zip_name` that contains all files within `dir`."""
-    with ZipFile(zip_name, 'w') as zf:
-        _add_to_zip(zf, dir, '')
+    with ZipFile(zip_name, "w") as zf:
+        _add_to_zip(zf, dir, "")
 
 
 class MecaArchiveTestCase(TestCase):
@@ -41,8 +41,8 @@ class MecaArchiveTestCase(TestCase):
     that contains all files inside the source directory.
     """
 
-    MECA_SOURCE_DIR = 'tests/resources/meca'
-    MECA_TARGET_DIR = 'tests/tmp/meca'
+    MECA_SOURCE_DIR = "tests/resources/meca"
+    MECA_TARGET_DIR = "tests/tmp/meca"
 
     def setUp(self) -> None:
         try:
@@ -53,7 +53,7 @@ class MecaArchiveTestCase(TestCase):
 
         self.meca_archives = []
         for meca_source in listdir(self.MECA_SOURCE_DIR):
-            file_path = f'{self.MECA_SOURCE_DIR}/{meca_source}'
+            file_path = f"{self.MECA_SOURCE_DIR}/{meca_source}"
             if isdir(file_path):
                 zip_path = self.get_meca_archive_path(meca_source)
                 create_zip(zip_path, file_path)
@@ -62,15 +62,16 @@ class MecaArchiveTestCase(TestCase):
         return super().setUp()
 
     def get_meca_archive_path(self, meca_name: str) -> str:
-        return f'{self.MECA_TARGET_DIR}/{meca_name}.zip'
+        return f"{self.MECA_TARGET_DIR}/{meca_name}.zip"
 
     def get_meca_archive_paths(self, meca_names: List[str]) -> List[str]:
         return [self.get_meca_archive_path(meca_name) for meca_name in meca_names]
 
 
 class DepositionFileTestCase(TestCase):
-
-    def assertDepositionFileEquals(self, expected_deposition_file: str, actual_deposition_file: str) -> None:
+    def assertDepositionFileEquals(
+        self, expected_deposition_file: str, actual_deposition_file: str
+    ) -> None:
         def parse(xml_file: str) -> Tuple[DoiBatch, str, int]:
             parser = XmlParser()
             doi_batch = parser.from_string(xml_file, DoiBatch)

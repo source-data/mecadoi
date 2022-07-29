@@ -13,7 +13,7 @@ from os import getenv
 
 # Use the ENV_FILE parameter to load the configuration file. If the parameter isn't set, the dotenv library searches
 # for a file called ".env", first in the current folder and then in its parents.
-load_dotenv(dotenv_path=getenv('ENV_FILE'))
+load_dotenv(dotenv_path=getenv("ENV_FILE"))
 
 
 def getenv_or_raise(name: str) -> str:
@@ -23,46 +23,49 @@ def getenv_or_raise(name: str) -> str:
     return val
 
 
-DEPOSITOR_NAME = getenv_or_raise('DEPOSITOR_NAME')
-DEPOSITOR_EMAIL = getenv_or_raise('DEPOSITOR_EMAIL')
-REGISTRANT_NAME = getenv_or_raise('REGISTRANT_NAME')
-INSTITUTION_NAME = getenv_or_raise('INSTITUTION_NAME')
-REVIEW_RESOURCE_URL_TEMPLATE = getenv_or_raise('REVIEW_RESOURCE_URL_TEMPLATE')
-REVIEW_TITLE_TEMPLATE = getenv_or_raise('REVIEW_TITLE_TEMPLATE')
-AUTHOR_REPLY_RESOURCE_URL_TEMPLATE = getenv_or_raise('AUTHOR_REPLY_RESOURCE_URL_TEMPLATE')
-AUTHOR_REPLY_TITLE_TEMPLATE = getenv_or_raise('AUTHOR_REPLY_TITLE_TEMPLATE')
-DOI_TEMPLATE = getenv_or_raise('DOI_TEMPLATE')
+DEPOSITOR_NAME = getenv_or_raise("DEPOSITOR_NAME")
+DEPOSITOR_EMAIL = getenv_or_raise("DEPOSITOR_EMAIL")
+REGISTRANT_NAME = getenv_or_raise("REGISTRANT_NAME")
+INSTITUTION_NAME = getenv_or_raise("INSTITUTION_NAME")
+REVIEW_RESOURCE_URL_TEMPLATE = getenv_or_raise("REVIEW_RESOURCE_URL_TEMPLATE")
+REVIEW_TITLE_TEMPLATE = getenv_or_raise("REVIEW_TITLE_TEMPLATE")
+AUTHOR_REPLY_RESOURCE_URL_TEMPLATE = getenv_or_raise(
+    "AUTHOR_REPLY_RESOURCE_URL_TEMPLATE"
+)
+AUTHOR_REPLY_TITLE_TEMPLATE = getenv_or_raise("AUTHOR_REPLY_TITLE_TEMPLATE")
+DOI_TEMPLATE = getenv_or_raise("DOI_TEMPLATE")
 
-DB_URL = getenv_or_raise('DB_URL')
+DB_URL = getenv_or_raise("DB_URL")
 
-CROSSREF_DEPOSITION_URL = getenv_or_raise('CROSSREF_DEPOSITION_URL')
-CROSSREF_USERNAME = getenv_or_raise('CROSSREF_USERNAME')
-CROSSREF_PASSWORD = getenv_or_raise('CROSSREF_PASSWORD')
+CROSSREF_DEPOSITION_URL = getenv_or_raise("CROSSREF_DEPOSITION_URL")
+CROSSREF_USERNAME = getenv_or_raise("CROSSREF_USERNAME")
+CROSSREF_PASSWORD = getenv_or_raise("CROSSREF_PASSWORD")
 
-LOG_FILE = getenv('LOG_FILE')
-LOG_LEVEL = getenv('LOG_LEVEL')
+LOG_FILE = getenv("LOG_FILE")
+LOG_LEVEL = getenv("LOG_LEVEL")
 
 if LOG_FILE:
-    level = LOG_LEVEL or 'INFO'
-    basicConfig(filename=LOG_FILE, level=level, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    level = LOG_LEVEL or "INFO"
+    basicConfig(
+        filename=LOG_FILE,
+        level=level,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
 
 __all__ = [
-    'DEPOSITOR_NAME',
-    'DEPOSITOR_EMAIL',
-    'REGISTRANT_NAME',
-    'INSTITUTION_NAME',
-    'REVIEW_RESOURCE_URL_TEMPLATE',
-    'REVIEW_TITLE_TEMPLATE',
-    'AUTHOR_REPLY_RESOURCE_URL_TEMPLATE',
-    'AUTHOR_REPLY_TITLE_TEMPLATE',
-    'DOI_TEMPLATE',
-
-    'DB_URL',
-
-    'CROSSREF_DEPOSITION_URL',
-    'CROSSREF_USERNAME',
-    'CROSSREF_PASSWORD',
-
-    'LOG_FILE',
-    'LOG_LEVEL',
+    "DEPOSITOR_NAME",
+    "DEPOSITOR_EMAIL",
+    "REGISTRANT_NAME",
+    "INSTITUTION_NAME",
+    "REVIEW_RESOURCE_URL_TEMPLATE",
+    "REVIEW_TITLE_TEMPLATE",
+    "AUTHOR_REPLY_RESOURCE_URL_TEMPLATE",
+    "AUTHOR_REPLY_TITLE_TEMPLATE",
+    "DOI_TEMPLATE",
+    "DB_URL",
+    "CROSSREF_DEPOSITION_URL",
+    "CROSSREF_USERNAME",
+    "CROSSREF_PASSWORD",
+    "LOG_FILE",
+    "LOG_LEVEL",
 ]

@@ -9,18 +9,18 @@ class TestGeneratePeerReviewDeposition(MecaArchiveTestCase, DepositionFileTestCa
         super().setUp()
 
         self.fixtures = [
-            'multiple-revision-rounds',
-            'no-author-reply',
-            'single-revision-round',
+            "multiple-revision-rounds",
+            "no-author-reply",
+            "single-revision-round",
         ]
         self.publication_date = datetime(2020, 10, 10)
-        self.doi_for_review = '10.15252/rc.2020123456'
+        self.doi_for_review = "10.15252/rc.2020123456"
         self.maxDiff = None
 
     def test_generate_peer_review_deposition(self) -> None:
         for article_name in self.fixtures:
             with self.subTest(article=article_name):
-                with open(f'tests/resources/expected/{article_name}.xml', 'r') as f:
+                with open(f"tests/resources/expected/{article_name}.xml", "r") as f:
                     expected_xml = f.read()
 
                 article = ARTICLES[article_name]
