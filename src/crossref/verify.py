@@ -10,6 +10,7 @@ class VerificationResult:
     preprint_doi: str
     all_reviews_present: Optional[bool] = None
     author_reply_matches: Optional[bool] = None
+    no_dois_assigned: Optional[bool] = None
     error: Optional[str] = None
 
 
@@ -64,24 +65,34 @@ def verify_reviews_match(
 
     review_process = articles[0]['review_process']
     eeb_reviews = review_process['reviews']
+    eeb_response = review_process['response']
+
     num_reviews = len(reviews)
     num_eeb_reviews = len(eeb_reviews)
     all_reviews_present = num_eeb_reviews == num_reviews
-    eeb_has_author_reply = review_process['response'] is not None
+
+    eeb_has_author_reply = eeb_response is not None
     deposition_has_author_reply = author_reply is not None
     author_reply_matches = eeb_has_author_reply == deposition_has_author_reply
+
+    eeb_dois = [r.get('doi', None) for r in eeb_reviews]
+    if eeb_response:
+        eeb_dois += [eeb_response.get('doi', None)]
+    no_dois_assigned = not any([bool(doi) for doi in eeb_dois])
 
     return VerificationResult(
         preprint_doi=preprint_doi,
         all_reviews_present=all_reviews_present,
         author_reply_matches=author_reply_matches,
+        no_dois_assigned=no_dois_assigned,
         error=(
-            None if all_reviews_present and author_reply_matches
+            None if all_reviews_present and author_reply_matches and no_dois_assigned
             else (
                 f'deposition file wants to create DOIs for {num_reviews} reviews'
                 + f'{" and an author reply" if deposition_has_author_reply else ""}'
                 + f' but EEB has {num_eeb_reviews} reviews'
                 + f'{" and an author reply" if eeb_has_author_reply else " and no author reply"}'
+                + f'{"" if no_dois_assigned else " with DOIs already assigned"}'
             )
         ),
     )

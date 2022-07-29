@@ -34,9 +34,46 @@ class TestVerifyDepositionFile(TestCase):
         self.assertIsNotNone(verification_result.error)
         self.assertFalse(verification_result.all_reviews_present)
 
+    @responses.activate
+    def test_verify_deposition_file_with_dois_already_assigned(self) -> None:
+        fixtures = [
+            # review DOIs, author reply DOI, expected result for no_dois_assigned
+            ([None, None, None, None], None, True),  # no DOIs
+            (['', None, None, None], None, True),  # empty DOI for a review
+            ([None, None, None, None], '', True),  # empty DOI for the response
+            (['doi', None, None, None], None, False),  # one review has a DOI
+            ([None, None, None, None], 'doi', False),  # the author reply has a DOI
+            (['doi', 'doi', 'doi', 'doi'], 'doi', False),  # everything has a DOI
+        ]
+
+        for review_dois, response_doi, expected in fixtures:
+            with self.subTest(
+                review_dois=review_dois, response_doi=response_doi, expected=expected
+            ):
+                review_process = self.eeb_api_response[0]['review_process']
+                for i, review in enumerate(review_process['reviews']):
+                    doi = review_dois[i]  # type: ignore[index] # review_dois is a list
+                    if doi is not None:
+                        review['doi'] = doi
+                response = review_process['response']
+                if response and response_doi is not None:
+                    response['doi'] = response_doi
+
+                self.set_up_eeb_api_response()
+
+                actual_result = verify(self.deposition_file)
+
+                self.assertEqual(1, len(actual_result))
+                verification_result = actual_result[0]
+                if expected:
+                    self.assertIsNone(verification_result.error)
+                else:
+                    self.assertIsNotNone(verification_result.error)
+                self.assertEqual(expected, verification_result.no_dois_assigned)
+
     def set_up_eeb_api_response(self) -> None:
         # Set up responses, which mocks out the requests library we use
-        responses.add(
+        responses.upsert(
             responses.GET,
             f'https://eeb.embo.org/api/v1/doi/{self.preprint_doi}',
             json=self.eeb_api_response,
@@ -102,7 +139,6 @@ class TestVerifyDepositionFile(TestCase):
                             "text": "This study has been evaluated by _MIT Press - Journals_.\n\n__Review 1: [..]",
                             "reviewed_by": "MIT Press - Journals",
                             "position_idx": 0,
-                            "doi": "10.1162/2e3983f5.0cb0c700"
                         },
                         {
                             "source": "cross_ref",
@@ -113,7 +149,6 @@ class TestVerifyDepositionFile(TestCase):
                             "text": "This study has been evaluated by _MIT Press - Journals_.\n\n__Review 1: [..]",
                             "reviewed_by": "MIT Press - Journals",
                             "position_idx": 1,
-                            "doi": "10.1162/2e3983f5.0cb0c700"
                         },
                         {
                             "source": "cross_ref",
@@ -124,7 +159,6 @@ class TestVerifyDepositionFile(TestCase):
                             "text": "This study has been evaluated by _MIT Press - Journals_.\n\n__Review 1: [..]",
                             "reviewed_by": "MIT Press - Journals",
                             "position_idx": 2,
-                            "doi": "10.1162/2e3983f5.0cb0c700"
                         },
                         {
                             "source": "cross_ref",
@@ -135,7 +169,6 @@ class TestVerifyDepositionFile(TestCase):
                             "text": "This study has been evaluated by _MIT Press - Journals_.\n\n__Review 1: [..]",
                             "reviewed_by": "MIT Press - Journals",
                             "position_idx": 3,
-                            "doi": "10.1162/2e3983f5.0cb0c700"
                         },
                     ],
                     'response': {
@@ -147,7 +180,6 @@ class TestVerifyDepositionFile(TestCase):
                         "text": "Detailed comments to reviews:\n\n__Review 1: [..]",
                         "reviewed_by": "MIT Press - Journals",
                         "position_idx": 3,
-                        "doi": "10.1162/2e3983f5.0cb0c700"
                     },
                     'annot': [],
                 },

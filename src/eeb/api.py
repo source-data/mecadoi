@@ -10,7 +10,7 @@ class Author(TypedDict):
     surname: Optional[str]
 
 
-class Review(TypedDict):
+class Review(TypedDict, total=False):
     source: str
     posting_date: str
     review_idx: str
