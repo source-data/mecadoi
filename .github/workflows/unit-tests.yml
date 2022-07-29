@@ -41,4 +41,5 @@ jobs:
     - name: Test with pytest
       run: |
         cp .env.ci .env
-        python -m unittest
+        coverage run -m unittest
+        coverage report -m

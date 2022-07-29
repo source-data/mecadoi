@@ -5,3 +5,4 @@ __pycache__/
 provisioning/buffer/
 tests/tmp/*
 .env
+.coverage
