@@ -171,8 +171,8 @@ class BatchDatabase:
     ) -> List[ParsedFile]:
         """Fetch all parsed files in the database between the given dates."""
         statement = (
-            select(ParsedFile)
-            .filter(  # type: ignore
+            select(ParsedFile)  # type: ignore
+            .filter(
                 ParsedFile.received_at > after,
                 ParsedFile.received_at < before,
             )
@@ -187,8 +187,8 @@ class BatchDatabase:
         """Fetch all parsed files in the database that are ready to be deposited."""
         ids_parsed_files_with_deposition_attempt = select(DepositionAttempt.id_parsed_file)  # type: ignore
         statement = (
-            select(ParsedFile)
-            .filter(  # type: ignore
+            select(ParsedFile)  # type: ignore
+            .filter(
                 ParsedFile.received_at > after,
                 ParsedFile.received_at < before,
                 ParsedFile.id.not_in(ids_parsed_files_with_deposition_attempt),  # type: ignore
