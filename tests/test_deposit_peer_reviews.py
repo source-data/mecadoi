@@ -53,7 +53,7 @@ Content-Disposition: form-data; name="fname"; filename="deposition.xml"
         actual_body = actual_request.body
         if actual_body:
             try:
-                actual_body = actual_body.decode()
+                actual_body = actual_body.decode()  # type: ignore[union-attr] # we catch the AttrError when it's a str
             except AttributeError:
                 pass
             actual_body = cast(str, actual_body)
