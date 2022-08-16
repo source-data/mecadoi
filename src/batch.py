@@ -9,12 +9,9 @@ given file.
 
 __all__ = [
     "deposit",
-    "DepositedMECAs",
     "parse",
-    "ParsedFiles",
 ]
 
-from dataclasses import dataclass, field
 from datetime import datetime
 from logging import getLogger
 from pathlib import Path
@@ -31,24 +28,7 @@ from src.meca import parse_meca_archive
 LOGGER = getLogger(__name__)
 
 
-@dataclass
-class ParsedFiles:
-    """The files that were parsed in one batch-parsing run."""
-
-    invalid: List[str] = field(default_factory=list)
-    """These files are either not .zip files or invalid MECA archives."""
-
-    no_reviews: List[str] = field(default_factory=list)
-    """These MECA archives contain no reviews."""
-
-    no_preprint_doi: List[str] = field(default_factory=list)
-    """These MECA archives don't have a DOI for the preprint that their manuscript is based on."""
-
-    ready_for_deposition: List[str] = field(default_factory=list)
-    """These MECA archives have all the necessary information to proceed with review DOI deposition."""
-
-
-def parse(files: List[str], db: BatchDatabase) -> ParsedFiles:
+def parse(files: List[str], db: BatchDatabase) -> List[ParsedFile]:
     """
     Parse all given files as MECA archives and store the results in `db`.
     """
@@ -60,25 +40,7 @@ def parse(files: List[str], db: BatchDatabase) -> ParsedFiles:
     db.insert_all(parsed_meca_archives)
 
     # Group the parsed files by their status
-    return group_files_by_status(parsed_meca_archives)
-
-
-def group_files_by_status(meca_archives: List[ParsedFile]) -> ParsedFiles:
-    result = ParsedFiles()
-
-    for meca_archive in meca_archives:
-        resulting_list = None
-        if meca_archive.manuscript is None:
-            resulting_list = result.invalid
-        elif not meca_archive.manuscript.review_process:
-            resulting_list = result.no_reviews
-        elif not meca_archive.manuscript.preprint_doi:
-            resulting_list = result.no_preprint_doi
-        else:
-            resulting_list = result.ready_for_deposition
-        resulting_list.append(meca_archive.path)
-
-    return result
+    return parsed_meca_archives
 
 
 def parse_potential_meca_archive(potential_meca_archive: str) -> ParsedFile:
@@ -100,26 +62,9 @@ def get_modification_time(file_path: str) -> datetime:
     return datetime.fromtimestamp(mod_timestamp)
 
 
-@dataclass
-class DepositedMECAs:
-    """The MECA archives that were attempted to be deposited in one batch-deposition run."""
-
-    deposition_generation_failed: List[str] = field(default_factory=list)
-    """No deposition file could be generated from these MECAs."""
-
-    deposition_verification_failed: List[str] = field(default_factory=list)
-    """No deposition file could be generated from these MECAs."""
-
-    deposition_failed: List[str] = field(default_factory=list)
-    """The DOI deposition failed for these MECAs."""
-
-    deposition_succeeded: List[str] = field(default_factory=list)
-    """The DOI deposition succeeded for these MECAs."""
-
-
 def deposit(
     mecas: List[ParsedFile], db: BatchDatabase, dry_run: bool = True
-) -> Tuple[DepositedMECAs, List[Article]]:
+) -> Tuple[List[DepositionAttempt], List[Article]]:
     """
     Generate deposition files from the given MECAs, try to send the files to the Crossref API, and store the results in
     `db`.
@@ -208,27 +153,4 @@ def deposit(
     if not dry_run:
         db.insert_all(deposition_attempts)
 
-    return (
-        group_deposition_attempts_by_status(deposition_attempts, dry_run),
-        successfully_deposited_articles,
-    )
-
-
-def group_deposition_attempts_by_status(
-    deposition_attempts: List[DepositionAttempt], dry_run: bool
-) -> DepositedMECAs:
-    result = DepositedMECAs()
-
-    for deposition_attempt in deposition_attempts:
-        resulting_list = None
-        if deposition_attempt.deposition is None:
-            resulting_list = result.deposition_generation_failed
-        elif deposition_attempt.verification_failed:
-            resulting_list = result.deposition_verification_failed
-        elif dry_run or deposition_attempt.succeeded:
-            resulting_list = result.deposition_succeeded
-        else:
-            resulting_list = result.deposition_failed
-        resulting_list.append(deposition_attempt.meca.path)
-
-    return result
+    return (deposition_attempts, successfully_deposited_articles)

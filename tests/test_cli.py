@@ -7,6 +7,10 @@ from unittest.mock import Mock, patch
 from click.testing import CliRunner, Result
 from yaml import Loader, load, safe_load
 from src.article import Article
+from src.cli.batch.commands import (
+    group_deposition_attempts_by_status,
+    group_parsed_files_by_status,
+)
 from src.cli.main import main as mecadoi
 from src.crossref.verify import VerificationResult
 from tests.common import MecaArchiveTestCase
@@ -82,11 +86,10 @@ class ParseTestCase(BaseBatchTestCase, BaseParseTestCase):
             ["batch", "parse", "-o", self.output_directory, self.input_directory]
         )
         self.assertEqual(0, result.exit_code)
-        actual_output = self.assert_cli_output_equal(
-            asdict(self.expected_output), result, ["id"]
-        )
+        expected_output = group_parsed_files_by_status(self.expected_parsed_files)
+        actual_output = self.assert_cli_output_equal(expected_output, result, ["id"])
 
-        self.assert_meca_archives_in_db(self.expected_db_contents)
+        self.assert_parsed_files_in_db(self.expected_parsed_files)
         self.assert_input_files_are_in_output_dir(actual_output)
 
     def assert_input_files_are_in_output_dir(self, actual: Dict[str, Any]) -> None:
@@ -123,8 +126,7 @@ class DepositTestCase(BaseBatchTestCase, BaseDepositTestCase):
         )
         self.assertEqual(0, result.exit_code)
 
-        expected_output = asdict(self.expected_output)
-        expected_output["dry_run"] = True
+        expected_output = self.expected_output(dry_run=True)
         actual_output = self.assert_cli_output_equal(expected_output, result, ["id"])
 
         self.assert_deposition_attempts_in_db([])
@@ -143,8 +145,7 @@ class DepositTestCase(BaseBatchTestCase, BaseDepositTestCase):
         )
         self.assertEqual(0, result.exit_code)
 
-        expected_output = asdict(self.expected_output)
-        expected_output["dry_run"] = False
+        expected_output = self.expected_output(dry_run=False)
         actual_output = self.assert_cli_output_equal(expected_output, result, ["id"])
 
         self.assert_deposition_attempts_in_db(self.expected_deposition_attempts())
@@ -165,3 +166,13 @@ class DepositTestCase(BaseBatchTestCase, BaseDepositTestCase):
             actual_content = safe_load(f)
 
         self.assertEqual(expected_content, actual_content)
+
+    def expected_output(self, dry_run: bool = False) -> Dict[str, Any]:
+        expected_deposition_attempts = self.expected_deposition_attempts(
+            dry_run=dry_run
+        )
+        expected_output = group_deposition_attempts_by_status(
+            expected_deposition_attempts, dry_run=dry_run
+        )
+        expected_output["dry_run"] = dry_run
+        return expected_output

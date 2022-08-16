@@ -5,17 +5,13 @@ from logging import getLogger
 from os import mkdir, walk
 from os.path import join
 from shutil import move
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from uuid import uuid4
 import click
 from yaml import dump
-from src.batch import (
-    deposit as batch_deposit,
-    group_files_by_status,
-    parse as batch_parse,
-)
+from src.batch import deposit as batch_deposit, parse as batch_parse
 from src.config import DB_URL
-from src.db import BatchDatabase
+from src.db import BatchDatabase, DepositionAttempt, ParsedFile
 
 LOGGER = getLogger(__name__)
 
@@ -48,8 +44,8 @@ def parse(input_directory: str, output_directory: str) -> None:
     LOGGER.debug("input_files=%s", input_files)
 
     # parse and register the input files
-    result = batch_parse(input_files, BatchDatabase(DB_URL))
-    LOGGER.debug("result=%s", result)
+    parsed_files = batch_parse(input_files, BatchDatabase(DB_URL))
+    LOGGER.debug("parsed_files=%s", parsed_files)
 
     # move the input files to the output directory
     id_batch_run = str(uuid4())
@@ -58,9 +54,9 @@ def parse(input_directory: str, output_directory: str) -> None:
     move(input_directory, output_directory)
     mkdir(input_directory)
 
-    result_as_dict = asdict(result)
-    result_as_dict["id"] = id_batch_run
-    click.echo(output(result_as_dict), nl=False)
+    result = group_parsed_files_by_status(parsed_files)
+    result["id"] = id_batch_run
+    click.echo(output(result), nl=False)
 
     LOGGER.info(
         'Parsed and moved %s files from "%s" to "%s"',
@@ -68,6 +64,29 @@ def parse(input_directory: str, output_directory: str) -> None:
         input_directory,
         output_directory,
     )
+
+
+def group_parsed_files_by_status(meca_archives: List[ParsedFile]) -> Dict[str, Any]:
+    result: Dict[str, Any] = {
+        "invalid": [],
+        "no_reviews": [],
+        "no_preprint_doi": [],
+        "ready_for_deposition": [],
+    }
+
+    for meca_archive in meca_archives:
+        resulting_list = None
+        if meca_archive.manuscript is None:
+            resulting_list = result["invalid"]
+        elif not meca_archive.manuscript.review_process:
+            resulting_list = result["no_reviews"]
+        elif not meca_archive.manuscript.preprint_doi:
+            resulting_list = result["no_preprint_doi"]
+        else:
+            resulting_list = result["ready_for_deposition"]
+        resulting_list.append(get_name(meca_archive))
+
+    return result
 
 
 @click.command()
@@ -98,14 +117,14 @@ def deposit(
     undeposited_files = batch_db.get_files_ready_for_deposition(
         after=after_as_datetime, before=before_as_datetime
     )
-    deposition_results, successfully_deposited_articles = batch_deposit(
+    deposition_attempts, successfully_deposited_articles = batch_deposit(
         undeposited_files, batch_db, dry_run=dry_run
     )
 
-    result_as_dict = asdict(deposition_results)
+    result = group_deposition_attempts_by_status(deposition_attempts, dry_run=dry_run)
     id_batch_run = str(uuid4())
-    result_as_dict["id"] = id_batch_run
-    result_as_dict["dry_run"] = dry_run
+    result["id"] = id_batch_run
+    result["dry_run"] = dry_run
 
     if successfully_deposited_articles:
         deposition_output_directory = f"{output_directory}/deposited"
@@ -116,7 +135,39 @@ def deposit(
         with open(f"{deposition_output_directory}/{id_batch_run}.yml", "w") as f:
             dump([asdict(article) for article in successfully_deposited_articles], f)
 
-    click.echo(output(result_as_dict), nl=False)
+    click.echo(output(result), nl=False)
+
+
+def group_deposition_attempts_by_status(
+    deposition_attempts: List[DepositionAttempt], dry_run: bool
+) -> Dict[str, Any]:
+    result: Dict[str, Any] = {
+        "deposition_generation_failed": [],
+        "deposition_verification_failed": [],
+        "deposition_failed": [],
+        "deposition_succeeded": [],
+    }
+
+    for deposition_attempt in deposition_attempts:
+        resulting_list = None
+        if deposition_attempt.deposition is None:
+            resulting_list = result["deposition_generation_failed"]
+        elif deposition_attempt.verification_failed:
+            resulting_list = result["deposition_verification_failed"]
+        elif dry_run or deposition_attempt.succeeded:
+            resulting_list = result["deposition_succeeded"]
+        else:
+            resulting_list = result["deposition_failed"]
+        resulting_list.append(get_name(deposition_attempt.meca))
+
+    return result
+
+
+def get_name(parsed_file: ParsedFile) -> str:
+    name = f"{parsed_file.path}"
+    if parsed_file.manuscript and parsed_file.manuscript.preprint_doi:
+        name += f" - {parsed_file.manuscript.preprint_doi}"
+    return name
 
 
 @click.command()
@@ -132,7 +183,7 @@ def ls(after: Optional[str] = None, before: Optional[str] = None) -> None:
     parsed_files = batch_db.fetch_parsed_files_between(
         after_as_datetime, before_as_datetime
     )
-    result_as_dict = asdict(group_files_by_status(parsed_files))
+    result_as_dict = group_parsed_files_by_status(parsed_files)
 
     click.echo(output(result_as_dict), nl=False)
 

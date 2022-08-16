@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Iterable, List
 from unittest.mock import Mock, patch
 
-from src.batch import DepositedMECAs, deposit, parse, ParsedFiles
+from src.batch import deposit, parse
 from src.crossref.verify import VerificationResult
 from src.db import DepositionAttempt, ParsedFile
 from tests.common import DepositionFileTestCase, MecaArchiveTestCase
@@ -51,21 +51,7 @@ class BaseParseTestCase(MecaArchiveTestCase, BaseBatchTestCase):
             [file for files in meca_names_by_status.values() for file in files]
         )
 
-        self.expected_output = ParsedFiles(
-            invalid=self.get_meca_archive_paths(
-                meca_names_by_status[ParsedFileStatus.INVALID]
-            ),
-            no_reviews=self.get_meca_archive_paths(
-                meca_names_by_status[ParsedFileStatus.NO_REVIEWS]
-            ),
-            no_preprint_doi=self.get_meca_archive_paths(
-                meca_names_by_status[ParsedFileStatus.NO_PREPRINT_DOI]
-            ),
-            ready_for_deposition=self.get_meca_archive_paths(
-                meca_names_by_status[ParsedFileStatus.READY_FOR_DEPOSITION]
-            ),
-        )
-        self.expected_db_contents = [
+        self.expected_parsed_files = [
             ParsedFile(
                 path=self.get_meca_archive_path(meca_name),
                 received_at=datetime.now(),
@@ -79,16 +65,22 @@ class BaseParseTestCase(MecaArchiveTestCase, BaseBatchTestCase):
 
         return super().setUp()
 
-    def assert_meca_archives_in_db(
+    def assert_parsed_files_in_db(
         self, expected_meca_archives: List[ParsedFile]
     ) -> None:
         meca_archives_in_db = self.db.fetch_all(ParsedFile)
+        self.assert_parsed_files_equal(expected_meca_archives, meca_archives_in_db)
 
-        self.assertEqual(len(expected_meca_archives), len(meca_archives_in_db))
+    def assert_parsed_files_equal(
+        self,
+        expected_meca_archives: List[ParsedFile],
+        actual_meca_archives: List[ParsedFile],
+    ) -> None:
+        self.assertEqual(len(expected_meca_archives), len(actual_meca_archives))
         for meca_archive in expected_meca_archives:
             # find the corresponding meca archive from the database
             meca_archive_in_db = [
-                m for m in meca_archives_in_db if m.path == meca_archive.path
+                m for m in actual_meca_archives if m.path == meca_archive.path
             ][0]
             # make sure the timestamps are roughly equal
             self.assert_timestamps_within_interval(
@@ -104,17 +96,14 @@ class BaseParseTestCase(MecaArchiveTestCase, BaseBatchTestCase):
 
             self.assertEqual(meca_archive, meca_archive_in_db)
 
-    def assert_results_equal(self, expected: ParsedFiles, actual: ParsedFiles) -> None:
-        self.assertEqual(expected, actual)
-
 
 class ParseTestCase(BaseParseTestCase):
     def test_batch_parse(self) -> None:
         """Verifies that all given files are parsed and entered into the database."""
-        actual_output = parse(self.input_files, self.db)
+        actual_parsed_files = parse(self.input_files, self.db)
 
-        self.assert_results_equal(self.expected_output, actual_output)
-        self.assert_meca_archives_in_db(self.expected_db_contents)
+        self.assert_parsed_files_equal(self.expected_parsed_files, actual_parsed_files)
+        self.assert_parsed_files_in_db(self.expected_parsed_files)
 
 
 class BaseDepositTestCase(DepositionFileTestCase, BaseBatchTestCase):
@@ -139,17 +128,13 @@ class BaseDepositTestCase(DepositionFileTestCase, BaseBatchTestCase):
         self.db.insert_all(parsed_files)
         self.parsed_files = self.db.fetch_all(ParsedFile)
 
-        self.expected_output = DepositedMECAs(
-            deposition_generation_failed=[],
-            deposition_failed=[],
-            deposition_succeeded=[p.path for p in self.parsed_files],
-        )
-
         self.expected_articles = [ARTICLES[name] for name in input_files]
 
         def expected_deposition_attempts(
-            generation_failed: bool = False, deposition_failed: bool = False
-        ) -> Iterable[DepositionAttempt]:
+            generation_failed: bool = False,
+            deposition_failed: bool = False,
+            dry_run: bool = False,
+        ) -> List[DepositionAttempt]:
             deposition_attempts = []
             for i, meca_name in enumerate(input_files):
                 deposition_attempt = DepositionAttempt(meca=self.parsed_files[i])
@@ -160,6 +145,8 @@ class BaseDepositTestCase(DepositionFileTestCase, BaseBatchTestCase):
                 deposition_attempt.deposition = Path(
                     f"tests/resources/expected/{meca_name}.xml"
                 ).read_text()
+                if dry_run:
+                    continue
                 deposition_attempt.attempted_at = datetime.now()
                 deposition_attempt.succeeded = False if deposition_failed else True
             return deposition_attempts
@@ -171,6 +158,15 @@ class BaseDepositTestCase(DepositionFileTestCase, BaseBatchTestCase):
     ) -> None:
         actual_deposition_attempts = self.db.fetch_all(DepositionAttempt)
         expected_deposition_attempts = [i for i in expected_deposition_attempts]
+        self.assert_deposition_attempts_equal(
+            expected_deposition_attempts, actual_deposition_attempts
+        )
+
+    def assert_deposition_attempts_equal(
+        self,
+        expected_deposition_attempts: List[DepositionAttempt],
+        actual_deposition_attempts: List[DepositionAttempt],
+    ) -> None:
         self.assertEqual(
             len(expected_deposition_attempts), len(actual_deposition_attempts)
         )
@@ -224,14 +220,16 @@ class DepositTestCase(BaseDepositTestCase):
         _get_free_doi: Mock,
         deposit_file_mock: Mock,
     ) -> None:
-        actual_output, actual_articles = deposit(
+        actual_deposition_attempts, actual_articles = deposit(
             self.parsed_files, self.db, dry_run=False
         )
-
-        self.assertEqual(self.expected_output, actual_output)
+        expected_deposition_attempts = self.expected_deposition_attempts()
+        self.assert_deposition_attempts_equal(
+            expected_deposition_attempts, actual_deposition_attempts
+        )
         self.assertEqual(self.expected_articles, actual_articles)
         self.assertEqual(3, len(deposit_file_mock.mock_calls))
-        self.assert_deposition_attempts_in_db(self.expected_deposition_attempts())
+        self.assert_deposition_attempts_in_db(expected_deposition_attempts)
 
     def test_deposition_fails(
         self,
@@ -240,19 +238,19 @@ class DepositTestCase(BaseDepositTestCase):
         deposit_file_mock: Mock,
     ) -> None:
         deposit_file_mock.side_effect = Exception("Boom!")
-        expected_output = DepositedMECAs(
-            deposition_failed=self.expected_output.deposition_succeeded
+        expected_deposition_attempts = self.expected_deposition_attempts(
+            deposition_failed=True
         )
 
-        actual_output, actual_articles = deposit(
+        actual_deposition_attempts, actual_articles = deposit(
             self.parsed_files, self.db, dry_run=False
         )
 
-        self.assertEqual(expected_output, actual_output)
-        self.assertEqual([], actual_articles)
-        self.assert_deposition_attempts_in_db(
-            self.expected_deposition_attempts(deposition_failed=True)
+        self.assert_deposition_attempts_equal(
+            expected_deposition_attempts, actual_deposition_attempts
         )
+        self.assertEqual([], actual_articles)
+        self.assert_deposition_attempts_in_db(expected_deposition_attempts)
         self.assertEqual(3, len(deposit_file_mock.mock_calls))
 
     @patch("src.batch.generate_peer_review_deposition", side_effect=Exception("Boom!"))
@@ -263,19 +261,19 @@ class DepositTestCase(BaseDepositTestCase):
         _get_free_doi: Mock,
         deposit_file_mock: Mock,
     ) -> None:
-        expected_output = DepositedMECAs(
-            deposition_generation_failed=self.expected_output.deposition_succeeded
+        expected_deposition_attempts = self.expected_deposition_attempts(
+            generation_failed=True
         )
 
-        actual_output, actual_articles = deposit(
+        actual_deposition_attempts, actual_articles = deposit(
             self.parsed_files, self.db, dry_run=False
         )
 
-        self.assertEqual(expected_output, actual_output)
-        self.assertEqual([], actual_articles)
-        self.assert_deposition_attempts_in_db(
-            self.expected_deposition_attempts(generation_failed=True)
+        self.assert_deposition_attempts_equal(
+            expected_deposition_attempts, actual_deposition_attempts
         )
+        self.assertEqual([], actual_articles)
+        self.assert_deposition_attempts_in_db(expected_deposition_attempts)
         deposit_file_mock.assert_not_called()
 
     @patch("src.batch.get_random_doi", return_value=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES)
@@ -286,10 +284,13 @@ class DepositTestCase(BaseDepositTestCase):
         _get_free_doi: Mock,
         deposit_file_mock: Mock,
     ) -> None:
-        actual_output, actual_articles = deposit(
+        actual_deposition_attempts, actual_articles = deposit(
             self.parsed_files, self.db, dry_run=True
         )
-        self.assertEqual(self.expected_output, actual_output)
+        expected_deposition_attempts = self.expected_deposition_attempts(dry_run=True)
+        self.assert_deposition_attempts_equal(
+            expected_deposition_attempts, actual_deposition_attempts
+        )
         self.assertEqual([], actual_articles)
         self.assert_deposition_attempts_in_db([])
         deposit_file_mock.assert_not_called()
