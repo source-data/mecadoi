@@ -94,9 +94,7 @@ class Manuscript(DigitalObject, Work):
     """
 
 
-def parse_meca_archive(
-    path_to_archive: Union[str, Path], use_preprint_doi: bool = True
-) -> Manuscript:
+def parse_meca_archive(path_to_archive: Union[str, Path]) -> Manuscript:
     """
     Read the MECA archive at the given path and construct an Article from it.
 
