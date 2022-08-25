@@ -108,6 +108,7 @@ def generate_reviews(article: Article) -> Generator[PeerReview, None, None]:
             yield PeerReview(
                 revision_round=revision,
                 type="referee-report",
+                stage="pre-publication",
                 contributors=Contributors(
                     anonymous=Anonymous(sequence="first", contributor_role="author")
                 ),

@@ -326,6 +326,12 @@ class PeerReview:
             "type": "Element",
         }
     )
+    stage: Optional[str] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
+        },
+    )
 
 
 @dataclass

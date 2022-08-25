@@ -9,7 +9,7 @@
     <registrant>EMBO</registrant>
   </head>
   <body>
-    <peer_review revision-round="0" type="referee-report">
+    <peer_review revision-round="0" stage="pre-publication" type="referee-report">
       <contributors>
         <anonymous sequence="first" contributor_role="author" />
       </contributors>
@@ -35,7 +35,7 @@
         <resource>https://eeb.embo.org/doi/10.1101/no-author-reply.123.456.7890#rev0-rr1</resource>
       </doi_data>
     </peer_review>
-    <peer_review revision-round="0" type="referee-report">
+    <peer_review revision-round="0" stage="pre-publication" type="referee-report">
       <contributors>
         <anonymous sequence="first" contributor_role="author" />
       </contributors>
@@ -61,7 +61,7 @@
         <resource>https://eeb.embo.org/doi/10.1101/no-author-reply.123.456.7890#rev0-rr2</resource>
       </doi_data>
     </peer_review>
-    <peer_review revision-round="0" type="referee-report">
+    <peer_review revision-round="0" stage="pre-publication" type="referee-report">
       <contributors>
         <anonymous sequence="first" contributor_role="author" />
       </contributors>
@@ -87,7 +87,7 @@
         <resource>https://eeb.embo.org/doi/10.1101/no-author-reply.123.456.7890#rev0-rr3</resource>
       </doi_data>
     </peer_review>
-    <peer_review revision-round="1" type="referee-report">
+    <peer_review revision-round="1" stage="pre-publication" type="referee-report">
       <contributors>
         <anonymous sequence="first" contributor_role="author" />
       </contributors>
