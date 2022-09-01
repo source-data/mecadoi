@@ -25,7 +25,7 @@ from pathlib import Path
 from typing import Any, IO, List, Optional, Set, Union
 from zipfile import BadZipFile, ZipFile
 
-from src.model import Author, DigitalObject, Orcid, Work
+from src.model import Author, DigitalObject, Institution, Orcid, Work
 
 
 @dataclass
@@ -221,22 +221,35 @@ def _get_authors(contrib_group_xml: Any, contrib_type: str) -> List[Author]:
                 )
                 if orcid_xml is not None
                 else None,
-                affiliation=_get_affiliation(contrib_group_xml, author_xml),
                 is_corresponding_author=author_xml.get("corresp") == "yes",
+                institutions=_get_institutions(contrib_group_xml, author_xml),
             )
         )
     return authors
 
 
-def _get_affiliation(contrib_group_xml: Any, author_xml: Any) -> Optional[str]:
-    aff_xref = author_xml.find('xref[@ref-type="aff"]')
-    if aff_xref is not None:
+def _get_institutions(contrib_group_xml: Any, author_xml: Any) -> List[Institution]:
+    institutions = []
+    aff_xrefs = author_xml.findall('xref[@ref-type="aff"]')
+    for aff_xref in aff_xrefs:
         aff_id = aff_xref.get("rid")
         if aff_id is not None:
-            institution = contrib_group_xml.find(f'aff[@id="{aff_id}"]/institution')
+            affiliation_xml = contrib_group_xml.find(f'aff[@id="{aff_id}"]')
+            institution = affiliation_xml.find("institution")
             if institution is not None:
-                return _text(institution)
-    return None
+                institutions.append(
+                    Institution(
+                        name=_text(institution),
+                        department=_text_or_default(
+                            affiliation_xml.find('institution[@content-type="dept"]')
+                        ),
+                        city=_text_or_default(
+                            affiliation_xml.find('addr-line[@content-type="city"]')
+                        ),
+                        country=_text_or_default(affiliation_xml.find("country")),
+                    )
+                )
+    return institutions
 
 
 def _text(node: Any) -> str:

@@ -178,9 +178,24 @@ def create_contributors(authors: List[Author]) -> Contributors:
                 given_name=author.given_name,
                 affiliations=(
                     Affiliations(
-                        institution=Institution(institution_name=author.affiliation)
+                        institution=[
+                            Institution(
+                                institution_name=institution.name,
+                                institution_department=institution.department,
+                                institution_place=(
+                                    f"{institution.city}, {institution.country}"
+                                    if institution.city and institution.country
+                                    else institution.city
+                                    if institution.city
+                                    else institution.country
+                                    if institution.country
+                                    else None
+                                ),
+                            )
+                            for institution in author.institutions
+                        ]
                     )
-                    if author.affiliation
+                    if author.institutions
                     else None
                 ),
                 orcid=(

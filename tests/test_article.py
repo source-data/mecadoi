@@ -7,7 +7,7 @@ from src.article import (
     Review,
     RevisionRound,
 )
-from src.model import Author, Orcid
+from src.model import Author, Institution, Orcid
 from tests.test_meca import MANUSCRIPTS
 
 DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES = "10.15252/rc.2020123456"
@@ -86,15 +86,29 @@ class ArticleTestCase(TestCase):
                                 given_name="Jane",
                                 surname="Doe",
                                 orcid=None,
-                                affiliation="EMBL",
                                 is_corresponding_author=False,
+                                institutions=[
+                                    Institution(
+                                        name="EMBL",
+                                        department="Medicinal Chemistry",
+                                        city="Heidelberg",
+                                        country="Germany",
+                                    )
+                                ],
                             ),
                             Author(
                                 given_name="John",
                                 surname="Doe",
                                 orcid=None,
-                                affiliation="EMBL",
                                 is_corresponding_author=True,
+                                institutions=[
+                                    Institution(
+                                        name="EMBL",
+                                        department="Medicinal Chemistry",
+                                        city="Heidelberg",
+                                        country="Germany",
+                                    )
+                                ],
                             ),
                         ],
                         text={},
@@ -212,15 +226,29 @@ ARTICLES = {
                             given_name="Jane",
                             surname="Doe",
                             orcid=None,
-                            affiliation="EMBL",
                             is_corresponding_author=True,
+                            institutions=[
+                                Institution(
+                                    name="EMBL",
+                                    department="Medicinal Chemistry",
+                                    city="Heidelberg",
+                                    country="Germany",
+                                )
+                            ],
                         ),
                         Author(
                             given_name="John",
                             surname="Doe",
                             orcid=None,
-                            affiliation="EMBL",
                             is_corresponding_author=False,
+                            institutions=[
+                                Institution(
+                                    name="EMBL",
+                                    department="Medicinal Chemistry",
+                                    city="Heidelberg",
+                                    country="Germany",
+                                )
+                            ],
                         ),
                     ],
                     text={},
@@ -280,15 +308,29 @@ ARTICLES = {
                                 id="https://orcid.org/0000-0012-3456-7890",
                                 is_authenticated=True,
                             ),
-                            affiliation="EMBL",
                             is_corresponding_author=True,
+                            institutions=[
+                                Institution(
+                                    name="EMBL",
+                                    department="Medicinal Chemistry",
+                                    city="Heidelberg",
+                                    country="Germany",
+                                )
+                            ],
                         ),
                         Author(
                             given_name="John",
                             surname="Doe",
                             orcid=None,
-                            affiliation="EMBL",
                             is_corresponding_author=False,
+                            institutions=[
+                                Institution(
+                                    name="EMBL",
+                                    department="Medicinal Chemistry",
+                                    city="Heidelberg",
+                                    country="Germany",
+                                )
+                            ],
                         ),
                     ],
                     text={},

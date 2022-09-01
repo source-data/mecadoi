@@ -53,8 +53,10 @@ class BaseBatchTestCase(CliTestCase, BatchDbTestCase):
             pass
         mkdir(self.output_directory)
 
-        self.db_file = f"{self.output_directory}/batch.sqlite3"
         super().setUp()
+
+    def get_db_file(self) -> str:
+        return f"{self.output_directory}/batch.sqlite3"
 
     def assert_cli_output_equal(
         self,

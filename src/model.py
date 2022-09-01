@@ -44,6 +44,23 @@ class Orcid:
 
 
 @dataclass
+class Institution:
+    """Information about an organization, institution, or a department within one of these."""
+
+    name: str
+    """The name of this institution, for example EMBL."""
+
+    department: Optional[str] = None
+    """The department within the institution, for example Department of Medicinal Chemistry."""
+
+    city: Optional[str] = None
+    """The city the institution is in, for example Heidelberg."""
+
+    country: Optional[str] = None
+    """The country the institution is in, for example Germany."""
+
+
+@dataclass
 class Author:
     """
     An author of a scholarly work.
@@ -60,11 +77,11 @@ class Author:
     orcid: Optional[Orcid]
     """The ORCID of this author to uniquely identify them."""
 
-    affiliation: Optional[str]
-    """The name of the institution that this author is mainly affiliated with."""
-
     is_corresponding_author: bool
     """Wether this author is the corresponding author of this scholarly work."""
+
+    institutions: Optional[List[Institution]] = None
+    """The institutions that this author is affiliated with."""
 
 
 @dataclass

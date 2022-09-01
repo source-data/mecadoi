@@ -8,17 +8,30 @@ from tests.test_meca import MANUSCRIPTS
 
 
 class BatchDbTestCase(TestCase):
-    def setUp(self) -> None:
-        if not hasattr(self, "db_file"):
-            self.db_file = "tests/tmp/batch.sqlite3"
+    def get_db_file(self) -> str:
+        return "tests/tmp/batch.sqlite3"
 
+    def clear_database(self) -> None:
         try:
-            remove(self.db_file)
+            remove(self.get_db_file())
         except FileNotFoundError:
             pass
 
-        self.db = BatchDatabase(f"sqlite:///{self.db_file}")
-        self.db.initialize()
+    def initialize_database(self) -> BatchDatabase:
+        db = BatchDatabase(f"sqlite:///{self.get_db_file()}")
+        db.initialize()
+        return db
+
+    def setUp(self) -> None:
+        db_file = self.get_db_file()
+        test_dir = "tests/tmp"
+        self.assertTrue(
+            db_file.startswith(test_dir),
+            f"Are you using the right db file? It should be in {test_dir}",
+        )
+
+        self.clear_database()
+        self.db = self.initialize_database()
 
 
 class DbTestCase(BatchDbTestCase):

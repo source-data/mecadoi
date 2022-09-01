@@ -1,5 +1,5 @@
 from src.meca import parse_meca_archive, Manuscript, AuthorReply, Review, RevisionRound
-from src.model import Author, Orcid
+from src.model import Author, Institution, Orcid
 from tests.common import MecaArchiveTestCase
 
 
@@ -22,6 +22,7 @@ class ParseMecaArchiveTestCase(MecaArchiveTestCase):
         """When parsing valid MECA archives an Article object with all the right info should be returned."""
         for meca_archive_name, expected_result in MANUSCRIPTS.items():
             with self.subTest(meca_archive=meca_archive_name):
+                print(meca_archive_name)
                 meca_archive_path = self.get_meca_archive_path(meca_archive_name)
                 actual_result = parse_meca_archive(meca_archive_path)
                 self.assertArticlesEqual(expected_result, actual_result)
@@ -45,15 +46,29 @@ MANUSCRIPTS = {
                 given_name="Jane",
                 surname="Doe",
                 orcid=None,
-                affiliation="EMBL",
                 is_corresponding_author=True,
+                institutions=[
+                    Institution(
+                        name="EMBL",
+                        department="Medicinal Chemistry",
+                        city="Heidelberg",
+                        country="Germany",
+                    )
+                ],
             ),
             Author(
                 given_name="John",
                 surname="Doe",
                 orcid=None,
-                affiliation="EMBL",
                 is_corresponding_author=False,
+                institutions=[
+                    Institution(
+                        name="EMBL",
+                        department="Medicinal Chemistry",
+                        city="Heidelberg",
+                        country="Germany",
+                    )
+                ],
             ),
         ],
         text={
@@ -71,15 +86,29 @@ MANUSCRIPTS = {
                 given_name="Jane",
                 surname="Doe",
                 orcid=None,
-                affiliation="EMBL",
                 is_corresponding_author=False,
+                institutions=[
+                    Institution(
+                        name="EMBL",
+                        department="Medicinal Chemistry",
+                        city="Heidelberg",
+                        country="Germany",
+                    )
+                ],
             ),
             Author(
                 given_name="John",
                 surname="Doe",
                 orcid=None,
-                affiliation="EMBL",
                 is_corresponding_author=True,
+                institutions=[
+                    Institution(
+                        name="EMBL",
+                        department="Medicinal Chemistry",
+                        city="Heidelberg",
+                        country="Germany",
+                    )
+                ],
             ),
         ],
         text={
@@ -98,8 +127,8 @@ MANUSCRIPTS = {
                                 given_name="",
                                 surname="redacted",
                                 orcid=None,
-                                affiliation=None,
                                 is_corresponding_author=False,
+                                institutions=[],
                             ),
                         ],
                         text={
@@ -114,8 +143,8 @@ MANUSCRIPTS = {
                                 given_name="redacted",
                                 surname="redacted",
                                 orcid=None,
-                                affiliation=None,
                                 is_corresponding_author=False,
+                                institutions=[],
                             ),
                         ],
                         text={
@@ -132,15 +161,29 @@ MANUSCRIPTS = {
                             given_name="Jane",
                             surname="Doe",
                             orcid=None,
-                            affiliation="EMBL",
                             is_corresponding_author=False,
+                            institutions=[
+                                Institution(
+                                    name="EMBL",
+                                    department="Medicinal Chemistry",
+                                    city="Heidelberg",
+                                    country="Germany",
+                                )
+                            ],
                         ),
                         Author(
                             given_name="John",
                             surname="Doe",
                             orcid=None,
-                            affiliation="EMBL",
                             is_corresponding_author=True,
+                            institutions=[
+                                Institution(
+                                    name="EMBL",
+                                    department="Medicinal Chemistry",
+                                    city="Heidelberg",
+                                    country="Germany",
+                                )
+                            ],
                         ),
                     ],
                     text={},
@@ -155,15 +198,29 @@ MANUSCRIPTS = {
                 given_name="Jane",
                 surname="Doe",
                 orcid=None,
-                affiliation="EMBL",
                 is_corresponding_author=True,
+                institutions=[
+                    Institution(
+                        name="EMBL",
+                        department="Medicinal Chemistry",
+                        city="Heidelberg",
+                        country="Germany",
+                    )
+                ],
             ),
             Author(
                 given_name="John",
                 surname="Doe",
                 orcid=None,
-                affiliation="EMBL",
                 is_corresponding_author=False,
+                institutions=[
+                    Institution(
+                        name="EMBL",
+                        department="Medicinal Chemistry",
+                        city="Heidelberg",
+                        country="Germany",
+                    )
+                ],
             ),
         ],
         text={
@@ -182,8 +239,8 @@ MANUSCRIPTS = {
                                 given_name="redacted",
                                 surname="redacted",
                                 orcid=None,
-                                affiliation=None,
                                 is_corresponding_author=False,
+                                institutions=[],
                             ),
                         ],
                         text={
@@ -198,8 +255,8 @@ MANUSCRIPTS = {
                                 given_name="redacted",
                                 surname="redacted",
                                 orcid=None,
-                                affiliation=None,
                                 is_corresponding_author=False,
+                                institutions=[],
                             ),
                         ],
                         text={
@@ -214,8 +271,8 @@ MANUSCRIPTS = {
                                 given_name="",
                                 surname="redacted",
                                 orcid=None,
-                                affiliation=None,
                                 is_corresponding_author=False,
+                                institutions=[],
                             ),
                         ],
                         text={
@@ -236,8 +293,8 @@ MANUSCRIPTS = {
                                 given_name="redacted",
                                 surname="redacted",
                                 orcid=None,
-                                affiliation=None,
                                 is_corresponding_author=False,
+                                institutions=[],
                             ),
                         ],
                         text={
@@ -259,15 +316,29 @@ MANUSCRIPTS = {
                 given_name="Jane",
                 surname="Doe",
                 orcid=None,
-                affiliation="EMBL",
                 is_corresponding_author=True,
+                institutions=[
+                    Institution(
+                        name="EMBL",
+                        department="Medicinal Chemistry",
+                        city="Heidelberg",
+                        country="Germany",
+                    )
+                ],
             ),
             Author(
                 given_name="John",
                 surname="Doe",
                 orcid=None,
-                affiliation="EMBL",
                 is_corresponding_author=False,
+                institutions=[
+                    Institution(
+                        name="EMBL",
+                        department="Medicinal Chemistry",
+                        city="Heidelberg",
+                        country="Germany",
+                    )
+                ],
             ),
         ],
         text={
@@ -286,8 +357,8 @@ MANUSCRIPTS = {
                                 given_name="redacted",
                                 surname="redacted",
                                 orcid=None,
-                                affiliation=None,
                                 is_corresponding_author=False,
+                                institutions=[],
                             ),
                         ],
                         text={
@@ -302,8 +373,8 @@ MANUSCRIPTS = {
                                 given_name="redacted",
                                 surname="redacted",
                                 orcid=None,
-                                affiliation=None,
                                 is_corresponding_author=False,
+                                institutions=[],
                             ),
                         ],
                         text={
@@ -318,8 +389,8 @@ MANUSCRIPTS = {
                                 given_name="",
                                 surname="redacted",
                                 orcid=None,
-                                affiliation=None,
                                 is_corresponding_author=False,
+                                institutions=[],
                             ),
                         ],
                         text={
@@ -335,15 +406,29 @@ MANUSCRIPTS = {
                             given_name="Jane",
                             surname="Doe",
                             orcid=None,
-                            affiliation="EMBL",
                             is_corresponding_author=True,
+                            institutions=[
+                                Institution(
+                                    name="EMBL",
+                                    department="Medicinal Chemistry",
+                                    city="Heidelberg",
+                                    country="Germany",
+                                )
+                            ],
                         ),
                         Author(
                             given_name="John",
                             surname="Doe",
                             orcid=None,
-                            affiliation="EMBL",
                             is_corresponding_author=False,
+                            institutions=[
+                                Institution(
+                                    name="EMBL",
+                                    department="Medicinal Chemistry",
+                                    city="Heidelberg",
+                                    country="Germany",
+                                )
+                            ],
                         ),
                     ],
                     text={},
@@ -358,8 +443,8 @@ MANUSCRIPTS = {
                                 given_name="redacted",
                                 surname="redacted",
                                 orcid=None,
-                                affiliation=None,
                                 is_corresponding_author=False,
+                                institutions=[],
                             )
                         ],
                         text={
@@ -383,15 +468,29 @@ MANUSCRIPTS = {
                 orcid=Orcid(
                     id="https://orcid.org/0000-0012-3456-7890", is_authenticated=True
                 ),
-                affiliation="EMBL",
                 is_corresponding_author=True,
+                institutions=[
+                    Institution(
+                        name="EMBL",
+                        department="Medicinal Chemistry",
+                        city="Heidelberg",
+                        country="Germany",
+                    )
+                ],
             ),
             Author(
                 given_name="John",
                 surname="Doe",
                 orcid=None,
-                affiliation="EMBL",
                 is_corresponding_author=False,
+                institutions=[
+                    Institution(
+                        name="EMBL",
+                        department="Medicinal Chemistry",
+                        city="Heidelberg",
+                        country="Germany",
+                    )
+                ],
             ),
         ],
         text={
@@ -410,8 +509,8 @@ MANUSCRIPTS = {
                                 given_name="",
                                 surname="redacted",
                                 orcid=None,
-                                affiliation=None,
                                 is_corresponding_author=False,
+                                institutions=[],
                             ),
                         ],
                         text={
@@ -426,8 +525,8 @@ MANUSCRIPTS = {
                                 given_name="redacted",
                                 surname="redacted",
                                 orcid=None,
-                                affiliation=None,
                                 is_corresponding_author=False,
+                                institutions=[],
                             ),
                         ],
                         text={
@@ -447,15 +546,29 @@ MANUSCRIPTS = {
                                 id="https://orcid.org/0000-0012-3456-7890",
                                 is_authenticated=True,
                             ),
-                            affiliation="EMBL",
                             is_corresponding_author=True,
+                            institutions=[
+                                Institution(
+                                    name="EMBL",
+                                    department="Medicinal Chemistry",
+                                    city="Heidelberg",
+                                    country="Germany",
+                                )
+                            ],
                         ),
                         Author(
                             given_name="John",
                             surname="Doe",
                             orcid=None,
-                            affiliation="EMBL",
                             is_corresponding_author=False,
+                            institutions=[
+                                Institution(
+                                    name="EMBL",
+                                    department="Medicinal Chemistry",
+                                    city="Heidelberg",
+                                    country="Germany",
+                                )
+                            ],
                         ),
                     ],
                     text={},

@@ -103,6 +103,18 @@ class Institution:
             "type": "Element",
         }
     )
+    institution_place: Optional[str] = field(
+        default=None,
+        metadata={
+            "type": "Element",
+        },
+    )
+    institution_department: Optional[str] = field(
+        default=None,
+        metadata={
+            "type": "Element",
+        },
+    )
 
 
 @dataclass
@@ -160,10 +172,11 @@ class Affiliations:
         name = "affiliations"
         namespace = "http://www.crossref.org/schema/5.3.1"
 
-    institution: Institution = field(
+    institution: List[Institution] = field(
+        default_factory=list,
         metadata={
             "type": "Element",
-        }
+        },
     )
 
 

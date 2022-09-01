@@ -69,6 +69,8 @@
           <affiliations>
             <institution>
               <institution_name>EMBL</institution_name>
+              <institution_place>Heidelberg, Germany</institution_place>
+              <institution_department>Medicinal Chemistry</institution_department>
             </institution>
           </affiliations>
           <ORCID authenticated="true">https://orcid.org/0000-0012-3456-7890</ORCID>
@@ -79,6 +81,8 @@
           <affiliations>
             <institution>
               <institution_name>EMBL</institution_name>
+              <institution_place>Heidelberg, Germany</institution_place>
+              <institution_department>Medicinal Chemistry</institution_department>
             </institution>
           </affiliations>
         </person_name>
