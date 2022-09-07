@@ -106,6 +106,7 @@ def generate_reviews(article: Article) -> Generator[PeerReview, None, None]:
                 running_number=running_number,
             )
             yield PeerReview(
+                language="en",
                 revision_round=revision,
                 type="referee-report",
                 stage="pre-publication",
@@ -137,6 +138,7 @@ def generate_reviews(article: Article) -> Generator[PeerReview, None, None]:
                 revision=revision,
             )
             yield PeerReview(
+                language="en",
                 revision_round=revision,
                 type="author-comment",
                 contributors=create_contributors(author_reply.authors),

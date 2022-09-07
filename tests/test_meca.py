@@ -22,7 +22,6 @@ class ParseMecaArchiveTestCase(MecaArchiveTestCase):
         """When parsing valid MECA archives an Article object with all the right info should be returned."""
         for meca_archive_name, expected_result in MANUSCRIPTS.items():
             with self.subTest(meca_archive=meca_archive_name):
-                print(meca_archive_name)
                 meca_archive_path = self.get_meca_archive_path(meca_archive_name)
                 actual_result = parse_meca_archive(meca_archive_path)
                 self.assertArticlesEqual(expected_result, actual_result)

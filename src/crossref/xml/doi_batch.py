@@ -292,6 +292,11 @@ class PeerReview:
         name = "peer_review"
         namespace = "http://www.crossref.org/schema/5.3.1"
 
+    language: str = field(
+        metadata={
+            "type": "Attribute",
+        }
+    )
     revision_round: int = field(
         metadata={
             "name": "revision-round",
