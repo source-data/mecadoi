@@ -6,6 +6,7 @@ from unittest.mock import patch
 import alembic.config
 import sys
 
+from src.config import DB_URL
 from tests.test_db import BatchDbTestCase
 
 
@@ -14,12 +15,13 @@ class DatabaseTestCase(BatchDbTestCase):
         return "tests/tmp/batch/batch.sqlite3"
 
     def setUp(self) -> None:
+        self.assertEqual(self.get_db_url(), DB_URL)
+        super().setUp()
         self.migrations = [
             migration_file.stem.split("_")[0]
             for migration_file in Path("src/migrations/versions").glob("*.py")
             if migration_file.stem != "__init__"
         ]
-        super().setUp()
 
     def migrate_to(self, revision: str) -> None:
         command_line_args = ["upgrade", revision]

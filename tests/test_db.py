@@ -11,6 +11,9 @@ class BatchDbTestCase(TestCase):
     def get_db_file(self) -> str:
         return "tests/tmp/batch.sqlite3"
 
+    def get_db_url(self) -> str:
+        return f"sqlite:///{self.get_db_file()}"
+
     def clear_database(self) -> None:
         try:
             remove(self.get_db_file())
@@ -18,7 +21,7 @@ class BatchDbTestCase(TestCase):
             pass
 
     def initialize_database(self) -> BatchDatabase:
-        db = BatchDatabase(f"sqlite:///{self.get_db_file()}")
+        db = BatchDatabase(self.get_db_url())
         db.initialize()
         return db
 

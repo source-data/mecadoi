@@ -12,6 +12,7 @@ from src.cli.batch.commands import (
     group_parsed_files_by_status,
 )
 from src.cli.main import main as mecadoi
+from src.config import DB_URL
 from src.crossref.verify import VerificationResult
 from tests.common import MecaArchiveTestCase
 from tests.test_article import DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES
@@ -47,6 +48,7 @@ class MecaTestCase(CliTestCase):
 class BaseBatchTestCase(CliTestCase, BatchDbTestCase):
     def setUp(self) -> None:
         self.output_directory = "tests/tmp/batch"
+        self.assertEqual(self.get_db_url(), DB_URL)
         try:
             rmtree(self.output_directory)
         except FileNotFoundError:
