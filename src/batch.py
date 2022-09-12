@@ -43,7 +43,9 @@ def parse(files: List[str], db: BatchDatabase) -> List[ParsedFile]:
     return parsed_meca_archives
 
 
-def parse_potential_meca_archive(potential_meca_archive: str, db: BatchDatabase) -> ParsedFile:
+def parse_potential_meca_archive(
+    potential_meca_archive: str, db: BatchDatabase
+) -> ParsedFile:
     received_at = get_modification_time(potential_meca_archive)
     result = ParsedFile(path=potential_meca_archive, received_at=received_at)
 

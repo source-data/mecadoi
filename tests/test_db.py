@@ -43,7 +43,7 @@ class DbTestCase(BatchDbTestCase):
             ParsedFile(
                 path="invalid",
                 received_at=datetime(2020, 6, 21),
-                status=ParsedFile.Invalid
+                status=ParsedFile.Invalid,
             ),
             ParsedFile(
                 path="incomplete",

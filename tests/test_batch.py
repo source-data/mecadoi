@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from enum import Enum, auto
 from pathlib import Path
 from typing import Iterable, List
 from unittest.mock import Mock, patch

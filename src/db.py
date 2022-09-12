@@ -178,10 +178,7 @@ class BatchDatabase:
         return [row[0] for row in rows]
 
     def fetch_parsed_files_with_doi(self, doi: str) -> List[ParsedFile]:
-        statement = (
-            select(ParsedFile)  # type: ignore
-            .filter(ParsedFile.doi == doi)
-        )
+        statement = select(ParsedFile).filter(ParsedFile.doi == doi)  # type: ignore
         rows = self._fetch_rows(statement)
         return [row["ParsedFile"] for row in rows]
 

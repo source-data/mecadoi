@@ -76,6 +76,8 @@ class BaseBatchTestCase(CliTestCase, BatchDbTestCase):
 
 
 OutputDirName = "deadbeef-2708-4afb-bbde-5890bd7e8fd0"
+
+
 @patch("src.cli.batch.commands.uuid4", return_value=OutputDirName)
 class ParseTestCase(BaseBatchTestCase, BaseParseTestCase):
     def setUp(self) -> None:
@@ -86,7 +88,7 @@ class ParseTestCase(BaseBatchTestCase, BaseParseTestCase):
             ParsedFile(
                 path=parsed_file.path.replace(
                     f"{self.MECA_TARGET_DIR}",
-                    f"{self.output_directory}/parsed/{OutputDirName}"
+                    f"{self.output_directory}/parsed/{OutputDirName}",
                 ),
                 received_at=parsed_file.received_at,
                 manuscript=parsed_file.manuscript,

@@ -45,15 +45,13 @@ def generate_peer_review_deposition(articles: List[Article]) -> str:
 
     If the article does not contain any peer reviews, a ValueError is thrown.
     """
-    num_reviews = (
-        len(
-            [
-                r
-                for article in articles
-                for revision_round in article.review_process
-                for r in revision_round.reviews
-            ]
-        )
+    num_reviews = len(
+        [
+            r
+            for article in articles
+            for revision_round in article.review_process
+            for r in revision_round.reviews
+        ]
     )
     if num_reviews == 0:
         raise ValueError("Articles don't contain any reviews!")
@@ -73,9 +71,7 @@ def generate_peer_review_deposition(articles: List[Article]) -> str:
         ),
         body=Body(
             peer_review=[
-                review
-                for article in articles
-                for review in generate_reviews(article)
+                review for article in articles for review in generate_reviews(article)
             ],
         ),
     )
