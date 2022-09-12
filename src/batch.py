@@ -100,7 +100,7 @@ def deposit(
                 meca.received_at,
                 doi_generator,
             )
-            deposition_attempt.deposition = generate_peer_review_deposition(article)
+            deposition_attempt.deposition = generate_peer_review_deposition([article])
         except Exception as e:
             LOGGER.warning(
                 'Failed to generate deposition file from "%s": %s', meca.path, str(e)

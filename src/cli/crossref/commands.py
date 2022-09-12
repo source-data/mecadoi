@@ -32,7 +32,7 @@ def generate(
             lambda _: get_random_doi(),
             preprint_doi=preprint_doi,
         )
-        deposition_xml = generate_peer_review_deposition(article)
+        deposition_xml = generate_peer_review_deposition([article])
     except ValueError as e:
         raise click.ClickException(str(e))
 

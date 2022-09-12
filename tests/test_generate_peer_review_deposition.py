@@ -24,6 +24,6 @@ class TestGeneratePeerReviewDeposition(MecaArchiveTestCase, DepositionFileTestCa
                     expected_xml = f.read()
 
                 article = ARTICLES[article_name]
-                actual_xml = generate_peer_review_deposition(article)
+                actual_xml = generate_peer_review_deposition([article])
 
                 self.assertDepositionFileEquals(expected_xml, actual_xml)

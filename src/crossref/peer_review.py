@@ -40,7 +40,7 @@ from src.crossref.xml.doi_batch import (
 from src.model import Author
 
 
-def generate_peer_review_deposition(article: Article) -> str:
+def generate_peer_review_deposition(articles: List[Article]) -> str:
     """Generate a CrossRef deposition file for the peer reviews in the given article.
 
     If the article does not contain any peer reviews, a ValueError is thrown.
@@ -49,15 +49,14 @@ def generate_peer_review_deposition(article: Article) -> str:
         len(
             [
                 r
+                for article in articles
                 for revision_round in article.review_process
                 for r in revision_round.reviews
             ]
         )
-        if article.review_process
-        else 0
     )
     if num_reviews == 0:
-        raise ValueError("Article does not contain any reviews!")
+        raise ValueError("Articles don't contain any reviews!")
 
     timestamp = time_ns()
     doi_batch = DoiBatch(
@@ -73,7 +72,11 @@ def generate_peer_review_deposition(article: Article) -> str:
             registrant=REGISTRANT_NAME,
         ),
         body=Body(
-            peer_review=list(generate_reviews(article)),
+            peer_review=[
+                review
+                for article in articles
+                for review in generate_reviews(article)
+            ],
         ),
     )
 
