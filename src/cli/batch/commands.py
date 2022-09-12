@@ -34,11 +34,18 @@ def parse(input_directory: str, output_directory: str) -> None:
     """
     LOGGER.debug('parse("%s", "%s")', input_directory, output_directory)
 
-    # find all files in the given input directory: these are the potential MECA archives. Usually they're .zip files,
+    # move the input files to the output directory
+    id_batch_run = str(uuid4())
+    output_directory = f"{output_directory}/parsed/{id_batch_run}/"
+
+    move(input_directory, output_directory)
+    mkdir(input_directory)
+
+    # find all files in the output directory: these are the potential MECA archives. Usually they're .zip files,
     # but let's just find everything in case they're not.
     input_files = [
         join(dirpath, filename)
-        for dirpath, _, filenames in walk(input_directory)
+        for dirpath, _, filenames in walk(output_directory)
         for filename in filenames
     ]
     LOGGER.debug("input_files=%s", input_files)
@@ -46,13 +53,6 @@ def parse(input_directory: str, output_directory: str) -> None:
     # parse and register the input files
     parsed_files = batch_parse(input_files, BatchDatabase(DB_URL))
     LOGGER.debug("parsed_files=%s", parsed_files)
-
-    # move the input files to the output directory
-    id_batch_run = str(uuid4())
-    output_directory = f"{output_directory}/parsed/{id_batch_run}/"
-
-    move(input_directory, output_directory)
-    mkdir(input_directory)
 
     result = group_parsed_files_by_status(parsed_files)
     result["id"] = id_batch_run

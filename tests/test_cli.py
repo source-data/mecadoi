@@ -14,6 +14,7 @@ from src.cli.batch.commands import (
 from src.cli.main import main as mecadoi
 from src.config import DB_URL
 from src.crossref.verify import VerificationResult
+from src.db import ParsedFile
 from tests.common import MecaArchiveTestCase
 from tests.test_article import DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES
 from tests.test_batch import BaseDepositTestCase, BaseParseTestCase
@@ -74,14 +75,26 @@ class BaseBatchTestCase(CliTestCase, BatchDbTestCase):
         return actual_output
 
 
+OutputDirName = "deadbeef-2708-4afb-bbde-5890bd7e8fd0"
+@patch("src.cli.batch.commands.uuid4", return_value=OutputDirName)
 class ParseTestCase(BaseBatchTestCase, BaseParseTestCase):
     def setUp(self) -> None:
         super().setUp()
 
         self.input_directory = self.MECA_TARGET_DIR
-        self.input_directory_structure = list(walk(self.input_directory))
+        self.expected_parsed_files = [
+            ParsedFile(
+                path=parsed_file.path.replace(
+                    f"{self.MECA_TARGET_DIR}",
+                    f"{self.output_directory}/parsed/{OutputDirName}"
+                ),
+                received_at=parsed_file.received_at,
+                manuscript=parsed_file.manuscript,
+            )
+            for parsed_file in self.expected_parsed_files
+        ]
 
-    def test_batch_parse(self) -> None:
+    def test_batch_parse(self, _uuid_mock: Mock) -> None:
         """
         Verifies that all files in the input directory are parsed, entered into the database, and moved to the output
         directory.
