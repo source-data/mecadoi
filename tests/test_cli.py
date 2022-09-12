@@ -1,5 +1,5 @@
 from dataclasses import asdict
-from os import mkdir, walk
+from os import mkdir
 from pathlib import Path
 from shutil import rmtree
 from typing import Any, Dict, List
@@ -90,6 +90,8 @@ class ParseTestCase(BaseBatchTestCase, BaseParseTestCase):
                 ),
                 received_at=parsed_file.received_at,
                 manuscript=parsed_file.manuscript,
+                doi=parsed_file.doi,
+                status=parsed_file.status,
             )
             for parsed_file in self.expected_parsed_files
         ]

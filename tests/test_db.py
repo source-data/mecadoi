@@ -40,26 +40,38 @@ class BatchDbTestCase(TestCase):
 class DbTestCase(BatchDbTestCase):
     def setUp(self) -> None:
         self.parsed_files = [
-            ParsedFile(path="invalid", received_at=datetime(2020, 6, 21)),
+            ParsedFile(
+                path="invalid",
+                received_at=datetime(2020, 6, 21),
+                status=ParsedFile.Invalid
+            ),
             ParsedFile(
                 path="incomplete",
                 received_at=datetime(2020, 9, 30),
                 manuscript=MANUSCRIPTS["no-reviews"],
+                doi=MANUSCRIPTS["no-reviews"].preprint_doi,
+                status=ParsedFile.NoReviews,
             ),
             ParsedFile(
                 path="ready",
                 received_at=datetime(2021, 2, 14),
                 manuscript=MANUSCRIPTS["no-author-reply"],
+                doi=MANUSCRIPTS["no-author-reply"].preprint_doi,
+                status=ParsedFile.Valid,
             ),
             ParsedFile(
                 path="deposition-failed",
                 received_at=datetime(2021, 11, 5),
                 manuscript=MANUSCRIPTS["multiple-revision-rounds"],
+                doi=MANUSCRIPTS["multiple-revision-rounds"].preprint_doi,
+                status=ParsedFile.Valid,
             ),
             ParsedFile(
                 path="deposited",
                 received_at=datetime(2022, 1, 1),
                 manuscript=MANUSCRIPTS["single-revision-round"],
+                doi=MANUSCRIPTS["single-revision-round"].preprint_doi,
+                status=ParsedFile.Valid,
             ),
         ]
 
@@ -175,6 +187,14 @@ class DbTestCase(BatchDbTestCase):
         )
         expected = inserted_parsed_files[2:4]
         self.assertEqual(expected, actual)
+
+    def test_get_parsed_files_with_doi(self) -> None:
+        self.db.insert_all(self.parsed_files)
+        inserted_parsed_files = self.db.fetch_all(ParsedFile)
+
+        for parsed_file in inserted_parsed_files:
+            actual = self.db.fetch_parsed_files_with_doi(parsed_file.doi)
+            self.assertEqual([parsed_file], actual)
 
     def test_get_parsed_files_between(self) -> None:
         self.db.insert_all(self.parsed_files)

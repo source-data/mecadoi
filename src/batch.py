@@ -34,7 +34,7 @@ def parse(files: List[str], db: BatchDatabase) -> List[ParsedFile]:
     """
     # Parse each file and register it in the batch database
     parsed_meca_archives = [
-        parse_potential_meca_archive(potential_meca_archive)
+        parse_potential_meca_archive(potential_meca_archive, db)
         for potential_meca_archive in sorted(files)
     ]
     db.insert_all(parsed_meca_archives)
@@ -43,7 +43,7 @@ def parse(files: List[str], db: BatchDatabase) -> List[ParsedFile]:
     return parsed_meca_archives
 
 
-def parse_potential_meca_archive(potential_meca_archive: str) -> ParsedFile:
+def parse_potential_meca_archive(potential_meca_archive: str, db: BatchDatabase) -> ParsedFile:
     received_at = get_modification_time(potential_meca_archive)
     result = ParsedFile(path=potential_meca_archive, received_at=received_at)
 
@@ -51,7 +51,18 @@ def parse_potential_meca_archive(potential_meca_archive: str) -> ParsedFile:
         result.manuscript = parse_meca_archive(potential_meca_archive)
     except ValueError as e:
         LOGGER.info('Invalid MECA archive "%s": %s', potential_meca_archive, str(e))
+        result.status = ParsedFile.Invalid
         return result
+
+    result.doi = result.manuscript.preprint_doi
+    if not result.doi:
+        result.status = ParsedFile.NoDoi
+    elif not result.manuscript.review_process:
+        result.status = ParsedFile.NoReviews
+    else:
+        parsed_files_with_same_doi = db.fetch_parsed_files_with_doi(result.doi)
+        is_duplicate = len(parsed_files_with_same_doi) > 0
+        result.status = ParsedFile.Duplicate if is_duplicate else ParsedFile.Valid
 
     return result
 

@@ -17,13 +17,6 @@ from tests.test_db import BatchDbTestCase
 from tests.test_meca import MANUSCRIPTS
 
 
-class ParsedFileStatus(Enum):
-    INVALID = auto()
-    NO_REVIEWS = auto()
-    NO_PREPRINT_DOI = auto()
-    READY_FOR_DEPOSITION = auto()
-
-
 class BaseBatchTestCase(BatchDbTestCase):
     def assert_timestamps_within_interval(
         self, expected: datetime, actual: datetime, interval: timedelta
@@ -37,10 +30,10 @@ class BaseBatchTestCase(BatchDbTestCase):
 class BaseParseTestCase(MecaArchiveTestCase, BaseBatchTestCase):
     def setUp(self) -> None:
         meca_names_by_status = {
-            ParsedFileStatus.INVALID: ["no-article", "no-manifest"],
-            ParsedFileStatus.NO_REVIEWS: ["no-reviews"],
-            ParsedFileStatus.NO_PREPRINT_DOI: ["no-preprint-doi"],
-            ParsedFileStatus.READY_FOR_DEPOSITION: [
+            ParsedFile.Invalid: ["no-article", "no-manifest"],
+            ParsedFile.NoReviews: ["no-reviews"],
+            ParsedFile.NoDoi: ["no-preprint-doi"],
+            ParsedFile.Valid: [
                 "multiple-revision-rounds",
                 "no-author-reply",
                 "single-revision-round",
@@ -56,8 +49,12 @@ class BaseParseTestCase(MecaArchiveTestCase, BaseBatchTestCase):
                 path=self.get_meca_archive_path(meca_name),
                 received_at=datetime.now(),
                 manuscript=MANUSCRIPTS[meca_name]
-                if status != ParsedFileStatus.INVALID
+                if status != ParsedFile.Invalid
                 else None,
+                doi=MANUSCRIPTS[meca_name].preprint_doi
+                if status != ParsedFile.Invalid
+                else None,
+                status=status,
             )
             for status, meca_names in meca_names_by_status.items()
             for meca_name in meca_names
@@ -122,6 +119,8 @@ class BaseDepositTestCase(DepositionFileTestCase, BaseBatchTestCase):
                 path=f"{meca_name}.zip",
                 received_at=PUBLICATION_DATE,
                 manuscript=MANUSCRIPTS[meca_name],
+                doi=MANUSCRIPTS[meca_name].preprint_doi,
+                status=ParsedFile.Valid,
             )
             for meca_name in input_files
         ]

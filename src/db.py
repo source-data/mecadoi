@@ -46,6 +46,15 @@ class ParsedFile:
     Is None if parsing the file as a MECA archive failed.
     """
 
+    doi: Optional[str] = None
+
+    Valid = 1
+    Invalid = 10
+    NoDoi = 20
+    NoReviews = 21
+    Duplicate = 22
+    status: Optional[int] = None
+
     id: Optional[int] = None
     """A unique identifier for this file."""
 
@@ -105,6 +114,8 @@ tbl_parsed_file = Table(
     Column("path", Text, nullable=False),
     Column("received_at", DateTime, nullable=False),
     Column("manuscript", Yaml, nullable=True),
+    Column("doi", Text, nullable=True),
+    Column("status", Integer, nullable=True),
 )
 mapper_registry.map_imperatively(ParsedFile, tbl_parsed_file)
 
@@ -166,6 +177,14 @@ class BatchDatabase:
         rows = self._fetch_rows(statement)
         return [row[0] for row in rows]
 
+    def fetch_parsed_files_with_doi(self, doi: str) -> List[ParsedFile]:
+        statement = (
+            select(ParsedFile)  # type: ignore
+            .filter(ParsedFile.doi == doi)
+        )
+        rows = self._fetch_rows(statement)
+        return [row["ParsedFile"] for row in rows]
+
     def fetch_parsed_files_between(
         self, after: datetime, before: datetime
     ) -> List[ParsedFile]:
@@ -192,18 +211,11 @@ class BatchDatabase:
                 ParsedFile.received_at > after,
                 ParsedFile.received_at < before,
                 ParsedFile.id.not_in(ids_parsed_files_with_deposition_attempt),  # type: ignore
-                ParsedFile.manuscript.is_not(None),  # type: ignore
+                ParsedFile.status == ParsedFile.Valid,
             )
             .order_by(ParsedFile.id)
         )
-        parsed_files = [row["ParsedFile"] for row in self._fetch_rows(statement)]
-        return [
-            p
-            for p in parsed_files
-            if p.manuscript
-            and p.manuscript.preprint_doi
-            and p.manuscript.review_process
-        ]
+        return [row["ParsedFile"] for row in self._fetch_rows(statement)]
 
     def mark_doi_as_used(self, doi: str, resource: str) -> None:
         used_doi = UsedDoi(doi=doi, resource=resource, claimed_at=datetime.now())
