@@ -61,7 +61,7 @@ cmd_parse() {
 
 cmd_deposit() {
     echo "$(date) Batch deposit"
-    _execute_batch_command deposit -o "${batch_dir}" --after "$(date --date='last week' "+%F")" --dry-run
+    _execute_batch_command deposit -o "${batch_dir}" --before "$(date --date='last week' "+%F")" --dry-run
 }
 
 with_lock() {
