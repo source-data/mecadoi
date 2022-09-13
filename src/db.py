@@ -69,11 +69,18 @@ class DepositionAttempt:
     deposition: Optional[str] = None
     """The deposition XML generated for this attempt. Is None if this generation failed."""
 
-    verification_failed: Optional[bool] = None
-    """Whether verifying the deposition file succeeded."""
-
     attempted_at: Optional[datetime] = None
     """The time when the deposition file was sent to the server."""
+
+    Succeeded = 1
+    DoisAlreadyPresent = 2
+    Failed = 10
+    VerificationFailed = 20
+    GenerationFailed = 21
+    status: Optional[int] = None
+
+    verification_failed: Optional[bool] = None
+    """Whether verifying the deposition file succeeded."""
 
     succeeded: Optional[bool] = None
     """Whether sending the deposition file succeeded. The deposition could still fail after processing!"""
@@ -128,6 +135,7 @@ tbl_deposition_attempt = Table(
     Column("verification_failed", Boolean),
     Column("attempted_at", DateTime),
     Column("succeeded", Boolean),
+    Column("status", Integer, nullable=True),
 )
 mapper_registry.map_imperatively(
     DepositionAttempt,
