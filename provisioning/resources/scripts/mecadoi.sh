@@ -61,8 +61,19 @@ cmd_parse() {
 
 cmd_deposit() {
     echo "$(date) Batch deposit"
-    _execute_batch_command deposit -o "${batch_dir}" --before "$(date --date='last week' "+%F")" --dry-run
+    _execute_batch_command deposit -o "${batch_dir}" --before "$(date --date='today - 2 days' "+%F")" --no-dry-run
 }
+
+cmd_retry_deposit() {
+    echo "$(date) Batch deposit retry"
+    _execute_batch_command deposit -o "${batch_dir}" --no-dry-run --retry-failed
+}
+
+cmd_prune() {
+    echo "$(date) Batch prune"
+    _execute_batch_command prune --no-dry-run
+}
+
 
 with_lock() {
     command="$@"
