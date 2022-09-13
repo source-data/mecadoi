@@ -97,7 +97,8 @@ def generate_reviews(article: Article) -> Generator[PeerReview, None, None]:
     for revision, revision_round in enumerate(article.review_process):
         for running_number, review in enumerate(revision_round.reviews, start=1):
             title = Template(REVIEW_TITLE_TEMPLATE).substitute(
-                article_title=article.title
+                article_title=article.title,
+                review_number=running_number,
             )
             resource_url = Template(REVIEW_RESOURCE_URL_TEMPLATE).substitute(
                 article_doi=article.doi,
