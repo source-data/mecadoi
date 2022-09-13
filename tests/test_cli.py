@@ -1,6 +1,6 @@
 from dataclasses import asdict
 from datetime import datetime
-from os import mkdir
+from os import mkdir, remove
 from pathlib import Path
 from shutil import rmtree
 from typing import Any, Dict, List
@@ -248,3 +248,88 @@ class DepositTestCase(BaseBatchTestCase, BaseDepositTestCase):
         )
         expected_output["dry_run"] = dry_run
         return expected_output
+
+
+class PruneTestCase(BaseBatchTestCase):
+
+    def path(self, filename: str) -> Path:
+        return Path(self.output_directory) / filename
+
+    def assert_files_exist(self, filenames: List[str]) -> None:
+        for filename in filenames:
+            self.assertTrue(self.path(filename).exists())
+
+    def assert_files_do_not_exist(self, filenames: List[str]) -> None:
+        for filename in filenames:
+            self.assertFalse(self.path(filename).exists())
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.existing_files = [
+            "exists.zip",
+            "yes.zml",
+        ]
+        self.already_pruned_files = [
+            "no.txt",
+            "pruned.zip",
+        ]
+        for filename in self.existing_files:
+            self.path(filename).write_text("this file is present")
+        self.db.insert_all([
+            ParsedFile(path=str(self.path(filename)), received_at=datetime.now())
+            for filename in self.existing_files + self.already_pruned_files
+        ])
+
+    def test_prune_files(self):
+        self.assert_files_exist(self.existing_files)
+        self.assert_files_do_not_exist(self.already_pruned_files)
+
+        result = self.run_mecadoi_command(
+            ["batch", "prune", "--no-dry-run"]
+        )
+        self.assertEqual(0, result.exit_code)
+
+        expected_output = {
+            "deleted": [str(self.path(filename)) for filename in self.existing_files],
+            "dry_run": False,
+        }
+        self.assert_cli_output_equal(expected_output, result, [])
+
+        self.assert_files_do_not_exist(self.already_pruned_files + self.existing_files)
+
+    @patch("src.cli.batch.commands.remove", side_effect=ValueError("failed"))
+    def test_prune_files_fails(self, _remove_mock: Mock):
+        self.assert_files_exist(self.existing_files)
+        self.assert_files_do_not_exist(self.already_pruned_files)
+
+        result = self.run_mecadoi_command(
+            ["batch", "prune", "--no-dry-run"]
+        )
+        self.assertEqual(0, result.exit_code)
+
+        expected_output = {
+            "dry_run": False,
+            "failed": [
+                str(self.path(filename))
+                for filename in self.existing_files
+            ],
+        }
+        self.assert_cli_output_equal(expected_output, result, [])
+
+    def test_prune_files_dry_run(self) -> None:
+        self.assert_files_exist(self.existing_files)
+        self.assert_files_do_not_exist(self.already_pruned_files)
+
+        result = self.run_mecadoi_command(
+            ["batch", "prune"]
+        )
+        self.assertEqual(0, result.exit_code)
+
+        expected_output = {
+            "deleted": [str(self.path(filename)) for filename in self.existing_files],
+            "dry_run": True,
+        }
+        self.assert_cli_output_equal(expected_output, result, [])
+
+        self.assert_files_exist(self.existing_files)
+        self.assert_files_do_not_exist(self.already_pruned_files)

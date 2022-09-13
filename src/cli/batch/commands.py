@@ -1,8 +1,9 @@
 from datetime import datetime
+from pathlib import Path
 from dateutil import parser
 from dataclasses import asdict
 from logging import getLogger
-from os import mkdir, walk
+from os import mkdir, remove, walk
 from os.path import join
 from shutil import move
 from typing import Any, Dict, List, Optional
@@ -193,3 +194,38 @@ def output(result: Dict[str, Any]) -> str:
     if any(result):
         return str(dump(result, canonical=False))
     return ""
+
+
+@click.command()
+@click.option(
+    "--dry-run/--no-dry-run",
+    default=True,
+)
+def prune(dry_run: bool = True) -> None:
+    """
+    Prune MECA archives after they've been parsed.
+    """
+    batch_db = BatchDatabase(DB_URL)
+    to_delete = set([
+        path
+        for path in batch_db.fetch_all(ParsedFile.path)
+        if Path(path).exists()
+    ])
+
+    deletion_failed = set()
+    if not dry_run:
+        for path in to_delete:
+            try:
+                remove(path)
+            except Exception as e:
+                LOGGER.warning("Pruning \"%s\" failed with \"%s\"", path, str(e))
+                deletion_failed.add(path)
+    deleted = to_delete - deletion_failed
+
+    result: Dict[str, Any] = {"dry_run": dry_run}
+    if deleted:
+        result["deleted"] = list(sorted(deleted))
+    if deletion_failed:
+        result["failed"] = list(sorted(deletion_failed))
+
+    click.echo(output(result), nl=False)
