@@ -138,15 +138,21 @@ class BaseDepositTestCase(DepositionFileTestCase, BaseBatchTestCase):
                 deposition_attempt = DepositionAttempt(meca=self.parsed_files[i])
                 deposition_attempts.append(deposition_attempt)
                 if generation_failed:
+                    deposition_attempt.status = DepositionAttempt.GenerationFailed
                     continue
 
                 deposition_attempt.deposition = Path(
                     f"tests/resources/expected/{meca_name}.xml"
                 ).read_text()
-                if dry_run:
-                    continue
                 deposition_attempt.attempted_at = datetime.now()
-                deposition_attempt.succeeded = False if deposition_failed else True
+                if dry_run:
+                    deposition_attempt.status = DepositionAttempt.Succeeded
+                    continue
+                deposition_attempt.status = (
+                    DepositionAttempt.Failed
+                    if deposition_failed
+                    else DepositionAttempt.Succeeded
+                )
             return deposition_attempts
 
         self.expected_deposition_attempts = expected_deposition_attempts
@@ -194,8 +200,8 @@ class BaseDepositTestCase(DepositionFileTestCase, BaseBatchTestCase):
                     expected_deposition_file, actual_deposition_file
                 )
             self.assertEqual(
-                expected_deposition_attempt.succeeded,
-                actual_deposition_attempt.succeeded,
+                expected_deposition_attempt.status,
+                actual_deposition_attempt.status,
             )
 
 

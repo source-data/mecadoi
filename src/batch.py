@@ -118,9 +118,7 @@ def deposit(
             LOGGER.warning(
                 'Failed to generate deposition file from "%s": %s', meca.path, str(e)
             )
-            continue
-
-        if deposition_attempt.deposition is None:
+            deposition_attempt.status = DepositionAttempt.GenerationFailed
             continue
 
         try:
@@ -134,33 +132,40 @@ def deposit(
             )
 
         if verification_result.error:
-            LOGGER.warning(
-                'Failed to verify deposition file from "%s": %s',
-                deposition_attempt.meca.path,
-                verification_result.error,
-            )
-            deposition_attempt.verification_failed = True
-            continue
-        else:
-            deposition_attempt.verification_failed = False
-
-        if dry_run:
+            if verification_result.no_dois_assigned is False:
+                deposition_attempt.status = DepositionAttempt.DoisAlreadyPresent
+                LOGGER.info(
+                    'DOIs already present for "%s": %s',
+                    deposition_attempt.meca.path,
+                    verification_result.error,
+                )
+            else:
+                deposition_attempt.status = DepositionAttempt.VerificationFailed
+                LOGGER.warning(
+                    'Failed to verify deposition file from "%s": %s',
+                    deposition_attempt.meca.path,
+                    verification_result.error,
+                )
             continue
 
         deposition_attempt.attempted_at = datetime.now()
 
+        if dry_run:
+            deposition_attempt.status = DepositionAttempt.Succeeded
+            continue
+
         try:
             deposit_file(deposition_attempt.deposition)
-            deposition_attempt.succeeded = True
+            deposition_attempt.status = DepositionAttempt.Succeeded
         except Exception as e:
             LOGGER.warning(
                 'Failed to deposit peer reviews from "%s": %s',
                 deposition_attempt.meca.path,
                 str(e),
             )
-            deposition_attempt.succeeded = False
+            deposition_attempt.status = DepositionAttempt.Failed
 
-        if deposition_attempt.succeeded:
+        if deposition_attempt.status == DepositionAttempt.Succeeded:
             successfully_deposited_articles.append(article)
 
     if not dry_run:
