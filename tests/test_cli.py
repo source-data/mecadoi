@@ -1,4 +1,5 @@
 from dataclasses import asdict
+from datetime import datetime
 from os import mkdir
 from pathlib import Path
 from shutil import rmtree
@@ -14,7 +15,7 @@ from src.cli.batch.commands import (
 from src.cli.main import main as mecadoi
 from src.config import DB_URL
 from src.crossref.verify import VerificationResult
-from src.db import ParsedFile
+from src.db import DepositionAttempt, ParsedFile
 from tests.common import MecaArchiveTestCase
 from tests.test_article import DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES
 from tests.test_batch import BaseDepositTestCase, BaseParseTestCase
@@ -172,6 +173,56 @@ class DepositTestCase(BaseBatchTestCase, BaseDepositTestCase):
         self.assert_deposition_attempts_in_db(self.expected_deposition_attempts())
         self.assert_articles_in_output_dir(actual_output["id"], self.expected_articles)
         self.assertEqual(3, len(deposit_file_mock.mock_calls))
+
+    def test_batch_deposit_retry(
+        self,
+        _verify: Mock,
+        _get_random_doi: Mock,
+        _get_free_doi: Mock,
+        deposit_file_mock: Mock,
+    ) -> None:
+        initial_deposition_attempts = [
+            DepositionAttempt(
+                meca=self.parsed_files[0],
+                deposition=Path("tests/resources/expected/multiple-revision-rounds.xml").read_text(),
+                attempted_at=datetime.now(),
+                status=DepositionAttempt.Failed,
+            ),
+            DepositionAttempt(
+                meca=self.parsed_files[1],
+                deposition=Path("tests/resources/expected/no-author-reply.xml").read_text(),
+                attempted_at=datetime.now(),
+                status=DepositionAttempt.VerificationFailed,
+            ),
+        ]
+        self.db.insert_all(initial_deposition_attempts)
+
+        result = self.run_mecadoi_command(
+            ["batch", "deposit", "-o", self.output_directory, "--retry-failed", "--no-dry-run"]
+        )
+        self.assertEqual(0, result.exit_code)
+
+        self.expected_deposition_attempts = lambda *_args, **_kwargs: [
+            DepositionAttempt(
+                meca=self.parsed_files[0],
+                deposition=Path("tests/resources/expected/multiple-revision-rounds.xml").read_text(),
+                attempted_at=datetime.now(),
+                status=DepositionAttempt.Succeeded,
+            ),
+            DepositionAttempt(
+                meca=self.parsed_files[1],
+                deposition=Path("tests/resources/expected/no-author-reply.xml").read_text(),
+                attempted_at=datetime.now(),
+                status=DepositionAttempt.Succeeded,
+            ),
+        ]
+
+        expected_output = self.expected_output(dry_run=False)
+        actual_output = self.assert_cli_output_equal(expected_output, result, ["id"])
+
+        self.assert_deposition_attempts_in_db(initial_deposition_attempts + self.expected_deposition_attempts())
+        self.assert_articles_in_output_dir(actual_output["id"], self.expected_articles[:2])
+        self.assertEqual(2, len(deposit_file_mock.mock_calls))
 
     def assert_articles_in_output_dir(
         self, id_batch_run: str, expected_articles: List[Article]
