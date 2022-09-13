@@ -115,13 +115,13 @@ class DbTestCase(BatchDbTestCase):
                 meca=inserted_parsed_files[3],
                 deposition="<deposition_attempt></deposition_attempt>",
                 attempted_at=datetime.now(),
-                succeeded=False,
+                status=DepositionAttempt.Failed,
             ),
             DepositionAttempt(
                 meca=inserted_parsed_files[4],
                 deposition="<deposition_attempt></deposition_attempt>",
                 attempted_at=datetime.now(),
-                succeeded=True,
+                status=DepositionAttempt.Succeeded,
             ),
         ]
         self.db.insert_all(deposition_attempts)
@@ -151,7 +151,7 @@ class DbTestCase(BatchDbTestCase):
                 meca=meca,
                 deposition="<deposition_attempt></deposition_attempt>",
                 attempted_at=datetime.now(),
-                succeeded=False,
+                status=DepositionAttempt.Failed,
             )
             for meca in [
                 file_with_failed_attempts,
@@ -164,7 +164,7 @@ class DbTestCase(BatchDbTestCase):
                 meca=file_with_successful_attempt,
                 deposition="<deposition_attempt></deposition_attempt>",
                 attempted_at=datetime.now(),
-                succeeded=True,
+                status=DepositionAttempt.Succeeded,
             )
         ]
         self.db.insert_all(failed_attempts + successful_attempts)
@@ -187,6 +187,77 @@ class DbTestCase(BatchDbTestCase):
         )
         expected = inserted_parsed_files[2:4]
         self.assertEqual(expected, actual)
+
+    def test_get_files_to_retry_deposition(self) -> None:
+        self.db.insert_all(self.parsed_files + [
+            ParsedFile(
+                path="verification-failed",
+                received_at=datetime(2022, 3, 15),
+                manuscript=MANUSCRIPTS["no-author-reply"],
+                doi=MANUSCRIPTS["no-author-reply"].preprint_doi,
+                status=ParsedFile.Valid,
+            ),
+            ParsedFile(
+                path="dois-already-present",
+                received_at=datetime(2022, 4, 16),
+                manuscript=MANUSCRIPTS["no-author-reply"],
+                doi=MANUSCRIPTS["no-author-reply"].preprint_doi,
+                status=ParsedFile.Valid,
+            ),
+        ])
+        inserted_parsed_files = self.db.fetch_all(ParsedFile)
+
+        file_with_failed_attempts = inserted_parsed_files[3]
+        file_with_successful_attempt = inserted_parsed_files[4]
+        file_with_failed_verification = inserted_parsed_files[5]
+        file_with_dois_already_present = inserted_parsed_files[6]
+
+        failed_attempts = [
+            DepositionAttempt(
+                meca=meca,
+                deposition="<deposition_attempt></deposition_attempt>",
+                attempted_at=datetime.now(),
+                status=DepositionAttempt.Failed,
+            )
+            for meca in [
+                file_with_failed_attempts,
+                file_with_successful_attempt,
+            ]
+        ]
+        successful_attempts = [
+            DepositionAttempt(
+                meca=file_with_successful_attempt,
+                deposition="<deposition_attempt></deposition_attempt>",
+                attempted_at=datetime.now(),
+                status=DepositionAttempt.Succeeded,
+            )
+        ]
+        failed_verification = [
+            DepositionAttempt(
+                meca=file_with_failed_verification,
+                deposition="<deposition_attempt></deposition_attempt>",
+                attempted_at=datetime.now(),
+                status=DepositionAttempt.VerificationFailed,
+            )
+        ]
+        dois_already_present = [
+            DepositionAttempt(
+                meca=file_with_dois_already_present,
+                deposition="<deposition_attempt></deposition_attempt>",
+                attempted_at=datetime.now(),
+                status=DepositionAttempt.DoisAlreadyPresent,
+            )
+        ]
+        self.db.insert_all(failed_attempts + successful_attempts + failed_verification + dois_already_present)
+
+        files_ready_for_deposition = self.db.get_files_to_retry_deposition(
+            datetime(1900, 1, 1), datetime.now()
+        )
+        expected_files_ready_for_deposition = [file_with_failed_attempts, file_with_failed_verification]
+
+        self.assertEqual(
+            expected_files_ready_for_deposition, files_ready_for_deposition
+        )
 
     def test_get_parsed_files_with_doi(self) -> None:
         self.db.insert_all(self.parsed_files)

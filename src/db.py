@@ -12,11 +12,14 @@ from sqlalchemy import (
     create_engine,
     DateTime,
     ForeignKey,
+    func,
     Integer,
     MetaData,
+    or_,
     Table,
     Text,
     select,
+    text,
 )
 from sqlalchemy.orm import registry, relationship, Session  # type: ignore[attr-defined] # it does have this attribute
 from sqlalchemy.types import TypeDecorator
@@ -57,6 +60,9 @@ class ParsedFile:
 
     id: Optional[int] = None
     """A unique identifier for this file."""
+
+    def __repr__(self) -> str:
+        return f"ParsedFile(id={self.id}, path={self.path}, doi={self.doi}, received_at={self.received_at})"
 
 
 @dataclass
@@ -185,16 +191,23 @@ class BatchDatabase:
         rows = self._fetch_rows(statement)
         return [row[0] for row in rows]
 
+    def _fetch_parsed_files(self, statement: Any) -> List[ParsedFile]:
+        return [
+            row["ParsedFile"]
+            for row in self._fetch_rows(statement)
+        ]
+
     def fetch_parsed_files_with_doi(self, doi: str) -> List[ParsedFile]:
-        statement = select(ParsedFile).filter(ParsedFile.doi == doi)  # type: ignore
-        rows = self._fetch_rows(statement)
-        return [row["ParsedFile"] for row in rows]
+        return self._fetch_parsed_files(
+            select(ParsedFile)  # type: ignore
+            .filter(ParsedFile.doi == doi)
+        )
 
     def fetch_parsed_files_between(
         self, after: datetime, before: datetime
     ) -> List[ParsedFile]:
         """Fetch all parsed files in the database between the given dates."""
-        statement = (
+        return self._fetch_parsed_files(
             select(ParsedFile)  # type: ignore
             .filter(
                 ParsedFile.received_at > after,
@@ -202,15 +215,13 @@ class BatchDatabase:
             )
             .order_by(ParsedFile.id)
         )
-        rows = self._fetch_rows(statement)
-        return [row["ParsedFile"] for row in rows]
 
     def get_files_ready_for_deposition(
         self, after: datetime, before: datetime
     ) -> List[ParsedFile]:
         """Fetch all parsed files in the database that are ready to be deposited."""
         ids_parsed_files_with_deposition_attempt = select(DepositionAttempt.id_parsed_file)  # type: ignore
-        statement = (
+        return self._fetch_parsed_files(
             select(ParsedFile)  # type: ignore
             .filter(
                 ParsedFile.received_at > after,
@@ -220,7 +231,30 @@ class BatchDatabase:
             )
             .order_by(ParsedFile.id)
         )
-        return [row["ParsedFile"] for row in self._fetch_rows(statement)]
+
+    def get_files_to_retry_deposition(
+        self, after: datetime, before: datetime
+    ) -> List[ParsedFile]:
+        """Fetch all parsed files in the database that are ready to be deposited."""
+        ids_parsed_files_with_failed_deposition_attempts = text(
+            "SELECT id_parsed_file "
+            "FROM ("
+            "  SELECT id_parsed_file, MAX(attempted_at) "
+            "  FROM deposition_attempt "
+            "  GROUP BY id_parsed_file "
+            f" HAVING status={DepositionAttempt.Failed} "
+            f"     OR status={DepositionAttempt.VerificationFailed} "
+            ")"
+        )
+        return self._fetch_parsed_files(
+            select(ParsedFile)  # type: ignore
+            .filter(
+                ParsedFile.received_at > after,
+                ParsedFile.received_at < before,
+                ParsedFile.id.in_(ids_parsed_files_with_failed_deposition_attempts),  # type: ignore
+            )
+            .order_by(ParsedFile.id)
+        )
 
     def mark_doi_as_used(self, doi: str, resource: str) -> None:
         used_doi = UsedDoi(doi=doi, resource=resource, claimed_at=datetime.now())

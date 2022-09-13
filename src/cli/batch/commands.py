@@ -67,23 +67,18 @@ def parse(input_directory: str, output_directory: str) -> None:
 
 
 def group_parsed_files_by_status(meca_archives: List[ParsedFile]) -> Dict[str, Any]:
-    result: Dict[str, Any] = {
-        "invalid": [],
-        "no_reviews": [],
-        "no_preprint_doi": [],
-        "ready_for_deposition": [],
-    }
+    result: Dict[str, Any] = {}
 
     for meca_archive in meca_archives:
         resulting_list = None
         if meca_archive.manuscript is None:
-            resulting_list = result["invalid"]
+            resulting_list = result.setdefault("invalid", [])
         elif not meca_archive.manuscript.review_process:
-            resulting_list = result["no_reviews"]
+            resulting_list = result.setdefault("no_reviews", [])
         elif not meca_archive.manuscript.preprint_doi:
-            resulting_list = result["no_preprint_doi"]
+            resulting_list = result.setdefault("no_preprint_doi", [])
         else:
-            resulting_list = result["ready_for_deposition"]
+            resulting_list = result.setdefault("ready_for_deposition", [])
         resulting_list.append(get_name(meca_archive))
 
     return result
@@ -100,11 +95,16 @@ def group_parsed_files_by_status(meca_archives: List[ParsedFile]) -> Dict[str, A
     "--dry-run/--no-dry-run",
     default=True,
 )
+@click.option(
+    "--retry-failed/--no-retry-failed",
+    default=False,
+)
 @click.option("-a", "--after")
 @click.option("-b", "--before")
 def deposit(
     output_directory: str,
     dry_run: bool = True,
+    retry_failed: bool = False,
     after: Optional[str] = None,
     before: Optional[str] = None,
 ) -> None:
@@ -114,11 +114,14 @@ def deposit(
     batch_db = BatchDatabase(DB_URL)
     after_as_datetime = parser.parse(after) if after is not None else datetime(1, 1, 1)
     before_as_datetime = parser.parse(before) if before is not None else datetime.now()
-    undeposited_files = batch_db.get_files_ready_for_deposition(
-        after=after_as_datetime, before=before_as_datetime
+    
+    files_to_deposit = (
+        batch_db.get_files_to_retry_deposition(after=after_as_datetime, before=before_as_datetime)
+        if retry_failed
+        else batch_db.get_files_ready_for_deposition(after=after_as_datetime, before=before_as_datetime)
     )
     deposition_attempts, successfully_deposited_articles = batch_deposit(
-        undeposited_files, batch_db, dry_run=dry_run
+        files_to_deposit, batch_db, dry_run=dry_run
     )
 
     result = group_deposition_attempts_by_status(deposition_attempts, dry_run=dry_run)
@@ -141,33 +144,31 @@ def deposit(
 def group_deposition_attempts_by_status(
     deposition_attempts: List[DepositionAttempt], dry_run: bool
 ) -> Dict[str, Any]:
-    result: Dict[str, Any] = {
-        "deposition_generation_failed": [],
-        "deposition_verification_failed": [],
-        "deposition_failed": [],
-        "deposition_succeeded": [],
-    }
+    result: Dict[str, Any] = {}
 
     for deposition_attempt in deposition_attempts:
         resulting_list = None
-        if deposition_attempt.deposition is None:
-            resulting_list = result["deposition_generation_failed"]
-        elif deposition_attempt.verification_failed:
-            resulting_list = result["deposition_verification_failed"]
-        elif dry_run or deposition_attempt.succeeded:
-            resulting_list = result["deposition_succeeded"]
+        if deposition_attempt.status == DepositionAttempt.GenerationFailed:
+            resulting_list = result.setdefault("deposition_generation_failed", [])
+        elif deposition_attempt.status == DepositionAttempt.DoisAlreadyPresent:
+            resulting_list = result.setdefault("dois_already_present", [])
+        elif deposition_attempt.status == DepositionAttempt.VerificationFailed:
+            resulting_list = result.setdefault("deposition_verification_failed", [])
+        elif deposition_attempt.status == DepositionAttempt.Succeeded:
+            resulting_list = result.setdefault("deposition_succeeded", [])
+        elif deposition_attempt.status == DepositionAttempt.Failed:
+            resulting_list = result.setdefault("deposition_failed", [])
         else:
-            resulting_list = result["deposition_failed"]
+            resulting_list = result.setdefault("other", [])
         resulting_list.append(get_name(deposition_attempt.meca))
 
     return result
 
 
-def get_name(parsed_file: ParsedFile) -> str:
-    name = f"{parsed_file.path}"
-    if parsed_file.manuscript and parsed_file.manuscript.preprint_doi:
-        name += f" - {parsed_file.manuscript.preprint_doi}"
-    return name
+def get_name(parsed_file: ParsedFile) -> Any:
+    if parsed_file.doi:
+        return f"{parsed_file.path}|{parsed_file.doi}"
+    return parsed_file.path
 
 
 @click.command()
@@ -189,4 +190,6 @@ def ls(after: Optional[str] = None, before: Optional[str] = None) -> None:
 
 
 def output(result: Dict[str, Any]) -> str:
-    return str(dump(result, canonical=False))
+    if any(result):
+        return str(dump(result, canonical=False))
+    return ""
