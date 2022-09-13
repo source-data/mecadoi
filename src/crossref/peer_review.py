@@ -140,6 +140,7 @@ def generate_reviews(article: Article) -> Generator[PeerReview, None, None]:
                 language="en",
                 revision_round=revision,
                 type="author-comment",
+                stage="pre-publication",
                 contributors=create_contributors(author_reply.authors),
                 titles=Titles(title=title),
                 review_date=ReviewDate(

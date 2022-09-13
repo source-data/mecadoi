@@ -61,7 +61,7 @@
         <resource>https://eeb.embo.org/doi/10.1101/single-revision-round.123.456.7890#rev0-rr2</resource>
       </doi_data>
     </peer_review>
-    <peer_review language="en" revision-round="0" type="author-comment">
+    <peer_review language="en" revision-round="0" stage="pre-publication" type="author-comment">
       <contributors>
         <person_name contributor_role="author" sequence="first">
           <given_name>Jane</given_name>
