@@ -1,6 +1,6 @@
 from dataclasses import asdict
 from datetime import datetime
-from os import mkdir, remove
+from os import mkdir
 from pathlib import Path
 from shutil import rmtree
 from typing import Any, Dict, List
@@ -184,13 +184,17 @@ class DepositTestCase(BaseBatchTestCase, BaseDepositTestCase):
         initial_deposition_attempts = [
             DepositionAttempt(
                 meca=self.parsed_files[0],
-                deposition=Path("tests/resources/expected/multiple-revision-rounds.xml").read_text(),
+                deposition=Path(
+                    "tests/resources/expected/multiple-revision-rounds.xml"
+                ).read_text(),
                 attempted_at=datetime.now(),
                 status=DepositionAttempt.Failed,
             ),
             DepositionAttempt(
                 meca=self.parsed_files[1],
-                deposition=Path("tests/resources/expected/no-author-reply.xml").read_text(),
+                deposition=Path(
+                    "tests/resources/expected/no-author-reply.xml"
+                ).read_text(),
                 attempted_at=datetime.now(),
                 status=DepositionAttempt.VerificationFailed,
             ),
@@ -198,20 +202,31 @@ class DepositTestCase(BaseBatchTestCase, BaseDepositTestCase):
         self.db.insert_all(initial_deposition_attempts)
 
         result = self.run_mecadoi_command(
-            ["batch", "deposit", "-o", self.output_directory, "--retry-failed", "--no-dry-run"]
+            [
+                "batch",
+                "deposit",
+                "-o",
+                self.output_directory,
+                "--retry-failed",
+                "--no-dry-run",
+            ]
         )
         self.assertEqual(0, result.exit_code)
 
         self.expected_deposition_attempts = lambda *_args, **_kwargs: [
             DepositionAttempt(
                 meca=self.parsed_files[0],
-                deposition=Path("tests/resources/expected/multiple-revision-rounds.xml").read_text(),
+                deposition=Path(
+                    "tests/resources/expected/multiple-revision-rounds.xml"
+                ).read_text(),
                 attempted_at=datetime.now(),
                 status=DepositionAttempt.Succeeded,
             ),
             DepositionAttempt(
                 meca=self.parsed_files[1],
-                deposition=Path("tests/resources/expected/no-author-reply.xml").read_text(),
+                deposition=Path(
+                    "tests/resources/expected/no-author-reply.xml"
+                ).read_text(),
                 attempted_at=datetime.now(),
                 status=DepositionAttempt.Succeeded,
             ),
@@ -220,8 +235,12 @@ class DepositTestCase(BaseBatchTestCase, BaseDepositTestCase):
         expected_output = self.expected_output(dry_run=False)
         actual_output = self.assert_cli_output_equal(expected_output, result, ["id"])
 
-        self.assert_deposition_attempts_in_db(initial_deposition_attempts + self.expected_deposition_attempts())
-        self.assert_articles_in_output_dir(actual_output["id"], self.expected_articles[:2])
+        self.assert_deposition_attempts_in_db(
+            initial_deposition_attempts + self.expected_deposition_attempts()
+        )
+        self.assert_articles_in_output_dir(
+            actual_output["id"], self.expected_articles[:2]
+        )
         self.assertEqual(2, len(deposit_file_mock.mock_calls))
 
     def assert_articles_in_output_dir(
@@ -251,7 +270,6 @@ class DepositTestCase(BaseBatchTestCase, BaseDepositTestCase):
 
 
 class PruneTestCase(BaseBatchTestCase):
-
     def path(self, filename: str) -> Path:
         return Path(self.output_directory) / filename
 
@@ -275,18 +293,18 @@ class PruneTestCase(BaseBatchTestCase):
         ]
         for filename in self.existing_files:
             self.path(filename).write_text("this file is present")
-        self.db.insert_all([
-            ParsedFile(path=str(self.path(filename)), received_at=datetime.now())
-            for filename in self.existing_files + self.already_pruned_files
-        ])
+        self.db.insert_all(
+            [
+                ParsedFile(path=str(self.path(filename)), received_at=datetime.now())
+                for filename in self.existing_files + self.already_pruned_files
+            ]
+        )
 
-    def test_prune_files(self):
+    def test_prune_files(self) -> None:
         self.assert_files_exist(self.existing_files)
         self.assert_files_do_not_exist(self.already_pruned_files)
 
-        result = self.run_mecadoi_command(
-            ["batch", "prune", "--no-dry-run"]
-        )
+        result = self.run_mecadoi_command(["batch", "prune", "--no-dry-run"])
         self.assertEqual(0, result.exit_code)
 
         expected_output = {
@@ -298,21 +316,16 @@ class PruneTestCase(BaseBatchTestCase):
         self.assert_files_do_not_exist(self.already_pruned_files + self.existing_files)
 
     @patch("src.cli.batch.commands.remove", side_effect=ValueError("failed"))
-    def test_prune_files_fails(self, _remove_mock: Mock):
+    def test_prune_files_fails(self, _remove_mock: Mock) -> None:
         self.assert_files_exist(self.existing_files)
         self.assert_files_do_not_exist(self.already_pruned_files)
 
-        result = self.run_mecadoi_command(
-            ["batch", "prune", "--no-dry-run"]
-        )
+        result = self.run_mecadoi_command(["batch", "prune", "--no-dry-run"])
         self.assertEqual(0, result.exit_code)
 
         expected_output = {
             "dry_run": False,
-            "failed": [
-                str(self.path(filename))
-                for filename in self.existing_files
-            ],
+            "failed": [str(self.path(filename)) for filename in self.existing_files],
         }
         self.assert_cli_output_equal(expected_output, result, [])
 
@@ -320,9 +333,7 @@ class PruneTestCase(BaseBatchTestCase):
         self.assert_files_exist(self.existing_files)
         self.assert_files_do_not_exist(self.already_pruned_files)
 
-        result = self.run_mecadoi_command(
-            ["batch", "prune"]
-        )
+        result = self.run_mecadoi_command(["batch", "prune"])
         self.assertEqual(0, result.exit_code)
 
         expected_output = {

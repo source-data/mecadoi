@@ -12,10 +12,8 @@ from sqlalchemy import (
     create_engine,
     DateTime,
     ForeignKey,
-    func,
     Integer,
     MetaData,
-    or_,
     Table,
     Text,
     select,
@@ -192,15 +190,11 @@ class BatchDatabase:
         return [row[0] for row in rows]
 
     def _fetch_parsed_files(self, statement: Any) -> List[ParsedFile]:
-        return [
-            row["ParsedFile"]
-            for row in self._fetch_rows(statement)
-        ]
+        return [row["ParsedFile"] for row in self._fetch_rows(statement)]
 
     def fetch_parsed_files_with_doi(self, doi: str) -> List[ParsedFile]:
         return self._fetch_parsed_files(
-            select(ParsedFile)  # type: ignore
-            .filter(ParsedFile.doi == doi)
+            select(ParsedFile).filter(ParsedFile.doi == doi)  # type: ignore
         )
 
     def fetch_parsed_files_between(

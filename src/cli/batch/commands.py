@@ -115,11 +115,15 @@ def deposit(
     batch_db = BatchDatabase(DB_URL)
     after_as_datetime = parser.parse(after) if after is not None else datetime(1, 1, 1)
     before_as_datetime = parser.parse(before) if before is not None else datetime.now()
-    
+
     files_to_deposit = (
-        batch_db.get_files_to_retry_deposition(after=after_as_datetime, before=before_as_datetime)
+        batch_db.get_files_to_retry_deposition(
+            after=after_as_datetime, before=before_as_datetime
+        )
         if retry_failed
-        else batch_db.get_files_ready_for_deposition(after=after_as_datetime, before=before_as_datetime)
+        else batch_db.get_files_ready_for_deposition(
+            after=after_as_datetime, before=before_as_datetime
+        )
     )
     deposition_attempts, successfully_deposited_articles = batch_deposit(
         files_to_deposit, batch_db, dry_run=dry_run
@@ -206,11 +210,9 @@ def prune(dry_run: bool = True) -> None:
     Prune MECA archives after they've been parsed.
     """
     batch_db = BatchDatabase(DB_URL)
-    to_delete = set([
-        path
-        for path in batch_db.fetch_all(ParsedFile.path)
-        if Path(path).exists()
-    ])
+    to_delete = set(
+        [path for path in batch_db.fetch_all(ParsedFile.path) if Path(path).exists()]
+    )
 
     deletion_failed = set()
     if not dry_run:
@@ -218,7 +220,7 @@ def prune(dry_run: bool = True) -> None:
             try:
                 remove(path)
             except Exception as e:
-                LOGGER.warning("Pruning \"%s\" failed with \"%s\"", path, str(e))
+                LOGGER.warning('Pruning "%s" failed with "%s"', path, str(e))
                 deletion_failed.add(path)
     deleted = to_delete - deletion_failed
 
