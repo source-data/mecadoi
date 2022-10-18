@@ -1,11 +1,11 @@
 # MECADOI
 
-Deposit DOIs for peer reviews in MECA archives.
+Deposit DOIs for peer reviews and authors' reply contained in a MECA archive.
 
 This project consists of a Python library thats reads [Manuscript Exchange Common Approach](https://www.niso.org/standards-committees/meca) (MECA) archives, extracts
-the metadata of any peer reviews within, and then creates a DOI for each review using the [CrossRef deposition API](https://www.crossref.org/documentation/member-setup/direct-deposit-xml/).
+the metadata required then register a DOI for each review and, when available, the authors' reply, using the [CrossRef deposition API](https://www.crossref.org/documentation/member-setup/direct-deposit-xml/).
 
-It is currently used in the context of EMBO's [Review Commons](https://www.reviewcommons.org/) and [Early Evidence Base](https://eeb.embo.org/) projects and would require changes for use in another environment.
+It is currently used in the context of EMBO's [Review Commons](https://www.reviewcommons.org/) and [Early Evidence Base](https://eeb.embo.org/) projects and _would require changes for use in another environment._ \[To be clarified later...\]
 
 ## Requirements
 
@@ -14,9 +14,11 @@ For the basic CLI commands:
 * `pip`
 
 If you want to register DOIs:
-* [CrossRef account](https://www.crossref.org/documentation/member-setup/) credentials
+* [CrossRef membership](https://www.crossref.org/documentation/member-setup/) and [CrossRef account]() credentials.
 
-For the requirements for the automated deposition workflows see the Workflows section.
+If you only want to test the application, CrossRef provides a [sandbox environment](https://test.crossref.org/) that neeed separate credentials. Note that it might be necessary to first preregister an article DOI before being able to test the deposition of a linked peer review.
+
+_For the requirements for the automated deposition workflows see the Workflows section._
 
 ## Quick Start
 
@@ -35,8 +37,19 @@ cp .env.example .env
 You're now ready to use the CLI to get basic info about a MECA archive:
 
 ```bash
-python3 -m src.cli.main meca info meca-archive.zip
+python3 -m src.cli.main meca info demo-meca.zip
 ```
+
+Expected output
+```bash
+authors: Jane, Doe, John, Doe
+doi: 10.12345/multiple-revision-rounds.1234567890
+journal: Review Commons - TEST
+preprint_doi: 10.1101/multiple-revision-rounds.123.456.7890
+review_process: 2 revision rounds, 4 reviews, 1 author reply
+title: An article with multiple revision rounds.
+```
+
 
 ## Configuration
 
@@ -46,6 +59,9 @@ It's location is `.env` by default but can be set through the `ENV_FILE` environ
 ```
 ENV_FILE=.env.ci python3 -m src.cli.main [command] [subcommand]
 ```
+
+The configuration for a specific peer review platform is defined in `config.py`. See details in `documentation/doc.md`.
+
 
 ## CLI
 
@@ -61,6 +77,22 @@ The CLI has three groups of subcommands:
 - `crossref` to generate a deposition file from a MECA archive and send it to the Crossref API
 - `batch` to perform the MECA parsing, deposition file generation, & interaction with the Crossref API for multiple MECA archives.
 
+The `meca` and `crossref` commands are for exploration and debugging. The `batch` command is used in the actual deposition workflow.
+Each command has its own subcommands:
+
+```
+meca
+    info
+    reviews
+crossref
+    generate
+    verify
+batch
+    parse
+    deposit
+
+
+
 Almost every command's output is in the YAML format.
 
 ### `meca`
@@ -72,16 +104,19 @@ These commands extract and output information from a single MECA archive.
 Use the `info` subcommand to get basic information about a MECA archive:
 
 ```bash
-python3 -m src.cli.main meca info meca-archive.zip
+python3 -m src.cli.main meca info demo-meca.zip
 ```
 This will output the authors, journal, and title of the article, any DOIs, and a summary of the peer review process.
+Example:
+```
+```
 
 #### `reviews`
 
 This outputs detailed information about the peer review process of the article in the MECA archive:
 
 ```bash
-python3 -m src.cli.main meca reviews meca-archive.zip
+python3 -m src.cli.main meca reviews demo-meca.zip
 ```
 
 ### `crossref`
@@ -90,12 +125,12 @@ These commands are for interaction with the Crossref API.
 
 #### `generate`
 
-This generates and outputs a Crossref deposition file that can be used to create DOIs for every peer review in the MECA archive.
+This command is useful for debugging and inspection of CrossRef deposition file. It also can be used for manual deposition of peer review DOIs for a single. This takes a MECA archive as input and generates a Crossref deposition file. It contains all the metadata needed to create DOIs for every peer review in the MECA archive.
 The DOIs to be used are randomly generated and not checked for uniqueness.
 Information such as the registrant and depositor name are taken from the `.env` file.
 
 ```bash
-python3 -m src.cli.main crossref generate -o deposition.xml meca-archive.zip
+python3 -m src.cli.main crossref generate -o deposition.xml demo-meca.zip
 ```
 
 #### `verify`
@@ -117,35 +152,45 @@ As an example, if the deposition file has 3 reviews and 1 author reply belonging
 
 These commands are for processing multiple MECA archives.
 
-All actions taken during these commands are recorded in an sqlite database.
+All actions taken during these commands are recorded in the MECADOI database.
 Its location can be set through the `DB_URL` parameter in the `.env` file.
-
-Some commands have a `--no-dry-run` option: only if this option is passed are irreversible actions taken and is the database updated.
-An example is the `deposit` command: by default, no DOIs are actually deposited.
-Only by adding `--no-dry-run` is this irreversible action taken and recorded in the database.
 
 #### `parse`
 
+This command parses MECA archives to extract the relevant metadata and update the MECADOI database.
+It takes as input positional parameter the path to the directory containing the MECA archives. This input directory is search recursively.
+Every processed MECA archive is saved for further reference to a `parsed/<uuid>/` subfolder within the folder provided with the `-o` option.
+
+
 ```bash
 python3 -m src.cli.main batch parse -o output/ input-dir/
+
+
 ```
 
 This subcommand...
 1. Moves all files in the given input directory to a new subdirectory in the given output directory.
 2. Registers all files in the database.
-3. Tries to parse these files as MECA archives.
+3. Tries to parse these files as MECA archives and updates the database accordingly with the extracted metadata.
 
 It returns all processed files and their status after parsing.
+
+Example (including failures):
+```
+
+```
 
 
 #### `deposit`
 
-The `deposit` subcommand finds every successfully parsed MECA archive in the batch database that has reviews & a preprint DOI and for which no DOIs have been successfully deposited. Then, for each file a deposition attempt is made and stored in the batch database.
+The `deposit` subcommand execute the deposition of multiple CrossRef metadata deposition files. It finds the MECADOI database records for every successfully parsed MECA archive that has reviews & a preprint DOI and for which no DOIs have yet been successfully deposited. Then, for each selected record, a deposition attempt is made and stored in the batch database. 
 
-Generated deposition files can then be sent to Crossref for DOI creation with the `deposit` command:
+By default, the command `deposit` will NOT execute the deposition of the DOIS. To actually execute the irreversible deposition and to update the database, the default behavior has to be overriden by explicitly adding the option `--no-dry-run`.
+
+The `deposit` commdand will generate .`yml` file to....
 
 ```bash
-python3 -m src.cli.main batch parse -o output/ input-dir/
+python3 -m src.cli.main batch deposit -o output/
 ```
 
 The Crossref API almost always returns a message indicating success even with obvious mistakes such as malformed DOIs.
