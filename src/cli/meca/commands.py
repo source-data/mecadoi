@@ -95,7 +95,7 @@ def get_contributors(contributors: Optional[List[Author]]) -> str:
     return truncate(
         ", ".join(
             [
-                f"{contributor.given_name}, {contributor.surname}"
+                f"{contributor.surname}, {contributor.given_name}"
                 for contributor in contributors
             ]
         )
