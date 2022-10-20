@@ -8,6 +8,7 @@ from src.cli.meca import meca
 def main() -> None:
     pass
 
+
 main.add_command(batch)
 main.add_command(meca)
 
