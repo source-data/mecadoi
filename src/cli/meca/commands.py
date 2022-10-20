@@ -11,7 +11,12 @@ from .options import meca_archive
 @click.command()
 @meca_archive
 def info(meca_archive: str) -> None:
-    """Show information about the given MECA archive."""
+    """
+    Show basic information about the manuscript in a MECA archive.
+
+    Parses the file at `MECA_ARCHIVE` and prints the authors, journal, title, any DOIs, and a
+    summary of the peer review process of the manuscript to stdout.
+    """
     manuscript = parse_meca_archive(meca_archive)
     output = {
         "title": truncate(manuscript.title),
@@ -47,7 +52,12 @@ def info(meca_archive: str) -> None:
 @click.command()
 @meca_archive
 def reviews(meca_archive: str) -> None:
-    """Show information about the reviews in the given MECA archive."""
+    """
+    Show information about the review process of the manuscript in a MECA archive.
+
+    Parses the file at `MECA_ARCHIVE` and prints the authors, date, and a summary of all reviews
+    and author replies of the manuscript to stdout.
+    """
     manuscript = parse_meca_archive(meca_archive)
 
     if manuscript.review_process:

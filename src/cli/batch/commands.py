@@ -19,34 +19,49 @@ LOGGER = getLogger(__name__)
 
 @click.command()
 @click.argument(
-    "input-directory",
+    "input-dir",
     type=click.Path(exists=True, file_okay=False, dir_okay=True),
 )
 @click.option(
     "-o",
-    "--output-directory",
+    "--output-dir",
     required=True,
     type=click.Path(exists=True, file_okay=False, dir_okay=True, writable=True),
+    help="The directory to which processed files will be archived. Must be an existing directory.",
 )
-def parse(input_directory: str, output_directory: str) -> None:
+def parse(input_dir: str, output_dir: str) -> None:
     """
-    Parse all files in the given directory, register them in the batch database, and move them to the given output
-    directory.
+    Import files into the MECADOI database.
+
+    The command archives all files in `INPUT_DIR` to a new folder in `--output-dir`, tries to parse
+    them as MECA archives, and registers them in the MECADOI database.
+
+    The processed files are moved to a subfolder named `parsed/<id>/` within `--output-dir`, where
+    <id> is the unique ID generated for this command invocation.
+
+    The ID of this command invocation and a list of all processed files is printed to stdout. The
+    files are grouped by their status:
+
+    \b
+    - `invalid` for files that are not MECA archives (e.g. non-ZIP files)
+    - `no_reviews` for MECA archives that contain no reviews or author replies
+    - `no_preprint_doi` for MECA archives that contain no preprint DOI (required for DOI creation)
+    - `ready_for_deposition` for MECA archives where review and author reply DOIs can be created
     """
-    LOGGER.debug('parse("%s", "%s")', input_directory, output_directory)
+    LOGGER.debug('parse("%s", "%s")', input_dir, output_dir)
 
     # move the input files to the output directory
     id_batch_run = str(uuid4())
-    output_directory = f"{output_directory}/parsed/{id_batch_run}/"
+    output_dir = f"{output_dir}/parsed/{id_batch_run}/"
 
-    move(input_directory, output_directory)
-    mkdir(input_directory)
+    move(input_dir, output_dir)
+    mkdir(input_dir)
 
     # find all files in the output directory: these are the potential MECA archives. Usually they're .zip files,
     # but let's just find everything in case they're not.
     input_files = [
         join(dirpath, filename)
-        for dirpath, _, filenames in walk(output_directory)
+        for dirpath, _, filenames in walk(output_dir)
         for filename in filenames
     ]
     LOGGER.debug("input_files=%s", input_files)
@@ -62,8 +77,8 @@ def parse(input_directory: str, output_directory: str) -> None:
     LOGGER.info(
         'Parsed and moved %s files from "%s" to "%s"',
         len(input_files),
-        input_directory,
-        output_directory,
+        input_dir,
+        output_dir,
     )
 
 
@@ -88,29 +103,75 @@ def group_parsed_files_by_status(meca_archives: List[ParsedFile]) -> Dict[str, A
 @click.command()
 @click.option(
     "-o",
-    "--output-directory",
+    "--output-dir",
     required=True,
     type=click.Path(exists=True, file_okay=False, dir_okay=True, writable=True),
+    help="The directory to which a file with information about successful deposition attempts is written.",
 )
 @click.option(
     "--dry-run/--no-dry-run",
     default=True,
+    help="Only show what would happen / actually create DOIs and update the database. DEFAULT: `--dry-run`",
 )
 @click.option(
     "--retry-failed/--no-retry-failed",
     default=False,
+    help=(
+        "Re-try DOI deposition for MECA archives for which a previous attempt has failed / "
+        "deposit DOIs for MECA archives without deposition attempt. DEFAULT: `--no-retry-failed`"
+    ),
 )
-@click.option("-a", "--after")
-@click.option("-b", "--before")
+@click.option(
+    "-a",
+    "--after",
+    help="Only attempt to deposit DOIs for MECA archives that were received after this date. Example: 2022-04-01",
+)
+@click.option(
+    "-b",
+    "--before",
+    help="Only attempt to deposit DOIs for MECA archives that were received before this date. Example: 2022-10-01",
+)
 def deposit(
-    output_directory: str,
+    output_dir: str,
     dry_run: bool = True,
     retry_failed: bool = False,
     after: Optional[str] = None,
     before: Optional[str] = None,
 ) -> None:
     """
-    Find all files in the batch database that are not yet deposited, and try to deposit them.
+    Create DOIs for MECA archives in the MECADOI database.
+
+    The command finds those MECA archives in the MECADOI database for which DOIs can be deposited,
+    i.e. those that have reviews and a preprint DOI and for which no deposition has been attempted
+    yet.
+    Then a deposition attempt is made for each selected MECA and its result recorded in the MECADOI
+    database.
+    Information about each successful deposition attempt is written to a file in `--output-dir`.
+
+    DOIs are deposited by sending an XML file conforming to the Crossref metadata schema to the
+    Crossref API.
+    Emails with detailed information about the status of every submission is sent to the depositor's
+    email address, which is taken from the `DEPOSITOR_EMAIL` variable in your `.env` file.
+    Failures in the deposition data (e.g. malformed DOIs) are only reported in this email, i.e. this
+    command almost always executes successfully.
+
+    Before a deposition is attempted the DOIs to be created are verified against the EEB platform
+    (eeb.embo.org).
+    If any review or reply already has a DOI, or if the amount of reviews and replies don't match
+    exactly, the attempt is marked as failed.
+
+    The ID of this command invocation and a list of all processed MECA archives is printed to stdout.
+    The MECA archives are grouped by their status:
+
+    \b
+    - `deposition_generation_failed` if the Crossref XML file could not be generated
+    - `dois_already_present` if at least one review or reply in the MECA archive already has a DOI
+    - `deposition_verification_failed`  if the reviews and replies in the MECA archive don't exactly match those on EEB
+    - `deposition_succeeded` if the deposition XML was accepted by the Crossref API
+    - `deposition_failed` if the deposition XML was not accepted by or could not be sent to the Crossref API
+
+    NOTE: By default, this command will *not* create any DOIs or update the MECADOI database. Pass
+    the `--no-dry-run` option to actually execute the irreversible deposition and update the database.
     """
     batch_db = BatchDatabase(DB_URL)
     after_as_datetime = parser.parse(after) if after is not None else datetime(1, 1, 1)
@@ -135,12 +196,12 @@ def deposit(
     result["dry_run"] = dry_run
 
     if successfully_deposited_articles:
-        deposition_output_directory = f"{output_directory}/deposited"
+        deposition_output_dir = f"{output_dir}/deposited"
         try:
-            mkdir(deposition_output_directory)
+            mkdir(deposition_output_dir)
         except FileExistsError:
             pass
-        with open(f"{deposition_output_directory}/{id_batch_run}.yml", "w") as f:
+        with open(f"{deposition_output_dir}/{id_batch_run}.yml", "w") as f:
             dump([asdict(article) for article in successfully_deposited_articles], f)
 
     click.echo(output(result), nl=False)
@@ -176,7 +237,7 @@ def get_name(parsed_file: ParsedFile) -> Any:
     return parsed_file.path
 
 
-@click.command()
+@click.command(hidden=True)
 @click.option("-a", "--after")
 @click.option("-b", "--before")
 def ls(after: Optional[str] = None, before: Optional[str] = None) -> None:
@@ -204,10 +265,21 @@ def output(result: Dict[str, Any]) -> str:
 @click.option(
     "--dry-run/--no-dry-run",
     default=True,
+    help="Only show what would happen / actually delete MECA archives. DEFAULT: `--dry-run`",
 )
 def prune(dry_run: bool = True) -> None:
     """
-    Prune MECA archives after they've been parsed.
+    Delete MECA archives that are no longer needed for deposition.
+
+    All MECA archives are parsed during the initial import and all information necessary for DOI
+    creation is stored in the MECADOI database. After this step, the actual file on disk is no
+    longer needed to create DOIs.
+
+    This command checks the file path of every MECA archive registered in the MECADOI database and
+    deletes those files that exist on disk.
+
+    NOTE: By default, this command will *not* delete any files. Pass the `--no-dry-run` option to
+    actually execute the deletions.
     """
     batch_db = BatchDatabase(DB_URL)
     to_delete = set(

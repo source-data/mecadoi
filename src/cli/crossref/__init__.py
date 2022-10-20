@@ -4,7 +4,7 @@ from .commands import generate, verify
 
 @click.group()
 def crossref() -> None:
-    """Subcommands for interacting with the Crossref API."""
+    """Interact with the Crossref API."""
     pass
 
 

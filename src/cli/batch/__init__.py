@@ -4,7 +4,12 @@ from .commands import deposit, ls, parse, prune
 
 @click.group()
 def batch() -> None:
-    """Subcommands for batch depositing peer reviews from MECA archives."""
+    """
+    Create DOIs for peer reviews and author replies in MECA archives.
+
+    All actions taken during these commands are recorded in the MECADOI database.
+    Its location can be set through the `DB_URL` parameter in the `.env` file.
+    """
     pass
 
 
