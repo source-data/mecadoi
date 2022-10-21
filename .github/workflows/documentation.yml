@@ -1,0 +1,29 @@
+name: Build & deploy documentation
+
+env:
+  DOCS_BRANCH: gh-pages
+
+on:
+ push:
+   branches:
+    - main
+
+jobs:
+ build-and-deploy:
+   runs-on: ubuntu-latest
+   steps:
+   - uses: actions/setup-python@v4
+     with:
+       python-version: "3.9"
+   - uses: actions/checkout@v3
+   - name: Build and Commit
+     uses: sphinx-notes/pages@v2
+     with:
+       documentation_path: docs
+       requirements_path: requirements/docs.txt
+       target_branch: ${{ env.DOCS_BRANCH }}
+   - name: Push changes
+     uses: ad-m/github-push-action@master
+     with:
+       github_token: ${{ secrets.GITHUB_TOKEN }}
+       branch: ${{ env.DOCS_BRANCH }}
