@@ -1,0 +1,276 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Configuration &#8212; MECADOI  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Development" href="development.html" />
+    <link rel="prev" title="Installation" href="installation.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="configuration">
+<h1>Configuration<a class="headerlink" href="#configuration" title="Permalink to this heading">¶</a></h1>
+<p>The application is configured through an env file. Its location is, by default, <code class="docutils literal notranslate"><span class="pre">.env</span></code> in the
+working directory. If no such file exists, the parent folders of the working directory are searched.
+The env file location can be changed by setting the environment variable <code class="docutils literal notranslate"><span class="pre">ENV_FILE</span></code>, like so:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">ENV_FILE</span><span class="o">=</span>.env.example python3 -m src <span class="o">[</span>command<span class="o">]</span> <span class="o">[</span>subcommand<span class="o">]</span>
+</pre></div>
+</div>
+<p>The project contains the sample env file <code class="docutils literal notranslate"><span class="pre">.env.example</span></code> with valid settings for all configuration
+settings.</p>
+<section id="general-settings">
+<h2>General settings<a class="headerlink" href="#general-settings" title="Permalink to this heading">¶</a></h2>
+<section id="crossref-deposition-url">
+<h3>CROSSREF_DEPOSITION_URL<a class="headerlink" href="#crossref-deposition-url" title="Permalink to this heading">¶</a></h3>
+<p>The URL of the Crossref XML deposition system.</p>
+<p>Should be either <a class="reference external" href="https://doi.crossref.org/servlet/deposit">https://doi.crossref.org/servlet/deposit</a> for the production system or
+<a class="reference external" href="https://test.crossref.org/servlet/deposit">https://test.crossref.org/servlet/deposit</a> for the test sandbox, but check <a class="reference external" href="https://www.crossref.org/documentation/register-maintain-records/direct-deposit-xml/https-post/">Crossref’s documentation</a>
+to make sure.</p>
+<p>Required when creating DOIs with Crossref. Can be left empty otherwise.</p>
+</section>
+<section id="crossref-username">
+<h3>CROSSREF_USERNAME<a class="headerlink" href="#crossref-username" title="Permalink to this heading">¶</a></h3>
+<p>The username of your Crossref account credentials.</p>
+<p>Required when creating DOIs with Crossref. Can be left empty otherwise.</p>
+</section>
+<section id="crossref-password">
+<h3>CROSSREF_PASSWORD<a class="headerlink" href="#crossref-password" title="Permalink to this heading">¶</a></h3>
+<p>The password of your Crossref account credentials.</p>
+<p>Required when creating DOIs with Crossref. Can be left empty otherwise.</p>
+</section>
+<section id="db-url">
+<h3>DB_URL<a class="headerlink" href="#db-url" title="Permalink to this heading">¶</a></h3>
+<p>The URL to access the MECADOI database.</p>
+<p>It must be in a form understood by SQLAlchemy’s <code class="docutils literal notranslate"><span class="pre">create_engine</span></code>. Quoting from its documentation:</p>
+<p>“The string form of the URL is dialect[+driver]://user:password&#64;host/dbname[?key=value..], where
+dialect is a database name such as mysql, oracle, postgresql, etc., and driver the name of a DBAPI,
+such as psycopg2, pyodbc, cx_oracle, etc.”</p>
+</section>
+<section id="log-file">
+<h3>LOG_FILE<a class="headerlink" href="#log-file" title="Permalink to this heading">¶</a></h3>
+<p>Where to write the log to. Must be a file path.</p>
+<p>Not required. The application logs to stdout if empty.</p>
+</section>
+<section id="log-level">
+<h3>LOG_LEVEL<a class="headerlink" href="#log-level" title="Permalink to this heading">¶</a></h3>
+<p>The log level to use.</p>
+<p>Not required. Defaults to <code class="docutils literal notranslate"><span class="pre">INFO</span></code>.</p>
+</section>
+</section>
+<section id="deposition-metadata">
+<h2>Deposition metadata<a class="headerlink" href="#deposition-metadata" title="Permalink to this heading">¶</a></h2>
+<p>These settings are used for generating the metadata sent to Crossref to create DOIs.
+They are are required when creating deposition files and can be left empty otherwise.</p>
+<p>All values are going into fields of the <a class="reference external" href="https://data.crossref.org/reports/help/schema_doc/5.3.1/index.html">Crossref metadata schema</a> for DOI deposition.
+Each description below has an <a class="reference external" href="https://en.wikipedia.org/wiki/XPath">XPath</a> location path to the field that the setting value will be
+inserted into.</p>
+<p>Some of these settings are templates (those with the suffix <code class="docutils literal notranslate"><span class="pre">_TEMPLATE</span></code>). They will be used to
+build the value to go into their field by substituting $-prefixed placeholders with actual values.
+As an example, a template like <code class="docutils literal notranslate"><span class="pre">This</span> <span class="pre">is</span> <span class="pre">a</span> <span class="pre">$placeholder</span></code> will produce a value of <code class="docutils literal notranslate"><span class="pre">This</span> <span class="pre">is</span> <span class="pre">a</span> <span class="pre">test</span></code>
+if the placeholder is replaced by the word “test”. For more details on the syntax, see the documentation
+for <a class="reference external" href="https://docs.python.org/3/library/string.html#template-strings">Python template strings</a>.</p>
+<section id="depositor-name">
+<h3>DEPOSITOR_NAME<a class="headerlink" href="#depositor-name" title="Permalink to this heading">¶</a></h3>
+<p>Name of the organization registering the DOIs.</p>
+<p><a class="reference external" href="https://data.crossref.org/reports/help/schema_doc/5.3.1/common5_3_1_xsd.html#depositor_name">doi_batch/head/depositor/depositor_name</a></p>
+</section>
+<section id="depositor-email">
+<h3>DEPOSITOR_EMAIL<a class="headerlink" href="#depositor-email" title="Permalink to this heading">¶</a></h3>
+<p>Email address to which batch success and/or error messages are sent.</p>
+<p><a class="reference external" href="https://data.crossref.org/reports/help/schema_doc/5.3.1/common5_3_1_xsd.html#email_address">doi_batch/head/depositor/email_address</a></p>
+</section>
+<section id="registrant-name">
+<h3>REGISTRANT_NAME<a class="headerlink" href="#registrant-name" title="Permalink to this heading">¶</a></h3>
+<p>The organization responsible for the information being registered.</p>
+<p><a class="reference external" href="https://data.crossref.org/reports/help/schema_doc/5.3.1/common5_3_1_xsd.html#registrant">doi_batch/head/registrant</a></p>
+</section>
+<section id="institution-name">
+<h3>INSTITUTION_NAME<a class="headerlink" href="#institution-name" title="Permalink to this heading">¶</a></h3>
+<p>The full name of institution or organization associated with a peer review or author reply.</p>
+<p><a class="reference external" href="https://data.crossref.org/reports/help/schema_doc/5.3.1/common5_3_1_xsd.html#institution_name">doi_batch/body/peer_review/institution/institution_name</a></p>
+</section>
+<section id="review-resource-url-template">
+<h3>REVIEW_RESOURCE_URL_TEMPLATE<a class="headerlink" href="#review-resource-url-template" title="Permalink to this heading">¶</a></h3>
+<p>The URI associated with a peer review’s DOI will be constructed from this template.</p>
+<p>For each review in a MECA archive, this template will be used to construct the URI under which the
+review is published.
+The template must contain these parameters:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">$article_id</span></code>: the DOI of the article under review.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">$revision</span></code>: the revision identifier that this review belongs to.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">$running_number</span></code>: the running number of this review.</p></li>
+</ul>
+<p><a class="reference external" href="https://data.crossref.org/reports/help/schema_doc/5.3.1/common5_3_1_xsd.html#resource">doi_batch/body/peer_review/doi_data/resource</a></p>
+</section>
+<section id="review-title-template">
+<h3>REVIEW_TITLE_TEMPLATE<a class="headerlink" href="#review-title-template" title="Permalink to this heading">¶</a></h3>
+<p>The title of the review being registered will be constructed from this template.</p>
+<p>For each review in a MECA archive, this template will be used to construct the title of the review.
+The template must contain these parameters:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">$article_title</span></code>: the title of the article under review.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">$review_number</span></code>: the running number of this review.</p></li>
+</ul>
+<p><a class="reference external" href="https://data.crossref.org/reports/help/schema_doc/5.3.1/common5_3_1_xsd.html#title">doi_batch/body/peer_review/titles/title</a></p>
+</section>
+<section id="author-reply-resource-url-template">
+<h3>AUTHOR_REPLY_RESOURCE_URL_TEMPLATE<a class="headerlink" href="#author-reply-resource-url-template" title="Permalink to this heading">¶</a></h3>
+<p>The URI associated with an author reply’s DOI will be constructed from this template.</p>
+<p>For each author reply in a MECA archive, this template will be used to construct the URI under
+which the author reply is published.
+The template must contain these parameters:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">$article_id</span></code>: the DOI of the article under review.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">$revision</span></code>: the revision identifier that this author reply belongs to.</p></li>
+</ul>
+<p><a class="reference external" href="https://data.crossref.org/reports/help/schema_doc/5.3.1/common5_3_1_xsd.html#resource">doi_batch/body/peer_review/doi_data/resource</a></p>
+</section>
+<section id="author-reply-title-template">
+<h3>AUTHOR_REPLY_TITLE_TEMPLATE<a class="headerlink" href="#author-reply-title-template" title="Permalink to this heading">¶</a></h3>
+<p>The title of the author reply being registered will be constructed from this template.</p>
+<p>For each author reply in a MECA archive, this template will be used to construct title of the
+author reply.
+The template must contain these parameters:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">$article_title</span></code>: the title of the article under review.</p></li>
+</ul>
+<p><a class="reference external" href="https://data.crossref.org/reports/help/schema_doc/5.3.1/common5_3_1_xsd.html#title">doi_batch/body/peer_review/titles/title</a></p>
+</section>
+<section id="doi-template">
+<h3>DOI_TEMPLATE<a class="headerlink" href="#doi-template" title="Permalink to this heading">¶</a></h3>
+<p>The DOI under which reviews and author replies are published will be constructed from this template.</p>
+<p>For each review and author reply in a MECA archive, this template will be used to construct the DOI
+under which they are published.
+The template must contain these parameters:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">$year</span></code>: the current year, e.g. <code class="docutils literal notranslate"><span class="pre">2022</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">$random</span></code>: a random strinc of numbers.</p></li>
+</ul>
+<p><a class="reference external" href="https://data.crossref.org/reports/help/schema_doc/5.3.1/common5_3_1_xsd.html#doi">doi_batch/body/peer_review/doi_data/doi</a></p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">MECADOI</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#general-settings">General settings</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#crossref-deposition-url">CROSSREF_DEPOSITION_URL</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#crossref-username">CROSSREF_USERNAME</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#crossref-password">CROSSREF_PASSWORD</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#db-url">DB_URL</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#log-file">LOG_FILE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#log-level">LOG_LEVEL</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#deposition-metadata">Deposition metadata</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#depositor-name">DEPOSITOR_NAME</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#depositor-email">DEPOSITOR_EMAIL</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#registrant-name">REGISTRANT_NAME</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#institution-name">INSTITUTION_NAME</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#review-resource-url-template">REVIEW_RESOURCE_URL_TEMPLATE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#review-title-template">REVIEW_TITLE_TEMPLATE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#author-reply-resource-url-template">AUTHOR_REPLY_RESOURCE_URL_TEMPLATE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#author-reply-title-template">AUTHOR_REPLY_TITLE_TEMPLATE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#doi-template">DOI_TEMPLATE</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="project.html">Project Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="installation.html" title="previous chapter">Installation</a></li>
+      <li>Next: <a href="development.html" title="next chapter">Development</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, SourceData.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/configuration.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

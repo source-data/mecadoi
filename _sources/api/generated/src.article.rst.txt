@@ -1,0 +1,38 @@
+﻿src.article
+===========
+
+.. automodule:: src.article
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      from_meca_manuscript
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Article
+      AuthorReply
+      Review
+      RevisionRound
+   
+   
+
+   
+   
+   
+
+
+

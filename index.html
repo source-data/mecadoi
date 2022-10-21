@@ -1,0 +1,201 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>MECADOI &#8212; MECADOI  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="installation.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="mecadoi">
+<h1>MECADOI<a class="headerlink" href="#mecadoi" title="Permalink to this heading">¶</a></h1>
+<p>MECADOI is a Python library and command-line interface to create DOIs for peer reviews and author replies contained in a MECA archive.
+MECA is a <a class="reference external" href="https://www.niso.org/publications/rp-30-2020-meca">standardized format</a> for the transferral of a manuscript, its metadata, and optionally peer review data between publishers.</p>
+<p>The command-line interface (CLI) provides an easy way to read MECA archives, extract their contents and metadata, store the required data in a local database, and create a DOI for each peer review and, when available, authors’ reply, using the <a class="reference external" href="https://www.crossref.org/documentation/member-setup/direct-deposit-xml/">CrossRef deposition API</a>.</p>
+<p>The Python library enables more fine-grained control over the workflow executed by the CLI.</p>
+<p>The project also contains the setup for a simple workflow pipeline to automatically ingest MECA archives from a file server, create DOIs for any peer reviews and authors’ replies within them, archive the results to an AWS S3 bucket, and export a summary of all created DOIs.</p>
+<p>MECADOI was built by <a class="reference external" href="https://www.embopress.org/">EMBO Press</a> for use by the <a class="reference external" href="https://www.reviewcommons.org/">Review Commons</a> platform.</p>
+<section id="links">
+<h2>Links<a class="headerlink" href="#links" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Documentation: <a class="reference external" href="https://source-data.github.io/mecadoi/">https://source-data.github.io/mecadoi/</a></p></li>
+<li><p>Source code: <a class="reference external" href="https://github.com/source-data/mecadoi/">https://github.com/source-data/mecadoi/</a></p></li>
+</ul>
+</section>
+<section id="documentation">
+<h2>Documentation:<a class="headerlink" href="#documentation" title="Permalink to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#installing-from-source">Installing from source</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#general-settings">General settings</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#crossref-deposition-url">CROSSREF_DEPOSITION_URL</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#crossref-username">CROSSREF_USERNAME</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#crossref-password">CROSSREF_PASSWORD</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#db-url">DB_URL</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#log-file">LOG_FILE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#log-level">LOG_LEVEL</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#deposition-metadata">Deposition metadata</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#depositor-name">DEPOSITOR_NAME</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#depositor-email">DEPOSITOR_EMAIL</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#registrant-name">REGISTRANT_NAME</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#institution-name">INSTITUTION_NAME</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#review-resource-url-template">REVIEW_RESOURCE_URL_TEMPLATE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#review-title-template">REVIEW_TITLE_TEMPLATE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#author-reply-resource-url-template">AUTHOR_REPLY_RESOURCE_URL_TEMPLATE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#author-reply-title-template">AUTHOR_REPLY_TITLE_TEMPLATE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#doi-template">DOI_TEMPLATE</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="development.html#linting">Linting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development.html#testing">Testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development.html#documentation">Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development.html#crossref-sandbox">Crossref sandbox</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="project.html">Project Background</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="project.html#the-meca-format">The MECA format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="project.html#the-doi-system">The DOI system</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/cli.html">CLI</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/cli.html#python-m-src">python -m src</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/cli.html#python-m-src-batch">batch</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/cli.html#python-m-src-batch-deposit">deposit</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/cli.html#python-m-src-batch-parse">parse</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/cli.html#python-m-src-batch-prune">prune</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="api/cli.html#python-m-src-meca">meca</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/cli.html#python-m-src-meca-info">info</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/cli.html#python-m-src-meca-reviews">reviews</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/library.html">Library</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/generated/src.article.html">src.article</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/generated/src.batch.html">src.batch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/generated/src.crossref.peer_review.html">src.crossref.peer_review</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/generated/src.crossref.verify.html">src.crossref.verify</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/generated/src.meca.html">src.meca</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">MECADOI</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="project.html">Project Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="installation.html" title="next chapter">Installation</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, SourceData.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

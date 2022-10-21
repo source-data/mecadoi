@@ -1,0 +1,40 @@
+﻿src.meca
+========
+
+.. automodule:: src.meca
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      parse_meca_archive
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      AuthorReply
+      FileInMeca
+      MECArchive
+      Manuscript
+      Review
+      RevisionRound
+   
+   
+
+   
+   
+   
+
+
+

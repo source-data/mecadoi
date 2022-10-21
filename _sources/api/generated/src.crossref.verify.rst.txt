@@ -1,0 +1,36 @@
+﻿src.crossref.verify
+===================
+
+.. automodule:: src.crossref.verify
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      verify
+      verify_reviews_match
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      VerificationResult
+   
+   
+
+   
+   
+   
+
+
+

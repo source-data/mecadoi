@@ -1,0 +1,141 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Project Background &#8212; MECADOI  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Reference" href="reference.html" />
+    <link rel="prev" title="Development" href="development.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="project-background">
+<h1>Project Background<a class="headerlink" href="#project-background" title="Permalink to this heading">¶</a></h1>
+<p>Reviews produced during the scholarly peer review process at Review Commons are published to the web (currently to the <a class="reference external" href="https://web.hypothes.is/">hypothes.is</a> platform).
+As they represent scholarly work, Review Commons wants them to receive a DOI like other such works.
+This is currently not supported by the publishing platform used by Review Commons.
+Upon completion of the peer review process, however, this publishing platform allows exporting the data associated with a peer-reviewed article to a configurable FTP server in the MECA format.</p>
+<section id="the-meca-format">
+<h2>The MECA format<a class="headerlink" href="#the-meca-format" title="Permalink to this heading">¶</a></h2>
+<p>The <a class="reference external" href="https://www.niso.org/standards-committees/meca">Manuscript Exchange Common Approach</a> format is a standard for transferral of manuscripts and related information between publishers.
+A single MECA archive is .zip-compressed file with metadata and review data in XML files and manuscripts, revisions, etc. in .docx or .pdf files.</p>
+<p>Specifically, each MECA must contain a file named <code class="docutils literal notranslate"><span class="pre">manifest.xml</span></code> that lists every file in the archive.
+It also must have a file, commonly called <code class="docutils literal notranslate"><span class="pre">article.xml</span></code>, with metadata about the manuscript or article packaged in the MECA.
+Finally, MECAs can contain information about the review process of the packaged article in an optional file usually called <code class="docutils literal notranslate"><span class="pre">reviews.xml</span></code>.</p>
+</section>
+<section id="the-doi-system">
+<h2>The DOI system<a class="headerlink" href="#the-doi-system" title="Permalink to this heading">¶</a></h2>
+<p>The digital object identifier [DOI®] system provides an infrastructure for persistent unique identification of objects of any type.
+DOI is an acronym for “digital object identifier”, meaning a “digital identifier of an object” rather than an “identifier of a digital object”.
+The DOI system is designed to work over the Internet.
+A DOI name is permanently assigned to an object to provide a resolvable persistent network link to current information about that object, including where the object, or information about it, can be found on the Internet.
+While information about an object can change over time, its DOI name will not change.</p>
+<p>For example, the DOI name “10.1000/182” is assigned to the latest version of the DOI handbook, from which the preceding paragraph is taken.
+It can be accessed like so: <a class="reference external" href="https://doi.org/10.1000/182">https://doi.org/10.1000/182</a>
+DOIs are created through registration agencies such as <a class="reference external" href="https://www.crossref.org/">Crossref</a>.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">MECADOI</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Project Background</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-meca-format">The MECA format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-doi-system">The DOI system</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="development.html" title="previous chapter">Development</a></li>
+      <li>Next: <a href="reference.html" title="next chapter">API Reference</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, SourceData.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/project.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
