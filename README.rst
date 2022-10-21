@@ -20,5 +20,5 @@ MECADOI was built by `EMBO Press`_ for use by the `Review Commons`_ platform.
 Links
 -----
 
-- Documentation: TBD
+- Documentation: https://source-data.github.io/mecadoi/
 - Source code: https://github.com/source-data/mecadoi/
