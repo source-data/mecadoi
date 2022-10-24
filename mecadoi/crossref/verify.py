@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 from xsdata.formats.dataclass.parsers import XmlParser
-from src.crossref.xml.doi_batch import DoiBatch, PeerReview
-from src.eeb.api import get_articles
+from mecadoi.crossref.xml.doi_batch import DoiBatch, PeerReview
+from mecadoi.eeb.api import get_articles
 
 
 @dataclass

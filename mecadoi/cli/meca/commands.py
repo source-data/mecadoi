@@ -2,8 +2,8 @@ from typing import List, Optional
 import click
 from yaml import dump
 
-from src.meca import parse_meca_archive, Review
-from src.model import Author
+from mecadoi.meca import parse_meca_archive, Review
+from mecadoi.model import Author
 
 from .options import meca_archive
 

@@ -7,8 +7,8 @@ from secrets import choice
 from sqlalchemy.exc import IntegrityError
 from string import digits, Template
 
-from src.config import DOI_TEMPLATE
-from src.db import BatchDatabase
+from mecadoi.config import DOI_TEMPLATE
+from mecadoi.db import BatchDatabase
 
 
 def get_free_doi(doi_db: BatchDatabase, resource: str) -> str:

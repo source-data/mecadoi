@@ -2,8 +2,8 @@ from datetime import datetime
 from re import escape
 from sqlalchemy.exc import IntegrityError
 from unittest.mock import Mock
-from src.config import DOI_TEMPLATE
-from src.dois import get_free_doi
+from mecadoi.config import DOI_TEMPLATE
+from mecadoi.dois import get_free_doi
 from tests.test_db import BatchDbTestCase
 
 

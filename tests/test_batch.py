@@ -3,9 +3,9 @@ from pathlib import Path
 from typing import Iterable, List
 from unittest.mock import Mock, patch
 
-from src.batch import deposit, parse
-from src.crossref.verify import VerificationResult
-from src.db import DepositionAttempt, ParsedFile
+from mecadoi.batch import deposit, parse
+from mecadoi.crossref.verify import VerificationResult
+from mecadoi.db import DepositionAttempt, ParsedFile
 from tests.common import DepositionFileTestCase, MecaArchiveTestCase
 from tests.test_article import (
     ARTICLES,
@@ -103,7 +103,7 @@ class ParseTestCase(BaseParseTestCase):
 
 
 class BaseDepositTestCase(DepositionFileTestCase, BaseBatchTestCase):
-    """Verifies that the src.batch.deposit function works as expected."""
+    """Verifies that the mecadoi.batch.deposit function works as expected."""
 
     def setUp(self) -> None:
         super().setUp()
@@ -205,9 +205,9 @@ class BaseDepositTestCase(DepositionFileTestCase, BaseBatchTestCase):
             )
 
 
-@patch("src.batch.deposit_file")
+@patch("mecadoi.batch.deposit_file")
 @patch(
-    "src.batch.verify",
+    "mecadoi.batch.verify",
     return_value=[
         VerificationResult(
             preprint_doi="preprint_doi",
@@ -216,7 +216,7 @@ class BaseDepositTestCase(DepositionFileTestCase, BaseBatchTestCase):
         )
     ],
 )
-@patch("src.batch.get_free_doi", return_value=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES)
+@patch("mecadoi.batch.get_free_doi", return_value=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES)
 class DepositTestCase(BaseDepositTestCase):
     def test_depositing_parsed_files(
         self,
@@ -257,7 +257,9 @@ class DepositTestCase(BaseDepositTestCase):
         self.assert_deposition_attempts_in_db(expected_deposition_attempts)
         self.assertEqual(3, len(deposit_file_mock.mock_calls))
 
-    @patch("src.batch.generate_peer_review_deposition", side_effect=Exception("Boom!"))
+    @patch(
+        "mecadoi.batch.generate_peer_review_deposition", side_effect=Exception("Boom!")
+    )
     def test_deposition_file_generation_fails(
         self,
         _generate_peer_review_deposition: Mock,
@@ -280,7 +282,9 @@ class DepositTestCase(BaseDepositTestCase):
         self.assert_deposition_attempts_in_db(expected_deposition_attempts)
         deposit_file_mock.assert_not_called()
 
-    @patch("src.batch.get_random_doi", return_value=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES)
+    @patch(
+        "mecadoi.batch.get_random_doi", return_value=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES
+    )
     def test_dry_run_depositing_parsed_files(
         self,
         _get_random_doi: Mock,

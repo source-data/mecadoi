@@ -2,8 +2,8 @@ import re
 from typing import cast
 import responses
 from unittest import TestCase
-from src.config import CROSSREF_DEPOSITION_URL, CROSSREF_USERNAME, CROSSREF_PASSWORD
-from src.crossref.api import deposit
+from mecadoi.config import CROSSREF_DEPOSITION_URL, CROSSREF_USERNAME, CROSSREF_PASSWORD
+from mecadoi.crossref.api import deposit
 
 
 class TestDepositPeerReviews(TestCase):

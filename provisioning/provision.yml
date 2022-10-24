@@ -92,7 +92,7 @@
 
   - name: Copy the Python files to the server
     ansible.posix.synchronize:
-      src: ../src
+      src: ../mecadoi
       dest: '{{ code_dir }}/'
       # Delete files in dest that do not exist (after transfer, not before) in the src path
       delete: yes

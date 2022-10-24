@@ -10,7 +10,7 @@ from unittest import TestCase
 from xsdata.formats.dataclass.parsers import XmlParser
 from zipfile import ZipFile, ZIP_DEFLATED
 
-from src.crossref.xml import DoiBatch
+from mecadoi.crossref.xml import DoiBatch
 
 
 def _add_to_zip(zf: ZipFile, path: str, zip_path: str) -> None:

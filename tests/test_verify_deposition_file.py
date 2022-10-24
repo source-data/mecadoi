@@ -1,8 +1,8 @@
 from typing import List
 import responses
 from unittest import TestCase
-from src.eeb.api import Article
-from src.crossref.verify import verify
+from mecadoi.eeb.api import Article
+from mecadoi.crossref.verify import verify
 
 
 class TestVerifyDepositionFile(TestCase):

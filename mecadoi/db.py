@@ -24,7 +24,7 @@ from sqlalchemy.types import TypeDecorator
 from typing import Any, List, Optional
 from yaml import dump, load, Loader
 
-from src.meca import Manuscript
+from mecadoi.meca import Manuscript
 
 
 mapper_registry = registry()

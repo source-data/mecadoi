@@ -1,5 +1,5 @@
 from requests import PreparedRequest, Request, Session
-from src.config import CROSSREF_DEPOSITION_URL, CROSSREF_USERNAME, CROSSREF_PASSWORD
+from mecadoi.config import CROSSREF_DEPOSITION_URL, CROSSREF_USERNAME, CROSSREF_PASSWORD
 
 
 def pretty_print_request(req: PreparedRequest) -> None:

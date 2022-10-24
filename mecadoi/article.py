@@ -13,9 +13,9 @@ __all__ = [
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Callable, List, Optional
-from src.meca import Manuscript
+from mecadoi.meca import Manuscript
 
-from src.model import DigitalObject, Work
+from mecadoi.model import DigitalObject, Work
 
 
 @dataclass

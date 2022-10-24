@@ -17,13 +17,13 @@ from logging import getLogger
 from pathlib import Path
 from typing import List, Tuple
 
-from src.article import Article, from_meca_manuscript
-from src.crossref.api import deposit as deposit_file
-from src.crossref.peer_review import generate_peer_review_deposition
-from src.crossref.verify import VerificationResult, verify
-from src.db import BatchDatabase, DepositionAttempt, ParsedFile
-from src.dois import get_random_doi, get_free_doi
-from src.meca import parse_meca_archive
+from mecadoi.article import Article, from_meca_manuscript
+from mecadoi.crossref.api import deposit as deposit_file
+from mecadoi.crossref.peer_review import generate_peer_review_deposition
+from mecadoi.crossref.verify import VerificationResult, verify
+from mecadoi.db import BatchDatabase, DepositionAttempt, ParsedFile
+from mecadoi.dois import get_random_doi, get_free_doi
+from mecadoi.meca import parse_meca_archive
 
 LOGGER = getLogger(__name__)
 

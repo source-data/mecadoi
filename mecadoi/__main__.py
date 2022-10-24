@@ -1,7 +1,7 @@
 from click import group
 
-from src.cli.batch import batch
-from src.cli.meca import meca
+from mecadoi.cli.batch import batch
+from mecadoi.cli.meca import meca
 
 
 @group()

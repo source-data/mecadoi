@@ -3,7 +3,7 @@ from os import remove
 from typing import List
 from unittest import TestCase
 
-from src.db import BatchDatabase, DepositionAttempt, ParsedFile
+from mecadoi.db import BatchDatabase, DepositionAttempt, ParsedFile
 from tests.test_meca import MANUSCRIPTS
 
 

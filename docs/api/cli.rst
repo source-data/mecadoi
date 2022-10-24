@@ -5,6 +5,6 @@ CLI
    :local:
    :backlinks: none
 
-.. click:: src.__main__:main
-   :prog: python -m src
+.. click:: mecadoi.__main__:main
+   :prog: python -m mecadoi
    :nested: full

@@ -8,7 +8,7 @@ Create Date: 2022-07-28 09:04:44.944476
 from alembic import op
 import sqlalchemy as sa
 
-from src.db import Yaml
+from mecadoi.db import Yaml
 
 
 # revision identifiers, used by Alembic.

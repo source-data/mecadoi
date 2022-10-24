@@ -43,9 +43,9 @@ _execute_batch_command() {
 
     cd "${code_dir}"
     source .venv/bin/activate
-    output_batch_command="$(python3 -m src.cli.main batch ${command})"
+    output_batch_command="$(python3 -m mecadoi batch ${command})"
     cd -
-    echo "python3 -m src.cli.main batch ${command}
+    echo "python3 -m mecadoi batch ${command}
 
 ${output_batch_command}" | mutt -s "[MECADOI] batch ${command_name}" -- "${recipient_email}"
     echo "${output_batch_command}"

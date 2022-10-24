@@ -1,5 +1,11 @@
-from src.meca import parse_meca_archive, Manuscript, AuthorReply, Review, RevisionRound
-from src.model import Author, Institution, Orcid
+from mecadoi.meca import (
+    parse_meca_archive,
+    Manuscript,
+    AuthorReply,
+    Review,
+    RevisionRound,
+)
+from mecadoi.model import Author, Institution, Orcid
 from tests.common import MecaArchiveTestCase
 
 

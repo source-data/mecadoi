@@ -4,7 +4,7 @@
 set -eo pipefail
 
 # use a bash array to pass multiple dirs as arguments
-source_dirs=("./src" "./tests")
+source_dirs=("./mecadoi" "./tests")
 
 flake8 "${source_dirs[@]}"
 echo "flake8 passed!"

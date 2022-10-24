@@ -1,13 +1,13 @@
 from datetime import datetime
 from unittest import TestCase
-from src.article import (
+from mecadoi.article import (
     from_meca_manuscript,
     Article,
     AuthorReply,
     Review,
     RevisionRound,
 )
-from src.model import Author, Institution, Orcid
+from mecadoi.model import Author, Institution, Orcid
 from tests.test_meca import MANUSCRIPTS
 
 DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES = "10.15252/rc.2020123456"

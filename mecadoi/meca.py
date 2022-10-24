@@ -25,7 +25,7 @@ from pathlib import Path
 from typing import Any, IO, List, Optional, Set, Union
 from zipfile import BadZipFile, ZipFile
 
-from src.model import Author, DigitalObject, Institution, Orcid, Work
+from mecadoi.model import Author, DigitalObject, Institution, Orcid, Work
 
 
 @dataclass

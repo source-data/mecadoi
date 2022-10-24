@@ -8,24 +8,24 @@ Library
 .. autosummary::
    :toctree: generated
 
-   src.article
+   mecadoi.article
 
 .. autosummary::
    :toctree: generated
 
-   src.batch
+   mecadoi.batch
 
 .. autosummary::
    :toctree: generated
 
-   src.crossref.peer_review
+   mecadoi.crossref.peer_review
 
 .. autosummary::
    :toctree: generated
 
-   src.crossref.verify
+   mecadoi.crossref.verify
 
 .. autosummary::
    :toctree: generated
 
-   src.meca
+   mecadoi.meca

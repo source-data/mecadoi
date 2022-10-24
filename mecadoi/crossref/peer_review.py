@@ -7,7 +7,7 @@ from time import time_ns
 from typing import Generator, List
 from xsdata.formats.dataclass.serializers import XmlSerializer
 from xsdata.formats.dataclass.serializers.config import SerializerConfig
-from src.config import (
+from mecadoi.config import (
     DEPOSITOR_NAME,
     DEPOSITOR_EMAIL,
     REGISTRANT_NAME,
@@ -17,8 +17,8 @@ from src.config import (
     AUTHOR_REPLY_TITLE_TEMPLATE,
     AUTHOR_REPLY_RESOURCE_URL_TEMPLATE,
 )
-from src.article import Article
-from src.crossref.xml.doi_batch import (
+from mecadoi.article import Article
+from mecadoi.crossref.xml.doi_batch import (
     Affiliations,
     Anonymous,
     Body,
@@ -37,7 +37,7 @@ from src.crossref.xml.doi_batch import (
     ReviewDate,
     Titles,
 )
-from src.model import Author
+from mecadoi.model import Author
 
 
 def generate_peer_review_deposition(articles: List[Article]) -> str:

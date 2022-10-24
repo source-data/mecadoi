@@ -6,7 +6,7 @@ from unittest.mock import patch
 import alembic.config
 import sys
 
-from src.config import DB_URL
+from mecadoi.config import DB_URL
 from tests.test_db import BatchDbTestCase
 
 
@@ -19,7 +19,7 @@ class DatabaseTestCase(BatchDbTestCase):
         super().setUp()
         self.migrations = [
             migration_file.stem.split("_")[0]
-            for migration_file in Path("src/migrations/versions").glob("*.py")
+            for migration_file in Path("mecadoi/migrations/versions").glob("*.py")
             if migration_file.stem != "__init__"
         ]
 

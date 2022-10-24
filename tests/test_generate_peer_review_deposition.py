@@ -1,5 +1,5 @@
 from datetime import datetime
-from src.crossref.peer_review import generate_peer_review_deposition
+from mecadoi.crossref.peer_review import generate_peer_review_deposition
 from tests.common import DepositionFileTestCase, MecaArchiveTestCase
 from tests.test_article import ARTICLES
 

@@ -1,4 +1,4 @@
-from src.crossref.xml.doi_batch import (
+from mecadoi.crossref.xml.doi_batch import (
     Anonymous,
     Body,
     Contributors,

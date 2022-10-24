@@ -7,15 +7,15 @@ from typing import Any, Dict, List
 from unittest.mock import Mock, patch
 from click.testing import CliRunner, Result
 from yaml import Loader, load, safe_load
-from src.article import Article
-from src.cli.batch.commands import (
+from mecadoi.article import Article
+from mecadoi.cli.batch.commands import (
     group_deposition_attempts_by_status,
     group_parsed_files_by_status,
 )
-from src.cli.main import main as mecadoi
-from src.config import DB_URL
-from src.crossref.verify import VerificationResult
-from src.db import DepositionAttempt, ParsedFile
+from mecadoi.cli.main import main as mecadoi
+from mecadoi.config import DB_URL
+from mecadoi.crossref.verify import VerificationResult
+from mecadoi.db import DepositionAttempt, ParsedFile
 from tests.common import MecaArchiveTestCase
 from tests.test_article import DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES
 from tests.test_batch import BaseDepositTestCase, BaseParseTestCase
@@ -79,7 +79,7 @@ class BaseBatchTestCase(CliTestCase, BatchDbTestCase):
 OutputDirName = "deadbeef-2708-4afb-bbde-5890bd7e8fd0"
 
 
-@patch("src.cli.batch.commands.uuid4", return_value=OutputDirName)
+@patch("mecadoi.cli.batch.commands.uuid4", return_value=OutputDirName)
 class ParseTestCase(BaseBatchTestCase, BaseParseTestCase):
     def setUp(self) -> None:
         super().setUp()
@@ -122,9 +122,9 @@ class ParseTestCase(BaseBatchTestCase, BaseParseTestCase):
         self.assertEqual(len(self.input_files), len(files_in_output_dir))
 
 
-@patch("src.batch.deposit_file")
+@patch("mecadoi.batch.deposit_file")
 @patch(
-    "src.batch.verify",
+    "mecadoi.batch.verify",
     return_value=[
         VerificationResult(
             preprint_doi="preprint_doi",
@@ -133,8 +133,8 @@ class ParseTestCase(BaseBatchTestCase, BaseParseTestCase):
         )
     ],
 )
-@patch("src.batch.get_random_doi", return_value=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES)
-@patch("src.batch.get_free_doi", return_value=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES)
+@patch("mecadoi.batch.get_random_doi", return_value=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES)
+@patch("mecadoi.batch.get_free_doi", return_value=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES)
 class DepositTestCase(BaseBatchTestCase, BaseDepositTestCase):
     def test_batch_deposit_dry_run(
         self,
@@ -315,7 +315,7 @@ class PruneTestCase(BaseBatchTestCase):
 
         self.assert_files_do_not_exist(self.already_pruned_files + self.existing_files)
 
-    @patch("src.cli.batch.commands.remove", side_effect=ValueError("failed"))
+    @patch("mecadoi.cli.batch.commands.remove", side_effect=ValueError("failed"))
     def test_prune_files_fails(self, _remove_mock: Mock) -> None:
         self.assert_files_exist(self.existing_files)
         self.assert_files_do_not_exist(self.already_pruned_files)

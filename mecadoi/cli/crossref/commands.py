@@ -2,12 +2,12 @@ from datetime import datetime
 from typing import Optional, TextIO
 import click
 from yaml import dump
-from src.article import from_meca_manuscript
-from src.cli.meca.options import meca_archive
-from src.crossref.peer_review import generate_peer_review_deposition
-from src.crossref.verify import verify as verify_xml
-from src.dois import get_random_doi
-from src.meca import parse_meca_archive
+from mecadoi.article import from_meca_manuscript
+from mecadoi.cli.meca.options import meca_archive
+from mecadoi.crossref.peer_review import generate_peer_review_deposition
+from mecadoi.crossref.verify import verify as verify_xml
+from mecadoi.dois import get_random_doi
+from mecadoi.meca import parse_meca_archive
 
 
 @click.command()

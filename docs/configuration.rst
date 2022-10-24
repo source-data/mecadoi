@@ -7,7 +7,7 @@ The env file location can be changed by setting the environment variable ``ENV_F
 
 .. code-block:: bash
 
-    ENV_FILE=.env.example python3 -m src [command] [subcommand]
+    ENV_FILE=.env.example python3 -m mecadoi [command] [subcommand]
 
 The project contains the sample env file ``.env.example`` with valid settings for all configuration
 settings.

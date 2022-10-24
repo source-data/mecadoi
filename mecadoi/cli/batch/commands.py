@@ -10,9 +10,9 @@ from typing import Any, Dict, List, Optional
 from uuid import uuid4
 import click
 from yaml import dump
-from src.batch import deposit as batch_deposit, parse as batch_parse
-from src.config import DB_URL
-from src.db import BatchDatabase, DepositionAttempt, ParsedFile
+from mecadoi.batch import deposit as batch_deposit, parse as batch_parse
+from mecadoi.config import DB_URL
+from mecadoi.db import BatchDatabase, DepositionAttempt, ParsedFile
 
 LOGGER = getLogger(__name__)
 
