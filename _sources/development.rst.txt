@@ -12,7 +12,7 @@ Linting
 Checking the code style, formatting, and types is performed with `flake8`_, `black`_, and `mypy`_, respectively.
 
 ``scripts/lint.sh`` runs the three tools in succession.
-Run ``black ./src ./tests`` to auto-format all code. 
+Run ``black ./mecadoi ./tests`` to auto-format all code. 
 
 Configuration for flake8 and mypy is in the ``.flake8`` and ``mypy.ini`` files.
 

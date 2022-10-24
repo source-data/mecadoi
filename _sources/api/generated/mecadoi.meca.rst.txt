@@ -1,7 +1,7 @@
-﻿src.meca
-========
+﻿mecadoi.meca
+============
 
-.. automodule:: src.meca
+.. automodule:: mecadoi.meca
 
    
    

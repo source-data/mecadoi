@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>src.crossref.verify &#8212; MECADOI  documentation</title>
+    <title>mecadoi.meca &#8212; MECADOI  documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
@@ -17,8 +17,7 @@
     <script src="../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="src.meca" href="src.meca.html" />
-    <link rel="prev" title="src.article" href="src.article.html" />
+    <link rel="prev" title="mecadoi.crossref.verify" href="mecadoi.crossref.verify.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -35,24 +34,42 @@
 
           <div class="body" role="main">
             
-  <section id="module-src.crossref.verify">
-<span id="src-crossref-verify"></span><h1>src.crossref.verify<a class="headerlink" href="#module-src.crossref.verify" title="Permalink to this heading">¶</a></h1>
+  <section id="module-mecadoi.meca">
+<span id="mecadoi-meca"></span><h1>mecadoi.meca<a class="headerlink" href="#module-mecadoi.meca" title="Permalink to this heading">¶</a></h1>
+<p>Functionality for interacting with Manuscript Exchange Common Approach (MECA) archives.</p>
+<p>This data format was introduced as an interface between various publishing systems to allow the transferral of
+manuscripts between different publishers. A single MECA archive contains a single manuscript, optionally peer
+reviews of that manuscript, and can contain any further data related to the manuscript.</p>
+<p><cite>parse_meca_archive()</cite> is the main entrypoint that parses a MECA archive into a <cite>Manuscript</cite>, the intermediate format
+defined in this module.</p>
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">verify</span></code>(deposition_file)</p></td>
-<td><p>Checks that all DOIs to be created from the given deposition file resolve to an actual document.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">verify_reviews_match</span></code>(preprint_doi, reviews, ...)</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_meca_archive</span></code>(path_to_archive)</p></td>
+<td><p>Read the MECA archive at the given path and construct an Article from it.</p></td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">VerificationResult</span></code>(preprint_doi[, ...])</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">AuthorReply</span></code>(authors, text)</p></td>
+<td><p>The reply by the article authors to its reviews, as it appears in a MECA archive.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileInMeca</span></code>(id, file_name, media_type, type, ...)</p></td>
+<td><p>Represents a file in a MECA archive.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">MECArchive</span></code>(path_to_archive)</p></td>
+<td><p>Encapsulates a MECA archive.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Manuscript</span></code>(authors, text, doi, title, ...)</p></td>
+<td><p>Represents the article packaged in a MECA archive.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Review</span></code>(authors, text, running_number)</p></td>
+<td><p>A referee report that reviews an article, as it appears in a MECA archive.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">RevisionRound</span></code>(revision_id, reviews, author_reply)</p></td>
+<td><p>A round of revisions as they appear in a MECA archive.</p></td>
 </tr>
 </tbody>
 </table>
@@ -83,9 +100,9 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../../reference.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../cli.html">CLI</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../library.html">Library</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="src.article.html">src.article</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">src.crossref.verify</a></li>
-<li class="toctree-l3"><a class="reference internal" href="src.meca.html">src.meca</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mecadoi.article.html">mecadoi.article</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mecadoi.crossref.verify.html">mecadoi.crossref.verify</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">mecadoi.meca</a></li>
 </ul>
 </li>
 </ul>
@@ -98,8 +115,7 @@
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../../reference.html">API Reference</a><ul>
   <li><a href="../library.html">Library</a><ul>
-      <li>Previous: <a href="src.article.html" title="previous chapter">src.article</a></li>
-      <li>Next: <a href="src.meca.html" title="next chapter">src.meca</a></li>
+      <li>Previous: <a href="mecadoi.crossref.verify.html" title="previous chapter">mecadoi.crossref.verify</a></li>
   </ul></li>
   </ul></li>
   </ul></li>
@@ -135,7 +151,7 @@
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
-      <a href="../../_sources/api/generated/src.crossref.verify.rst.txt"
+      <a href="../../_sources/api/generated/mecadoi.meca.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

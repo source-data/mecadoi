@@ -1,7 +1,7 @@
-﻿src.crossref.verify
-===================
+﻿mecadoi.crossref.verify
+=======================
 
-.. automodule:: src.crossref.verify
+.. automodule:: mecadoi.crossref.verify
 
    
    

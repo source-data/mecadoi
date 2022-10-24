@@ -37,7 +37,7 @@ You're now ready to use the CLI, e.g. to get basic info about a MECA archive:
 
 .. code-block:: bash
 
-    python3 -m src meca info demo-meca.zip
+    python3 -m mecadoi meca info demo-meca.zip
 
 Which should output something like this:
 

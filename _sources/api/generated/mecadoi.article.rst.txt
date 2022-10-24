@@ -1,7 +1,7 @@
-﻿src.article
-===========
+﻿mecadoi.article
+===============
 
-.. automodule:: src.article
+.. automodule:: mecadoi.article
 
    
    
