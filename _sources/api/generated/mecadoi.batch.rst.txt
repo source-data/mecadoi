@@ -1,0 +1,32 @@
+﻿mecadoi.batch
+=============
+
+.. automodule:: mecadoi.batch
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      deposit
+      get_modification_time
+      parse
+      parse_potential_meca_archive
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
