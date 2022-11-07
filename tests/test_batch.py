@@ -135,7 +135,9 @@ class BaseDepositTestCase(DepositionFileTestCase, BaseBatchTestCase):
         ) -> List[DepositionAttempt]:
             deposition_attempts = []
             for i, meca_name in enumerate(input_files):
-                deposition_attempt = DepositionAttempt(meca=self.parsed_files[i])
+                deposition_attempt = DepositionAttempt(
+                    meca=self.parsed_files[i], attempted_at=datetime.now()
+                )
                 deposition_attempts.append(deposition_attempt)
                 if generation_failed:
                     deposition_attempt.status = DepositionAttempt.GenerationFailed
@@ -144,7 +146,7 @@ class BaseDepositTestCase(DepositionFileTestCase, BaseBatchTestCase):
                 deposition_attempt.deposition = Path(
                     f"tests/resources/expected/{meca_name}.xml"
                 ).read_text()
-                deposition_attempt.attempted_at = datetime.now()
+
                 if dry_run:
                     deposition_attempt.status = DepositionAttempt.Succeeded
                     continue

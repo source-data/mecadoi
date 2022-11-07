@@ -104,7 +104,7 @@ def deposit(
     deposition_attempts = []
     successfully_deposited_articles = []
     for meca in mecas:
-        deposition_attempt = DepositionAttempt(meca=meca)
+        deposition_attempt = DepositionAttempt(meca=meca, attempted_at=datetime.now())
         deposition_attempts.append(deposition_attempt)
 
         try:
@@ -147,8 +147,6 @@ def deposit(
                     verification_result.error,
                 )
             continue
-
-        deposition_attempt.attempted_at = datetime.now()
 
         if dry_run:
             deposition_attempt.status = DepositionAttempt.Succeeded
