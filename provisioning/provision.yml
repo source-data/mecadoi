@@ -64,7 +64,7 @@
 
   - name: Merge the base authorized keys and the server's new public key to create the storage box' authorized keys file
     when: storage_box_key is changed
-    local_action: shell paste -d '\n' -s resources/authorized_keys buffer/id_storage_box.pub > buffer/authorized_keys_storage_box
+    local_action: shell paste -d '\n' -s resources/.ssh/authorized_keys buffer/id_storage_box.pub > buffer/authorized_keys_storage_box
 
   - name: Upload the storage box' authorized keys file
     when: storage_box_key is changed
