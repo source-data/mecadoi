@@ -14,6 +14,7 @@ MECADOI was built by `EMBO's Open Science Implementation Group`_ for `EMBO Press
 
 .. _standardized format: https://www.niso.org/publications/rp-30-2020-meca
 .. _CrossRef deposition API: https://www.crossref.org/documentation/member-setup/direct-deposit-xml/
+.. _EMBO's Open Science Implementation Group: https://www.embo.org/policy/open-science/
 .. _EMBO Press: https://www.embopress.org/ TODO
 .. _Review Commons: https://www.reviewcommons.org/
 
