@@ -10,11 +10,11 @@ The Python library enables more fine-grained control over the workflow executed 
 
 The project also contains the setup for a simple workflow pipeline to automatically ingest MECA archives from a file server, create DOIs for any peer reviews and authors' replies within them, archive the results to an AWS S3 bucket, and export a summary of all created DOIs.
 
-MECADOI was built by `EMBO Press`_ for use by the `Review Commons`_ platform.
+MECADOI was built by `EMBO's Open Science Implementation Group`_ for `EMBO Press`_. It is currently used by `Review Commons`_. The project was funded by the Wellcome Trust (Learned Society Curation Award 221510/Z/20/Z).
 
 .. _standardized format: https://www.niso.org/publications/rp-30-2020-meca
 .. _CrossRef deposition API: https://www.crossref.org/documentation/member-setup/direct-deposit-xml/
-.. _EMBO Press: https://www.embopress.org/
+.. _EMBO Press: https://www.embopress.org/ TODO
 .. _Review Commons: https://www.reviewcommons.org/
 
 Links
