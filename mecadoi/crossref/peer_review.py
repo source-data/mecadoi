@@ -27,7 +27,7 @@ from mecadoi.crossref.xml.doi_batch import (
     DoiBatch,
     DoiData,
     Head,
-    Institution,
+    Institution as CrossrefInstitution,
     InterWorkRelation,
     Orcid,
     PeerReview,
@@ -37,7 +37,7 @@ from mecadoi.crossref.xml.doi_batch import (
     ReviewDate,
     Titles,
 )
-from mecadoi.model import Author
+from mecadoi.model import Author, Institution as MecadoiInstitution
 
 
 def generate_peer_review_deposition(articles: List[Article]) -> str:
@@ -119,7 +119,7 @@ def generate_reviews(article: Article) -> Generator[PeerReview, None, None]:
                     month=review.publication_date.month,
                     day=review.publication_date.day,
                 ),
-                institution=Institution(institution_name=INSTITUTION_NAME),
+                institution=CrossrefInstitution(institution_name=INSTITUTION_NAME),
                 running_number=str(running_number),
                 program=Program(related_item=[is_review_of_relation]),
                 doi_data=DoiData(
@@ -149,7 +149,7 @@ def generate_reviews(article: Article) -> Generator[PeerReview, None, None]:
                     month=review.publication_date.month,
                     day=review.publication_date.day,
                 ),
-                institution=Institution(institution_name=INSTITUTION_NAME),
+                institution=CrossrefInstitution(institution_name=INSTITUTION_NAME),
                 running_number="Author Reply",
                 program=Program(
                     related_item=[is_review_of_relation]
@@ -171,6 +171,30 @@ def generate_reviews(article: Article) -> Generator[PeerReview, None, None]:
             )
 
 
+def create_institution(institution: MecadoiInstitution) -> CrossrefInstitution:
+    city = (
+        institution.city
+        if institution.city and len(institution.city) > 1
+        else None
+    )
+    country = (
+        institution.country
+        if institution.country and len(institution.country) > 1
+        else None
+    )
+    place = (
+        f"{city}, {country}" if city and country
+        else city if city
+        else country if country
+        else None
+    )
+    return CrossrefInstitution(
+        institution_name=institution.name,
+        institution_department=institution.department,
+        institution_place=place,
+    )
+
+
 def create_contributors(authors: List[Author]) -> Contributors:
     contributors = Contributors(
         person_name=[
@@ -182,19 +206,7 @@ def create_contributors(authors: List[Author]) -> Contributors:
                 affiliations=(
                     Affiliations(
                         institution=[
-                            Institution(
-                                institution_name=institution.name,
-                                institution_department=institution.department,
-                                institution_place=(
-                                    f"{institution.city}, {institution.country}"
-                                    if institution.city and institution.country
-                                    else institution.city
-                                    if institution.city
-                                    else institution.country
-                                    if institution.country
-                                    else None
-                                ),
-                            )
+                            create_institution(institution)
                             for institution in author.institutions
                         ]
                     )

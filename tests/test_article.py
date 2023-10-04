@@ -133,59 +133,6 @@ INVALID_MANUSCRIPTS = [
 ]
 
 ARTICLES = {
-    "no-author-reply": Article(
-        doi="10.1101/no-author-reply.123.456.7890",
-        title="An article without author reply.",
-        review_process=[
-            RevisionRound(
-                reviews=[
-                    Review(
-                        authors=[],
-                        text={
-                            "Estimated time to Complete Revisions (Required)": "Cannot tell / Not applicable",
-                            "Significance (Required)": "Consectetur adipiscing elit.",
-                        },
-                        doi=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES,
-                        publication_date=PUBLICATION_DATE,
-                    ),
-                    Review(
-                        authors=[],
-                        text={
-                            "Estimated time to Complete Revisions (Required)": "Cannot tell / Not applicable",
-                            "Significance (Required)": "Sed do eiusmod tempor incididunt ut labore et dolore.",
-                        },
-                        doi=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES,
-                        publication_date=PUBLICATION_DATE,
-                    ),
-                    Review(
-                        authors=[],
-                        text={
-                            "Estimated time to Complete Revisions (Required)": "Cannot tell / Not applicable",
-                            "Significance (Required)": "Cras adipiscing enim eu turpis egestas pretium aenean.",
-                        },
-                        doi=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES,
-                        publication_date=PUBLICATION_DATE,
-                    ),
-                ],
-                author_reply=None,
-            ),
-            RevisionRound(
-                reviews=[
-                    Review(
-                        authors=[],
-                        text={
-                            "Estimated time to Complete Revisions (Required)": "Cannot tell / Not applicable",
-                            "Evidence, reproducibility and clarity (Required)": "This is sample of evidence answer",
-                            "Significance (Required)": "This is a sample of significance",
-                        },
-                        doi=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES,
-                        publication_date=PUBLICATION_DATE,
-                    ),
-                ],
-                author_reply=None,
-            ),
-        ],
-    ),
     "multiple-revision-rounds": Article(
         doi="10.1101/multiple-revision-rounds.123.456.7890",
         title="An article with multiple revision rounds.",
@@ -270,6 +217,126 @@ ARTICLES = {
                     ),
                 ],
                 author_reply=None,
+            ),
+        ],
+    ),
+    "no-author-reply": Article(
+        doi="10.1101/no-author-reply.123.456.7890",
+        title="An article without author reply.",
+        review_process=[
+            RevisionRound(
+                reviews=[
+                    Review(
+                        authors=[],
+                        text={
+                            "Estimated time to Complete Revisions (Required)": "Cannot tell / Not applicable",
+                            "Significance (Required)": "Consectetur adipiscing elit.",
+                        },
+                        doi=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES,
+                        publication_date=PUBLICATION_DATE,
+                    ),
+                    Review(
+                        authors=[],
+                        text={
+                            "Estimated time to Complete Revisions (Required)": "Cannot tell / Not applicable",
+                            "Significance (Required)": "Sed do eiusmod tempor incididunt ut labore et dolore.",
+                        },
+                        doi=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES,
+                        publication_date=PUBLICATION_DATE,
+                    ),
+                    Review(
+                        authors=[],
+                        text={
+                            "Estimated time to Complete Revisions (Required)": "Cannot tell / Not applicable",
+                            "Significance (Required)": "Cras adipiscing enim eu turpis egestas pretium aenean.",
+                        },
+                        doi=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES,
+                        publication_date=PUBLICATION_DATE,
+                    ),
+                ],
+                author_reply=None,
+            ),
+            RevisionRound(
+                reviews=[
+                    Review(
+                        authors=[],
+                        text={
+                            "Estimated time to Complete Revisions (Required)": "Cannot tell / Not applicable",
+                            "Evidence, reproducibility and clarity (Required)": "This is sample of evidence answer",
+                            "Significance (Required)": "This is a sample of significance",
+                        },
+                        doi=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES,
+                        publication_date=PUBLICATION_DATE,
+                    ),
+                ],
+                author_reply=None,
+            ),
+        ],
+    ),
+    "no-institution": Article(
+        doi="10.1101/single-revision-round.123.456.7890",
+        title="An article with a single revision round.",
+        review_process=[
+            RevisionRound(
+                reviews=[
+                    Review(
+                        authors=[],
+                        text={
+                            "Estimated time to Complete Revisions (Required)": "Cannot tell / Not applicable",
+                            "Significance (Required)": "Lorem ipsum dolor sit amet.",
+                        },
+                        doi=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES,
+                        publication_date=PUBLICATION_DATE,
+                    ),
+                    Review(
+                        authors=[],
+                        text={
+                            "Estimated time to Complete Revisions (Required)": "Between 3 and 6 months",
+                            "Evidence, reproducibility and clarity (Required)": "Summary: this is a test",
+                            "Significance (Required)": "Signification: also a test",
+                        },
+                        doi=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES,
+                        publication_date=PUBLICATION_DATE,
+                    ),
+                ],
+                author_reply=AuthorReply(
+                    authors=[
+                        Author(
+                            given_name="Jane",
+                            surname="Doe",
+                            orcid=Orcid(
+                                id="https://orcid.org/0000-0012-3456-7890",
+                                is_authenticated=True,
+                            ),
+                            is_corresponding_author=True,
+                            institutions=[
+                                Institution(
+                                    name="/",
+                                    department=None,
+                                    city="/",
+                                    country="/",
+                                )
+                            ],
+                        ),
+                        Author(
+                            given_name="John",
+                            surname="Doe",
+                            orcid=None,
+                            is_corresponding_author=False,
+                            institutions=[
+                                Institution(
+                                    name="/",
+                                    department=None,
+                                    city="/",
+                                    country=None,
+                                )
+                            ],
+                        ),
+                    ],
+                    text={},
+                    doi=DOI_FOR_REVIEWS_AND_AUTHOR_REPLIES,
+                    publication_date=PUBLICATION_DATE,
+                ),
             ),
         ],
     ),

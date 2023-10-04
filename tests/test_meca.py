@@ -45,6 +45,123 @@ INVALID_MECA_ARCHIVES = [
 
 
 MANUSCRIPTS = {
+    "no-institution": Manuscript(
+        authors=[
+            Author(
+                given_name="Jane",
+                surname="Doe",
+                orcid=Orcid(
+                    id="https://orcid.org/0000-0012-3456-7890", is_authenticated=True
+                ),
+                is_corresponding_author=True,
+                institutions=[
+                    Institution(
+                        name="/",
+                        department=None,
+                        city="/",
+                        country="/",
+                    )
+                ],
+            ),
+            Author(
+                given_name="John",
+                surname="Doe",
+                orcid=None,
+                is_corresponding_author=False,
+                institutions=[
+                    Institution(
+                        name="/",
+                        department=None,
+                        city="/",
+                        country=None,
+                    )
+                ],
+            ),
+        ],
+        text={
+            "abstract": "This article has a single revision round and thus in ...",
+        },
+        doi="10.12345/single-revision-round.1234567890",
+        preprint_doi="10.1101/single-revision-round.123.456.7890",
+        journal="Review Commons - TEST",
+        review_process=[
+            RevisionRound(
+                revision_id="0",
+                reviews=[
+                    Review(
+                        authors=[
+                            Author(
+                                given_name="",
+                                surname="redacted",
+                                orcid=None,
+                                is_corresponding_author=False,
+                                institutions=[],
+                            ),
+                        ],
+                        text={
+                            "Estimated time to Complete Revisions (Required)": "Cannot tell / Not applicable",
+                            "Significance (Required)": "Lorem ipsum dolor sit amet.",
+                        },
+                        running_number="1",
+                    ),
+                    Review(
+                        authors=[
+                            Author(
+                                given_name="redacted",
+                                surname="redacted",
+                                orcid=None,
+                                is_corresponding_author=False,
+                                institutions=[],
+                            ),
+                        ],
+                        text={
+                            "Estimated time to Complete Revisions (Required)": "Between 3 and 6 months",
+                            "Evidence, reproducibility and clarity (Required)": "Summary: this is a test",
+                            "Significance (Required)": "Signification: also a test",
+                        },
+                        running_number="2",
+                    ),
+                ],
+                author_reply=AuthorReply(
+                    authors=[
+                        Author(
+                            given_name="Jane",
+                            surname="Doe",
+                            orcid=Orcid(
+                                id="https://orcid.org/0000-0012-3456-7890",
+                                is_authenticated=True,
+                            ),
+                            is_corresponding_author=True,
+                            institutions=[
+                                Institution(
+                                    name="/",
+                                    department=None,
+                                    city="/",
+                                    country="/",
+                                )
+                            ],
+                        ),
+                        Author(
+                            given_name="John",
+                            surname="Doe",
+                            orcid=None,
+                            is_corresponding_author=False,
+                            institutions=[
+                                Institution(
+                                    name="/",
+                                    department=None,
+                                    city="/",
+                                    country=None,
+                                )
+                            ],
+                        ),
+                    ],
+                    text={},
+                ),
+            ),
+        ],
+        title="An article with a single revision round.",
+    ),
     "no-reviews": Manuscript(
         authors=[
             Author(

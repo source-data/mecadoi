@@ -11,6 +11,7 @@ class TestGeneratePeerReviewDeposition(MecaArchiveTestCase, DepositionFileTestCa
         self.fixtures = [
             "multiple-revision-rounds",
             "no-author-reply",
+            "no-institution",
             "single-revision-round",
         ]
         self.publication_date = datetime(2020, 10, 10)

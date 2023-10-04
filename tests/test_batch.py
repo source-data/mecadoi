@@ -35,6 +35,7 @@ class BaseParseTestCase(MecaArchiveTestCase, BaseBatchTestCase):
             ParsedFile.Valid: [
                 "multiple-revision-rounds",
                 "no-author-reply",
+                "no-institution",
                 "single-revision-round",
             ],
         }
@@ -111,6 +112,7 @@ class BaseDepositTestCase(DepositionFileTestCase, BaseBatchTestCase):
         input_files = [
             "multiple-revision-rounds",
             "no-author-reply",
+            # "no-institution",
             "single-revision-round",
         ]
         parsed_files = [
@@ -234,7 +236,7 @@ class DepositTestCase(BaseDepositTestCase):
             expected_deposition_attempts, actual_deposition_attempts
         )
         self.assertEqual(self.expected_articles, actual_articles)
-        self.assertEqual(3, len(deposit_file_mock.mock_calls))
+        self.assertEqual(len(self.parsed_files), len(deposit_file_mock.mock_calls))
         self.assert_deposition_attempts_in_db(expected_deposition_attempts)
 
     def test_deposition_fails(
@@ -257,7 +259,7 @@ class DepositTestCase(BaseDepositTestCase):
         )
         self.assertEqual([], actual_articles)
         self.assert_deposition_attempts_in_db(expected_deposition_attempts)
-        self.assertEqual(3, len(deposit_file_mock.mock_calls))
+        self.assertEqual(len(self.parsed_files), len(deposit_file_mock.mock_calls))
 
     @patch(
         "mecadoi.batch.generate_peer_review_deposition", side_effect=Exception("Boom!")

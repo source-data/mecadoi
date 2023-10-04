@@ -172,7 +172,7 @@ class DepositTestCase(BaseBatchTestCase, BaseDepositTestCase):
 
         self.assert_deposition_attempts_in_db(self.expected_deposition_attempts())
         self.assert_articles_in_output_dir(actual_output["id"], self.expected_articles)
-        self.assertEqual(3, len(deposit_file_mock.mock_calls))
+        self.assertEqual(len(self.parsed_files), len(deposit_file_mock.mock_calls))
 
     def test_batch_deposit_retry(
         self,
