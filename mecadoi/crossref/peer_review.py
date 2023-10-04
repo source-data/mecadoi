@@ -172,20 +172,19 @@ def generate_reviews(article: Article) -> Generator[PeerReview, None, None]:
 
 
 def create_institution(institution: MecadoiInstitution) -> CrossrefInstitution:
-    city = (
-        institution.city
-        if institution.city and len(institution.city) > 1
-        else None
-    )
+    city = institution.city if institution.city and len(institution.city) > 1 else None
     country = (
         institution.country
         if institution.country and len(institution.country) > 1
         else None
     )
     place = (
-        f"{city}, {country}" if city and country
-        else city if city
-        else country if country
+        f"{city}, {country}"
+        if city and country
+        else city
+        if city
+        else country
+        if country
         else None
     )
     return CrossrefInstitution(
