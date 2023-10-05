@@ -1,4 +1,6 @@
-""""""
+"""
+Functions for generating a CrossRef peer review deposition file from a list of articles.
+"""
 
 __all__ = ["generate_peer_review_deposition"]
 
@@ -41,9 +43,16 @@ from mecadoi.model import Author, Institution as MecadoiInstitution
 
 
 def generate_peer_review_deposition(articles: List[Article]) -> str:
-    """Generate a CrossRef deposition file for the peer reviews in the given article.
+    """
+    Generate a CrossRef deposition file for the peer reviews in the given articles.
 
-    If the article does not contain any peer reviews, a ValueError is thrown.
+    If the articles do not contain any peer reviews, a ValueError is thrown.
+
+    Args:
+        articles: The articles to generate the deposition file for.
+
+    Returns:
+        The generated deposition file as a string.
     """
     num_reviews = len(
         [
@@ -71,7 +80,7 @@ def generate_peer_review_deposition(articles: List[Article]) -> str:
         ),
         body=Body(
             peer_review=[
-                review for article in articles for review in generate_reviews(article)
+                review for article in articles for review in _generate_reviews(article)
             ],
         ),
     )
@@ -86,7 +95,7 @@ def generate_peer_review_deposition(articles: List[Article]) -> str:
     return serializer.render(doi_batch, ns_map=namespaces)
 
 
-def generate_reviews(article: Article) -> Generator[PeerReview, None, None]:
+def _generate_reviews(article: Article) -> Generator[PeerReview, None, None]:
     is_review_of_relation = RelatedItem(
         inter_work_relation=InterWorkRelation(
             relationship_type="isReviewOf",
@@ -142,7 +151,7 @@ def generate_reviews(article: Article) -> Generator[PeerReview, None, None]:
                 revision_round=revision,
                 type="author-comment",
                 stage="pre-publication",
-                contributors=create_contributors(author_reply.authors),
+                contributors=_create_contributors(author_reply.authors),
                 titles=Titles(title=title),
                 review_date=ReviewDate(
                     year=author_reply.publication_date.year,
@@ -171,7 +180,7 @@ def generate_reviews(article: Article) -> Generator[PeerReview, None, None]:
             )
 
 
-def create_institution(institution: MecadoiInstitution) -> CrossrefInstitution:
+def _create_institution(institution: MecadoiInstitution) -> CrossrefInstitution:
     city = institution.city if institution.city and len(institution.city) > 1 else None
     country = (
         institution.country
@@ -194,7 +203,7 @@ def create_institution(institution: MecadoiInstitution) -> CrossrefInstitution:
     )
 
 
-def create_contributors(authors: List[Author]) -> Contributors:
+def _create_contributors(authors: List[Author]) -> Contributors:
     contributors = Contributors(
         person_name=[
             PersonName(
@@ -205,7 +214,7 @@ def create_contributors(authors: List[Author]) -> Contributors:
                 affiliations=(
                     Affiliations(
                         institution=[
-                            create_institution(institution)
+                            _create_institution(institution)
                             for institution in author.institutions
                         ]
                     )

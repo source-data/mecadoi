@@ -1,3 +1,15 @@
+"""
+Functions for verifying that a Crossref deposition file is valid.
+
+The DOIs to be assigned to reviews and replies by the deposition file are checked against the Early Evidence Base (EEB)
+API. EEB's API is checked because the DOIs will resolve to pages there.
+
+The EEB API must return the same number of reviews and replies as the deposition file wants to create, and the reviews
+and replies must not have any DOI assigned yet.
+"""
+
+__all__ = ["verify", "VerificationResult"]
+
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 from xsdata.formats.dataclass.parsers import XmlParser
@@ -7,11 +19,24 @@ from mecadoi.eeb.api import get_articles
 
 @dataclass
 class VerificationResult:
+    """
+    The result of verifying a Crossref deposition file.
+
+    If the verification was successful, all fields are set to True.
+    If the verification failed, the error field is set to a message describing the error.
+    """
+
     preprint_doi: str
+    """The preprint DOI that the deposition file wants to create reviews for."""
     all_reviews_present: Optional[bool] = None
+    """Whether all reviews that the deposition file wants to create DOIs for are present in the EEB."""
     author_reply_matches: Optional[bool] = None
+    """Whether the author reply that the deposition file wants to create a DOI for is present in the EEB."""
     no_dois_assigned: Optional[bool] = None
+    """Whether none of the reviews or the author reply that the deposition file wants to create DOIs for already have a
+    DOI assigned."""
     error: Optional[str] = None
+    """An error message if the verification failed."""
 
 
 def verify(deposition_file: str) -> List[VerificationResult]:
@@ -19,6 +44,12 @@ def verify(deposition_file: str) -> List[VerificationResult]:
     Checks that all DOIs to be created from the given deposition file resolve to an actual document.
 
     The deposition file may only contain peer review elements.
+
+    Args:
+        deposition_file: The deposition file to verify, as a string.
+
+    Returns:
+        A list of verification results, one for each preprint DOI that the deposition file wants to create DOIs for.
     """
     parser = XmlParser()
 
@@ -53,12 +84,12 @@ def verify(deposition_file: str) -> List[VerificationResult]:
         reviews_by_preprint_doi[preprint_doi] = (reviews, author_reply)
 
     return [
-        verify_reviews_match(preprint_doi, reviews, author_reply)
+        _verify_reviews_match(preprint_doi, reviews, author_reply)
         for preprint_doi, (reviews, author_reply) in reviews_by_preprint_doi.items()
     ]
 
 
-def verify_reviews_match(
+def _verify_reviews_match(
     preprint_doi: str,
     reviews: List[PeerReview],
     author_reply: Optional[PeerReview],

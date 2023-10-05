@@ -1,5 +1,4 @@
-"""
-"""
+"""Interface for the batch database storing information about processed MECAs and deposition attempts."""
 
 __all__ = ["BatchDatabase", "DepositionAttempt", "ParsedFile"]
 
@@ -48,6 +47,11 @@ class ParsedFile:
     """
 
     doi: Optional[str] = None
+    """
+    The DOI that was parsed from the file, if it was a valid MECA archive.
+
+    Is None if parsing the file as a MECA archive failed, or no DOI was found in the MECA archive.
+    """
 
     Valid = 1
     Invalid = 10
@@ -55,6 +59,11 @@ class ParsedFile:
     NoReviews = 21
     Duplicate = 22
     status: Optional[int] = None
+    """
+    The status of this file.
+
+    One of the constants defined in this class: `Valid`, `Invalid`, `NoDoi`, `NoReviews`, `Duplicate`.
+    """
 
     id: Optional[int] = None
     """A unique identifier for this file."""
@@ -82,6 +91,12 @@ class DepositionAttempt:
     VerificationFailed = 20
     GenerationFailed = 21
     status: Optional[int] = None
+    """
+    The status of this deposition attempt.
+
+    Must be one of the constants defined in this class: `Succeeded`, `DoisAlreadyPresent`, `Failed`,
+    `VerificationFailed`, `GenerationFailed`.
+    """
 
     verification_failed: Optional[bool] = None
     """Whether verifying the deposition file succeeded."""
@@ -95,9 +110,14 @@ class DepositionAttempt:
 
 @dataclass
 class UsedDoi:
+    """A DOI that is assigned to a resource."""
+
     doi: str
+    """The DOI."""
     resource: str
+    """The resource that the DOI is assigned to."""
     claimed_at: datetime
+    """The time when the DOI was claimed."""
 
 
 class Yaml(TypeDecorator):  # type: ignore[type-arg]
@@ -158,7 +178,7 @@ mapper_registry.map_imperatively(UsedDoi, tbl_used_dois)
 
 
 class BatchDatabase:
-    """An interface for the batch database storing information about processed MECAs and deposition attempts."""
+    """Store and retrieve information about processed MECAs and deposition attempts."""
 
     def __init__(self, db_url: str) -> None:
         self.engine = create_engine(db_url)

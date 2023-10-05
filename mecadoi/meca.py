@@ -96,10 +96,16 @@ class Manuscript(DigitalObject, Work):
 
 def parse_meca_archive(path_to_archive: Union[str, Path]) -> Manuscript:
     """
-    Read the MECA archive at the given path and construct an Article from it.
+    Read the MECA archive at the given path and construct a Manuscript from it.
 
     Raises exceptions if the MECA archive does not contain the necessary data that is required by the MECA standard
     such as a file with article metadata.
+
+    Args:
+        path_to_archive: The path to the MECA archive to parse. This can be a string or a pathlib.Path.
+
+    Returns:
+        A Manuscript that represents the article in the MECA archive.
     """
 
     meca = MECArchive(path_to_archive)

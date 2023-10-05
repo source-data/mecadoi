@@ -1,5 +1,9 @@
 """
+A data model for representing articles and their review processes.
 
+This module is intended as an intermediate representation of articles and their review processes.
+Articles can be constructed from MECA manuscripts with the `from_meca_manuscript` function and can be converted into
+other formats such as the Crossref deposition format.
 """
 
 __all__ = [
@@ -66,7 +70,24 @@ def from_meca_manuscript(
     doi_generator: Callable[[str], str],
     preprint_doi: Optional[str] = None,
 ) -> Article:
-    """"""
+    """
+    Convert a MECA manuscript with a review process into an Article that has DOIs for all reviews and authors' replies.
+
+    The manuscript must either have a preprint DOI or a preprint DOI must be given explicitly with the `preprint_doi`
+    parameter. The preprint DOI is used as the DOI of the Article. It must also have a review process.
+
+    The `doi_generator` function is used to generate DOIs for the reviews and the author reply. It is passed a string
+    that identifies the review.
+
+    Args:
+        manuscript: The manuscript to convert.
+        review__process_publication_date: The publication date of the review process.
+        doi_generator: A function that generates a DOI for a given string.
+        preprint_doi: The DOI of the preprint of the manuscript, if any.
+
+    Returns:
+        The converted article with DOIs for all reviews and the authors' replies.
+    """
     if preprint_doi is not None:
         article_doi = preprint_doi
     elif manuscript.preprint_doi is not None:
