@@ -1,0 +1,33 @@
+﻿mecadoi.db
+==========
+
+.. automodule:: mecadoi.db
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      BatchDatabase
+      DepositionAttempt
+      ParsedFile
+      UsedDoi
+      Yaml
+   
+   
+
+   
+   
+   
+
+
+

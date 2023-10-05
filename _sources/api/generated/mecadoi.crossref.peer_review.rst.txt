@@ -13,10 +13,7 @@
 
    .. autosummary::
    
-      create_contributors
-      create_institution
       generate_peer_review_deposition
-      generate_reviews
    
    
 

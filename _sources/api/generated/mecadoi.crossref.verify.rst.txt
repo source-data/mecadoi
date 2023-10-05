@@ -14,7 +14,6 @@
    .. autosummary::
    
       verify
-      verify_reviews_match
    
    
 

@@ -37,11 +37,15 @@
             
   <section id="module-mecadoi.article">
 <span id="mecadoi-article"></span><h1>mecadoi.article<a class="headerlink" href="#module-mecadoi.article" title="Permalink to this heading">¶</a></h1>
+<p>A data model for representing articles and their review processes.</p>
+<p>This module is intended as an intermediate representation of articles and their review processes.
+Articles can be constructed from MECA manuscripts with the <cite>from_meca_manuscript</cite> function and can be converted into
+other formats such as the Crossref deposition format.</p>
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_meca_manuscript</span></code>(manuscript, ...[, ...])</p></td>
-<td><p></p></td>
+<td><p>Convert a MECA manuscript with a review process into an Article that has DOIs for all reviews and authors' replies.</p></td>
 </tr>
 </tbody>
 </table>
@@ -85,6 +89,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../configuration.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../workflow.html">MECADOI workflow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../project.html">Project Background</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../../reference.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../cli.html">CLI</a></li>
@@ -93,6 +98,7 @@
 <li class="toctree-l3"><a class="reference internal" href="mecadoi.batch.html">mecadoi.batch</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mecadoi.crossref.peer_review.html">mecadoi.crossref.peer_review</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mecadoi.crossref.verify.html">mecadoi.crossref.verify</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mecadoi.db.html">mecadoi.db</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mecadoi.meca.html">mecadoi.meca</a></li>
 </ul>
 </li>

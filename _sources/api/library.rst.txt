@@ -28,4 +28,9 @@ Library
 .. autosummary::
    :toctree: generated
 
+   mecadoi.db
+
+.. autosummary::
+   :toctree: generated
+
    mecadoi.meca

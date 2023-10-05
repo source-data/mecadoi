@@ -17,7 +17,7 @@
     <script src="../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="mecadoi.meca" href="mecadoi.meca.html" />
+    <link rel="next" title="mecadoi.db" href="mecadoi.db.html" />
     <link rel="prev" title="mecadoi.crossref.peer_review" href="mecadoi.crossref.peer_review.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
@@ -37,14 +37,16 @@
             
   <section id="module-mecadoi.crossref.verify">
 <span id="mecadoi-crossref-verify"></span><h1>mecadoi.crossref.verify<a class="headerlink" href="#module-mecadoi.crossref.verify" title="Permalink to this heading">¶</a></h1>
+<p>Functions for verifying that a Crossref deposition file is valid.</p>
+<p>The DOIs to be assigned to reviews and replies by the deposition file are checked against the Early Evidence Base (EEB)
+API. EEB’s API is checked because the DOIs will resolve to pages there.</p>
+<p>The EEB API must return the same number of reviews and replies as the deposition file wants to create, and the reviews
+and replies must not have any DOI assigned yet.</p>
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">verify</span></code>(deposition_file)</p></td>
 <td><p>Checks that all DOIs to be created from the given deposition file resolve to an actual document.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">verify_reviews_match</span></code>(preprint_doi, reviews, ...)</p></td>
-<td><p></p></td>
 </tr>
 </tbody>
 </table>
@@ -52,7 +54,7 @@
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">VerificationResult</span></code>(preprint_doi[, ...])</p></td>
-<td><p></p></td>
+<td><p>The result of verifying a Crossref deposition file.</p></td>
 </tr>
 </tbody>
 </table>
@@ -79,6 +81,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../configuration.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../workflow.html">MECADOI workflow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../project.html">Project Background</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../../reference.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../cli.html">CLI</a></li>
@@ -87,6 +90,7 @@
 <li class="toctree-l3"><a class="reference internal" href="mecadoi.batch.html">mecadoi.batch</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mecadoi.crossref.peer_review.html">mecadoi.crossref.peer_review</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">mecadoi.crossref.verify</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mecadoi.db.html">mecadoi.db</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mecadoi.meca.html">mecadoi.meca</a></li>
 </ul>
 </li>
@@ -101,7 +105,7 @@
   <li><a href="../../reference.html">API Reference</a><ul>
   <li><a href="../library.html">Library</a><ul>
       <li>Previous: <a href="mecadoi.crossref.peer_review.html" title="previous chapter">mecadoi.crossref.peer_review</a></li>
-      <li>Next: <a href="mecadoi.meca.html" title="next chapter">mecadoi.meca</a></li>
+      <li>Next: <a href="mecadoi.db.html" title="next chapter">mecadoi.db</a></li>
   </ul></li>
   </ul></li>
   </ul></li>
