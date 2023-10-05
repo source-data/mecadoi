@@ -38,17 +38,20 @@
   <section id="mecadoi-workflow">
 <h1>MECADOI workflow<a class="headerlink" href="#mecadoi-workflow" title="Permalink to this heading">¶</a></h1>
 <p>Here’s an outline of the workflow that is used to deposit Review Commons reviews to Crossref:</p>
-<ol class="arabic simple" start="0">
+<ol class="arabic simple">
 <li><p>An author triggers export in eJP &amp; eJP sends a MECA archive to our FTP server.</p></li>
 <li><p>The FTP server contents are synced to a directory on the  MECADOI server.</p></li>
 <li><p>This MECADOI server directory is synced to AWS S3 storage for archival.</p></li>
-<li><p>Then, for every ZIP file in the MECADOI server directory:
-1. Try to parse it as MECA archive: if it fails to parse, continue with the next file.
-2. Check if the MECA archive has reviews: if not, continue with the next file.
-3. Check if the MECA archive has a preprint DOI: if not, continue with the next file.
-4. Create a Crossref deposition file with DOIs for each review and reply in the MECA archive.
-5. Verify that EEB resolves the links we set as resources for the DOIs: does EEB have the same amount of reviews and replies for the preprint DOI, and do these already have a DOI?
-6. Send the deposition file to Crossref.</p></li>
+<li><p>Then, for every ZIP file in the MECADOI server directory:</p>
+<ol class="arabic simple">
+<li><p>Try to parse it as MECA archive: if it fails to parse, continue with the next file.</p></li>
+<li><p>Check if the MECA archive has reviews: if not, continue with the next file.</p></li>
+<li><p>Check if the MECA archive has a preprint DOI: if not, continue with the next file.</p></li>
+<li><p>Create a Crossref deposition file with DOIs for each review and reply in the MECA archive.</p></li>
+<li><p>Verify that EEB resolves the links we set as resources for the DOIs: does EEB have the same amount of reviews and replies for the preprint DOI, and do these already have a DOI?</p></li>
+<li><p>Send the deposition file to Crossref.</p></li>
+</ol>
+</li>
 <li><p>Delete processed files from MECADOI server &amp; FTP server (but keep it in S3).</p></li>
 <li><p>Verify that the depositions are being processed correctly (out of band, through emails from Crossref).</p></li>
 </ol>
@@ -68,27 +71,19 @@
 </section>
 <section id="provisioning">
 <h3>Provisioning<a class="headerlink" href="#provisioning" title="Permalink to this heading">¶</a></h3>
-<ol class="arabic simple">
-<li><p>Switch to the <cite>provisioning</cite> directory on your local machine:</p></li>
-</ol>
+<p>Switch to the <cite>provisioning</cite> directory on your local machine:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> provisioning
 </pre></div>
 </div>
-<ol class="arabic simple" start="2">
-<li><p>Install Ansible &amp; any other dependencies on your local machine:</p></li>
-</ol>
+<p>Install Ansible &amp; any other dependencies on your local machine:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install -r requirements.txt
 </pre></div>
 </div>
-<ol class="arabic simple" start="3">
-<li><p>Run the provisioning playbook on your local machine:</p></li>
-</ol>
+<p>Run the provisioning playbook on your local machine:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ansible-playbook -i inventory provision.yml
 </pre></div>
 </div>
-<ol class="arabic simple" start="4">
-<li><p>Configure the credentials for the AWS CLI on the server:</p></li>
-</ol>
+<p>Configure the credentials for the AWS CLI on the server:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ssh mecadoi@mecadoi -- aws configure
 </pre></div>
 </div>
