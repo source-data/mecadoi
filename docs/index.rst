@@ -8,5 +8,6 @@ Documentation:
    installation
    configuration
    development
+   workflow
    project
    reference

@@ -17,7 +17,7 @@ Everything except creating DOIs also works without a Crossref membership and cre
 .. _account credentials: https://www.crossref.org/documentation/member-setup/account-credentials/
 
 Installing from source
-------------------------
+----------------------
 
 Clone this repository, create a virtual env (optional), and install the dependencies:
 
