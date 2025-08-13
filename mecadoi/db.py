@@ -285,13 +285,13 @@ class BatchDatabase:
                 session.add(deepcopy(used_doi))
 
     def update_preprint_doi(self, parsed_file: ParsedFile, doi: str) -> None:
-        if parsed_file.manuscript is None:
-            raise ValueError(
-                "Cannot update preprint DOI of a ParsedFile without a manuscript."
-            )
         with self.session() as session:  # type: ignore[attr-defined] # it does have this attribute
             with session.begin():
                 updated_file = deepcopy(parsed_file)
+                if updated_file.manuscript is None:
+                    raise ValueError(
+                        "Cannot update preprint DOI of a ParsedFile without a manuscript."
+                    )
                 updated_file.doi = doi
                 updated_file.manuscript.preprint_doi = doi
                 flag_modified(updated_file, "manuscript")  # type: ignore[no-untyped-call]
