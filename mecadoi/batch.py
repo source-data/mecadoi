@@ -209,3 +209,51 @@ def deposit(
         db.insert_all(deposition_attempts)
 
     return (deposition_attempts, successfully_deposited_articles)
+
+
+def add_preprint_doi(
+    manuscript_id: str,
+    doi: str,
+    db: BatchDatabase,
+    dry_run: bool = True,
+) -> ParsedFile:
+    """
+    Add a preprint DOI to a file in the database.
+
+    Args:
+        dry_run: If True, don't actually add DOIs to the database. Defaults to True.
+    """
+    if dry_run:
+        LOGGER.info("Dry run: not adding preprint DOIs to the database")
+
+    existing_files_with_doi = db.fetch_parsed_files_with_doi(doi)
+    if existing_files_with_doi:
+        raise ValueError(
+            f"DOI {doi} already exists in the database for files: "
+            f"{', '.join([f.path for f in existing_files_with_doi])}"
+        )
+
+    matching_files = db.fetch_parsed_files_with_manuscript_id(manuscript_id)
+    if not matching_files:
+        raise ValueError(f"No matching files found for manuscript ID {manuscript_id}")
+    if len(matching_files) > 1:
+        raise ValueError(
+            f"Multiple matching files found for manuscript ID {manuscript_id}"
+        )
+
+    matching_file = matching_files[0]
+    if matching_file.status != ParsedFile.NoDoi:
+        raise ValueError(
+            f"Can't assign preprint DOI to file {matching_file.path} because it's not marked as having no DOI"
+        )
+
+    if not dry_run:
+        db.update_preprint_doi(matching_file, doi)
+        updated_files = db.fetch_parsed_files_with_doi(doi)
+        if len(updated_files) != 1:
+            raise ValueError(
+                f"Expected exactly one updated file for DOI {doi}, but got {len(updated_files)}"
+            )
+        return updated_files[0]
+
+    return matching_file

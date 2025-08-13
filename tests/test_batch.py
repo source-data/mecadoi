@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Iterable, List
 from unittest.mock import Mock, patch
 
-from mecadoi.batch import deposit, parse
+from mecadoi.batch import add_preprint_doi, deposit, parse
 from mecadoi.crossref.verify import VerificationResult
 from mecadoi.db import DepositionAttempt, ParsedFile
 from tests.common import DepositionFileTestCase, MecaArchiveTestCase
@@ -330,3 +330,201 @@ class DepositTestCase(BaseDepositTestCase):
                 with self.assertRaises(ValueError):
                     deposit(parsed_files, self.db, dry_run=False)
                 deposit_file_mock.assert_not_called()
+
+
+class AddPreprintDoiTestCase(BaseBatchTestCase):
+    """Verifies that the mecadoi.batch.add_preprint_doi function works as expected."""
+
+    def setUp(self) -> None:
+        super().setUp()
+
+        parsed_files = (
+            [
+                ParsedFile(
+                    path=f"{meca_name}.zip",
+                    received_at=PUBLICATION_DATE,
+                    manuscript=MANUSCRIPTS[meca_name],
+                    doi=MANUSCRIPTS[meca_name].preprint_doi,
+                    status=ParsedFile.Valid,
+                )
+                for meca_name in [
+                    "multiple-revision-rounds",
+                    "single-revision-round",
+                    "single-revision-round",
+                ]
+            ]
+            + [
+                ParsedFile(
+                    path="no-preprint-doi.zip",
+                    received_at=PUBLICATION_DATE,
+                    manuscript=MANUSCRIPTS["no-preprint-doi"],
+                    status=ParsedFile.NoDoi,
+                ),
+                ParsedFile(
+                    path="invalid-meca.zip",
+                    received_at=PUBLICATION_DATE,
+                    status=ParsedFile.Invalid,
+                ),
+            ]
+            + [
+                ParsedFile(
+                    path=f"duplicate-manuscript-id.{i}.zip",
+                    received_at=PUBLICATION_DATE,
+                    manuscript=MANUSCRIPTS["no-preprint-doi"],
+                    status=ParsedFile.NoDoi,
+                )
+                for i in range(2)
+            ]
+        )
+        self.db.insert_all(parsed_files)
+        self.parsed_files = self.db.fetch_all(ParsedFile)
+        self.file_no_doi = next(
+            file for file in self.parsed_files if file.status == ParsedFile.NoDoi
+        )
+
+    def test_update_preprint_doi_happy_path(self) -> None:
+        """Verifies that a preprint DOI can be updated in the database."""
+        manuscript_id = "no-preprint-doi"
+        doi = "10.1234/updated-doi"
+
+        self.assertEqual(
+            self.db.fetch_parsed_files_with_doi(doi),
+            [],
+            "No existing file with that DOI",
+        )
+
+        add_preprint_doi(manuscript_id, doi, self.db, dry_run=False)
+
+        files_with_doi = self.db.fetch_parsed_files_with_doi(doi)
+        self.assertEqual(
+            len(files_with_doi), 1, "Expected one matching file with that DOI"
+        )
+
+        # the DOI is in all fields where it has to go and the status is updated
+        updated_file = files_with_doi[0]
+        self.assertEqual(updated_file.doi, doi, "ParsedFile.doi must be updated")
+        self.assertEqual(
+            updated_file.manuscript.preprint_doi if updated_file.manuscript else None,
+            doi,
+            "ParsedFile.manuscript.preprint_doi must be updated",
+        )
+        self.assertEqual(
+            updated_file.status,
+            ParsedFile.Valid,
+            "ParsedFile.status must be updated from NoDoi to Valid",
+        )
+
+    def test_update_preprint_doi_dry_run(self) -> None:
+        """Verifies that dry-run adding a preprint DOI doesn't change the database."""
+        manuscript_id = "no-preprint-doi"
+        doi = "10.1234/updated-doi"
+
+        self.assertEqual(
+            self.db.fetch_parsed_files_with_doi(doi),
+            [],
+            "No existing file with that DOI",
+        )
+        add_preprint_doi(manuscript_id, doi, self.db, dry_run=True)
+        self.assertEqual(
+            self.db.fetch_parsed_files_with_doi(doi),
+            [],
+            "Dry run should not update the database",
+        )
+
+    def test_update_preprint_doi_no_matching_files(self) -> None:
+        """Verifies that adding a preprint DOI with no matching files is a no-op."""
+        manuscript_id = "nonexistent-manuscript"
+        doi = "10.1234/nonexistent-doi"
+
+        self.assertEqual(
+            self.db.fetch_parsed_files_with_manuscript_id(manuscript_id),
+            [],
+            "No existing file with that manuscript ID",
+        )
+
+        with self.assertRaises(ValueError) as context:
+            add_preprint_doi(manuscript_id, doi, self.db, dry_run=False)
+        self.assertIn(
+            manuscript_id,
+            str(context.exception),
+            "The ValueError must mention the manuscript_id",
+        )
+        self.assertEqual(
+            self.db.fetch_parsed_files_with_doi(doi),
+            [],
+            "Failed update should not update the database",
+        )
+
+    def test_update_preprint_doi_multiple_matching_files(self) -> None:
+        """Verifies that adding a preprint DOI with multiple matching files updates all of them."""
+        manuscript_id = "duplicate-manuscript-id"
+        doi = "10.1234/updated-doi"
+
+        self.assertGreater(
+            len(self.db.fetch_parsed_files_with_manuscript_id(manuscript_id)),
+            1,
+            "Multiple files with that manuscript ID must exist",
+        )
+
+        with self.assertRaises(ValueError) as context:
+            add_preprint_doi(manuscript_id, doi, self.db, dry_run=False)
+        self.assertIn(
+            manuscript_id,
+            str(context.exception),
+            "The ValueError must mention the manuscript_id",
+        )
+        self.assertEqual(
+            self.db.fetch_parsed_files_with_doi(doi),
+            [],
+            "Failed update should not update the database",
+        )
+
+    def test_update_preprint_doi_existing_file_with_doi(self) -> None:
+        manuscript_id = "no-preprint-doi"
+        doi = MANUSCRIPTS["multiple-revision-rounds"].preprint_doi
+        if doi is None:
+            raise ValueError("Manuscript does not have a preprint DOI.")
+        files_with_doi = self.db.fetch_parsed_files_with_doi(doi)
+        self.assertEqual(len(files_with_doi), 1, "One existing file with that DOI")
+
+        with self.assertRaises(ValueError) as context:
+            add_preprint_doi(manuscript_id, doi, self.db, dry_run=False)
+        self.assertIn(
+            doi,
+            str(context.exception),
+            "The ValueError must mention the offending DOI",
+        )
+
+        self.assertEqual(
+            self.db.fetch_parsed_files_with_doi(doi),
+            files_with_doi,
+            "Failed update should not change the existing file with that DOI",
+        )
+
+    def test_update_preprint_doi_file_not_marked_as_no_doi(self) -> None:
+        manuscript_ids = [
+            "multiple-revision-rounds",
+            "invalid-meca",
+            "duplicate-manuscript-id",
+        ]
+        for manuscript_id in manuscript_ids:
+            with self.subTest(manuscript_id=manuscript_id):
+                doi = "10.1234/updated-doi"
+
+                self.assertEqual(
+                    self.db.fetch_parsed_files_with_doi(doi),
+                    [],
+                    "No existing file with that DOI",
+                )
+                with self.assertRaises(ValueError) as context:
+                    add_preprint_doi(manuscript_id, doi, self.db, dry_run=False)
+                self.assertIn(
+                    manuscript_id,
+                    str(context.exception),
+                    "The ValueError must mention the manuscript_id",
+                )
+                self.assertEqual(
+                    self.db.fetch_parsed_files_with_doi(doi),
+                    [],
+                    "Failed update should not change the existing file with that DOI",
+                )

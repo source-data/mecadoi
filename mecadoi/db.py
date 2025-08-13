@@ -19,6 +19,7 @@ from sqlalchemy import (
     text,
 )
 from sqlalchemy.orm import registry, relationship, Session  # type: ignore[attr-defined] # it does have this attribute
+from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy.types import TypeDecorator
 from typing import Any, List, Optional
 from yaml import dump, load, Loader
@@ -217,6 +218,13 @@ class BatchDatabase:
             select(ParsedFile).filter(ParsedFile.doi == doi)  # type: ignore
         )
 
+    def fetch_parsed_files_with_manuscript_id(
+        self, manuscript_id: str
+    ) -> List[ParsedFile]:
+        return self._fetch_parsed_files(
+            select(ParsedFile).filter(ParsedFile.path.like(f"%{manuscript_id}%"))  # type: ignore
+        )
+
     def fetch_parsed_files_between(
         self, after: datetime, before: datetime
     ) -> List[ParsedFile]:
@@ -275,3 +283,18 @@ class BatchDatabase:
         with self.session() as session:  # type: ignore[attr-defined] # it does have this attribute
             with session.begin():
                 session.add(deepcopy(used_doi))
+
+    def update_preprint_doi(self, parsed_file: ParsedFile, doi: str) -> None:
+        if parsed_file.manuscript is None:
+            raise ValueError(
+                "Cannot update preprint DOI of a ParsedFile without a manuscript."
+            )
+        with self.session() as session:  # type: ignore[attr-defined] # it does have this attribute
+            with session.begin():
+                updated_file = deepcopy(parsed_file)
+                updated_file.doi = doi
+                updated_file.manuscript.preprint_doi = doi
+                flag_modified(updated_file, "manuscript")  # type: ignore[no-untyped-call]
+                if updated_file.status == ParsedFile.NoDoi:
+                    updated_file.status = ParsedFile.Valid
+                session.add(updated_file)

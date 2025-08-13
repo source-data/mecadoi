@@ -278,6 +278,29 @@ class DbTestCase(BatchDbTestCase):
             actual = self.db.fetch_parsed_files_with_doi(parsed_file.doi)
             self.assertEqual([parsed_file], actual)
 
+    def test_get_parsed_files_with_manuscript_id(self) -> None:
+        manuscript_id = "JOURNAL-2025-12345"
+        # ensure no accidental matches
+        for parsed_file in self.parsed_files:
+            self.assertNotIn(manuscript_id, parsed_file.path)
+
+        # add the files that don't match
+        self.db.insert_all(self.parsed_files)
+        # add the file that does match
+        matching_file = ParsedFile(
+            path=f"/path/to/{manuscript_id}.zip",
+            received_at=datetime.now(),
+            manuscript=MANUSCRIPTS["single-revision-round"],
+            doi=MANUSCRIPTS["single-revision-round"].preprint_doi,
+            status=ParsedFile.Valid,
+        )
+        self.db.insert_all([matching_file])
+        result = self.db.fetch_parsed_files_with_manuscript_id(manuscript_id)
+
+        # Add an id to the expected ParsedFile to allow us to use the assertEqual method.
+        matching_file.id = result[0].id
+        self.assertEqual([matching_file], result)
+
     def test_get_parsed_files_between(self) -> None:
         self.db.insert_all(self.parsed_files)
 
@@ -286,6 +309,29 @@ class DbTestCase(BatchDbTestCase):
             datetime(2021, 1, 1), datetime(2022, 1, 1)
         )
         self.assert_parsed_files_equal(expected_parsed_files, actual_parsed_files)
+
+    def test_update_preprint_doi(self) -> None:
+        parsed_file = ParsedFile(
+            path="no-preprint-doi",
+            received_at=datetime(2023, 1, 1),
+            manuscript=MANUSCRIPTS["no-preprint-doi"],
+            status=ParsedFile.NoDoi,
+        )
+        self.db.insert_all([parsed_file])
+
+        preprint_doi = "10.1234/new-doi"
+        self.assertEqual(self.db.fetch_parsed_files_with_doi(preprint_doi), [])
+
+        self.db.update_preprint_doi(parsed_file, preprint_doi)
+
+        updated_files = self.db.fetch_parsed_files_with_doi(preprint_doi)
+        self.assertEqual(len(updated_files), 1)
+        updated_file = updated_files[0]
+        self.assertEqual(updated_file.doi, preprint_doi)
+        if updated_file.manuscript is None:
+            raise ValueError("ParsedFile should have a manuscript.")
+        self.assertEqual(updated_file.manuscript.preprint_doi, preprint_doi)
+        self.assertEqual(updated_file.status, ParsedFile.Valid)
 
     def assert_parsed_files_equal(
         self, expected: List[ParsedFile], actual: List[ParsedFile]
