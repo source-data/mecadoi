@@ -45,10 +45,13 @@ given file.</p>
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">deposit</span></code>(mecas, db[, dry_run])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_preprint_doi</span></code>(manuscript_id, doi, db[, ...])</p></td>
+<td><p>Add a preprint DOI to a file in the database.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">deposit</span></code>(mecas, db[, dry_run])</p></td>
 <td><p>Generate deposition files from the given ParsedFiles, try to send the files to the Crossref API, and store the results in <cite>db</cite>.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse</span></code>(files, db)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse</span></code>(files, db)</p></td>
 <td><p>Parse all given files as MECA archives and store the results in <cite>db</cite>.</p></td>
 </tr>
 </tbody>

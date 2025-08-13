@@ -13,6 +13,7 @@
 
    .. autosummary::
    
+      add_preprint_doi
       deposit
       parse
    
